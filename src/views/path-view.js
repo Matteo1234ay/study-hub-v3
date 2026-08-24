@@ -22,11 +22,11 @@ export function renderPathView(path) {
     : emptyState();
   const assessment = path.assessmentManifestUrl
     ? element("section", { className: "path-assessment-panel" }, [
-        element("p", { className: "eyebrow", text: "Valuta le tue competenze" }),
-        element("h2", { text: "Una verifica breve sull’intero percorso" }),
-        element("p", { text: "Le domande vengono selezionate tra tutte le lezioni disponibili. I nuovi tentativi variano e tengono conto delle aree da consolidare." }),
+        element("p", { className: "eyebrow", text: "Verifica riassuntiva" }),
+        element("h2", { text: "Controlla ciò che hai imparato finora" }),
+        element("p", { text: "Il test intermedio usa tutti i capitoli e tutte le lezioni attualmente presenti. Quando aggiungeremo una nuova lezione con le sue domande, verrà inclusa automaticamente." }),
         element("div", { className: "hero-actions" }, [
-          element("a", { className: "button primary", text: "Avvia verifica progressiva", href: `#/paths/${path.id}/assessment` }),
+          element("a", { className: "button primary", text: "Avvia verifica riassuntiva", href: `#/paths/${path.id}/assessment` }),
           element("a", { className: "button quiet", text: "Esame finale · non ancora disponibile", href: `#/paths/${path.id}/final-exam` })
         ]),
         element("small", { text: "Gratis, senza API: risultati e cronologia rimangono in questo browser." })

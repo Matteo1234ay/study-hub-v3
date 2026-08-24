@@ -1,7 +1,7 @@
 import { validateAssessment } from "../assessment/assessment-schema.js";
 import { scoreAttempt } from "../assessment/assessment-engine.js";
 import { buildAssessmentReviewPackage } from "../assessment/review-package.js";
-import { validatePathAssessment } from "../path-assessment/path-schema.js";
+import { includeConfiguredLessons, validatePathAssessment } from "../path-assessment/path-schema.js";
 import { buildQuestionPool } from "../path-assessment/question-pool.js";
 import { selectPathQuestions } from "../path-assessment/selector.js";
 import { progressiveLevel, scoreFinalGate } from "../path-assessment/path-score.js";
@@ -81,7 +81,7 @@ export async function renderPathAssessmentView({ path, mode = "progressive" }) {
   let manifest;
   try {
     const response = await fetch(path.assessmentManifestUrl, { cache: "no-cache" });
-    manifest = response.ok ? validatePathAssessment(await response.json()) : null;
+    manifest = response.ok ? validatePathAssessment(includeConfiguredLessons(await response.json(), path.lessons)) : null;
   } catch { manifest = null; }
   if (!manifest) return message(path, "Valutazione temporaneamente non disponibile", "Non è stato possibile caricare il piano di valutazione.");
   if (mode === "final" && manifest.status !== "complete") {
@@ -116,9 +116,9 @@ export async function renderPathAssessmentView({ path, mode = "progressive" }) {
   });
   const view = element("section", { className: "content-page assessment-page" }, [
     element("nav", { className: "breadcrumbs", attrs: { "aria-label": "Breadcrumb" } }, [
-      element("a", { text: path.title, href: `#/paths/${path.id}` }), element("span", { text: "/" }), element("span", { text: mode === "final" ? "Esame finale" : "Verifica progressiva" })
+      element("a", { text: path.title, href: `#/paths/${path.id}` }), element("span", { text: "/" }), element("span", { text: mode === "final" ? "Esame finale" : "Verifica riassuntiva" })
     ]),
-    pageHeader("Valutazione del percorso", mode === "final" ? `Esame finale · ${path.title}` : `Verifica progressiva · ${path.title}`, `${questions.length} domande rappresentative dei contenuti disponibili. Ogni nuovo tentativo varia la selezione.`),
+    pageHeader("Valutazione del percorso", mode === "final" ? `Esame finale · ${path.title}` : `Verifica riassuntiva · ${path.title}`, `${questions.length} domande rappresentative di tutte le lezioni disponibili. Quando viene aggiunta una nuova lezione con le sue domande, entra automaticamente nelle verifiche successive.`),
     dialog.node
   ]);
   const form = element("form", { className: "assessment-form" });

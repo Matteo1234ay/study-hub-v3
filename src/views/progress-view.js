@@ -105,10 +105,10 @@ export async function renderProgressView() {
     const latest = attempts[0];
     const scores = attempts.map(item => item.result?.total?.percent).filter(Number.isFinite);
     const panel = element("section", { className: "assessment-progress-card path-progress-card" }, [
-      element("p", { className: "eyebrow", text: `${path.code} · Verifica progressiva` }),
-      element("h2", { text: latest ? `Ultimo risultato: ${latest.result.total.percent}%` : "Nessuna verifica progressiva" }),
+      element("p", { className: "eyebrow", text: `${path.code} · Verifica riassuntiva` }),
+      element("h2", { text: latest ? `Ultimo risultato: ${latest.result.total.percent}%` : "Nessuna verifica riassuntiva" }),
       element("p", { text: attempts.length ? `${attempts.length} tentativi · migliore ${Math.max(...scores)}% · dati salvati solo qui` : "Valuta con poche domande rappresentative tutte le lezioni finora disponibili." }),
-      element("a", { className: "button primary", text: "Apri verifica progressiva", href: `#/paths/${path.id}/assessment` })
+      element("a", { className: "button primary", text: "Apri verifica riassuntiva", href: `#/paths/${path.id}/assessment` })
     ]);
     if (latest?.result?.weakCompetencyIds?.length) panel.append(element("p", { text: `${latest.result.weakCompetencyIds.length} aree da consolidare influenzeranno moderatamente il prossimo tentativo.` }));
     const clear = element("button", { className: "button quiet", text: "Cancella verifiche del percorso", attrs: { type: "button" } });

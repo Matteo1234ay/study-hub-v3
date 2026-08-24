@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { validatePathAssessment } from "../src/path-assessment/path-schema.js";
+import { validatePathAssessment, includeConfiguredLessons } from "../src/path-assessment/path-schema.js";
 
 test("accepts the in-progress SMM manifest", () => {
   const raw = JSON.parse(fs.readFileSync(new URL("../data/path-assessments/smm.json", import.meta.url)));
@@ -21,4 +21,17 @@ test("rejects unknown status duplicate lessons and invalid bounds", () => {
 test("complete manifest requires a mandatory competency", () => {
   const raw = JSON.parse(fs.readFileSync(new URL("../data/path-assessments/smm.json", import.meta.url)));
   assert.equal(validatePathAssessment({ ...raw, status: "complete", competencies: raw.competencies.map(item => ({ ...item, mandatory: false })) }), null);
+});
+
+test("automatically includes every configured lesson with an assessment", () => {
+  const raw = JSON.parse(fs.readFileSync(new URL("../data/path-assessments/smm.json", import.meta.url)));
+  const updated = includeConfiguredLessons(raw, [
+    { id: "SMM-01", assessmentUrl: "data/assessments/SMM-01.json" },
+    { id: "SMM-02", assessmentUrl: "data/assessments/SMM-02.json" },
+    { id: "SMM-03" }
+  ]);
+  assert.deepEqual(updated.lessons, [
+    { lessonId: "SMM-01", assessmentUrl: "data/assessments/SMM-01.json" },
+    { lessonId: "SMM-02", assessmentUrl: "data/assessments/SMM-02.json" }
+  ]);
 });

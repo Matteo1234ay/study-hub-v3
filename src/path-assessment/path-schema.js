@@ -1,5 +1,13 @@
 const VALID_STATUSES = new Set(["in-progress", "complete"]);
 
+export function includeConfiguredLessons(manifest, lessons = []) {
+  if (!manifest || typeof manifest !== "object") return manifest;
+  const configured = lessons
+    .filter(lesson => lesson?.id && lesson?.assessmentUrl)
+    .map(lesson => ({ lessonId: lesson.id, assessmentUrl: lesson.assessmentUrl }));
+  return { ...structuredClone(manifest), lessons: configured.length ? configured : structuredClone(manifest.lessons ?? []) };
+}
+
 export function validatePathAssessment(raw) {
   if (!raw || typeof raw !== "object" || !raw.id || !raw.pathId || !Number.isInteger(raw.version)) return null;
   if (!VALID_STATUSES.has(raw.status) || !Array.isArray(raw.lessons) || raw.lessons.length === 0) return null;
