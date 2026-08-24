@@ -10,6 +10,12 @@ export function parseRoute(hash = "#/home") {
   if (parts[0] === "paths" && parts.length === 2) {
     return { name: "path", params: { pathId: parts[1] } };
   }
+  if (parts[0] === "paths" && parts[2] === "assessment" && parts.length === 3) {
+    return { name: "path-assessment", params: { pathId: parts[1] } };
+  }
+  if (parts[0] === "paths" && parts[2] === "final-exam" && parts.length === 3) {
+    return { name: "path-final-exam", params: { pathId: parts[1] } };
+  }
   if (parts[0] === "lessons" && parts.length === 2) {
     return { name: "lesson", params: { lessonId: parts[1] } };
   }

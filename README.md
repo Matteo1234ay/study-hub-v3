@@ -23,6 +23,10 @@ Tentativi ed errori ripetuti alimentano la sezione Progressi e vengono inclusi n
 
 Il comando **Verifica con ChatGPT** è facoltativo. Prepara localmente soltanto le domande e risposte selezionate, mostra un'anteprima completa e apre la home di ChatGPT. Non usa API, non inserisce risposte nell'URL e non invia automaticamente alcun contenuto: copia e invio restano azioni dell'utente.
 
+Ogni percorso può inoltre avere una **verifica progressiva**: seleziona un numero contenuto di domande rappresentative da tutte le lezioni pubblicate, copre competenze e lezioni diverse, riduce la ripetizione delle domande recenti e dà una priorità moderata alle aree risultate deboli. Il risultato dichiara sempre fino a quale lezione è valida la diagnosi e rimanda direttamente ai capitoli da ripassare.
+
+L’**esame finale** usa lo stesso archivio ma resta bloccato finché il manifesto del percorso non è marcato come completo. Quando sarà attivo richiederà sia la soglia complessiva sia la soglia minima di ogni competenza obbligatoria. Il livello ottenuto è un’autovalutazione personale, non una certificazione.
+
 ## Sviluppo
 
 Servire la cartella con un server statico, per esempio:

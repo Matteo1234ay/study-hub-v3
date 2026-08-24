@@ -59,3 +59,12 @@ test("exports assessment drafts attempts and answers", () => {
   const entries = exportLocalData(storage, () => "2026-08-24T12:00:00.000Z").entries;
   assert.deepEqual(Object.keys(entries).sort(), ["study-hub-v3:assessment:attempts", "study-hub-v3:assessment:drafts"]);
 });
+
+test("exports progressive and final path assessment data", () => {
+  const storage = memoryStorage({
+    "study-hub-v3:path-assessment:sessions": '{"smm-1":{"answers":{"q1":"a"}}}',
+    "study-hub-v3:path-assessment:attempts": '{"smm":[{"result":{"total":{"percent":80}}}]}'
+  });
+  const entries = exportLocalData(storage, () => "2026-08-24T12:00:00.000Z").entries;
+  assert.deepEqual(Object.keys(entries).sort(), ["study-hub-v3:path-assessment:attempts", "study-hub-v3:path-assessment:sessions"]);
+});

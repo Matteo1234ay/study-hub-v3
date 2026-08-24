@@ -20,6 +20,18 @@ export function renderPathView(path) {
         ])
       ))
     : emptyState();
+  const assessment = path.assessmentManifestUrl
+    ? element("section", { className: "path-assessment-panel" }, [
+        element("p", { className: "eyebrow", text: "Valuta le tue competenze" }),
+        element("h2", { text: "Una verifica breve sull’intero percorso" }),
+        element("p", { text: "Le domande vengono selezionate tra tutte le lezioni disponibili. I nuovi tentativi variano e tengono conto delle aree da consolidare." }),
+        element("div", { className: "hero-actions" }, [
+          element("a", { className: "button primary", text: "Avvia verifica progressiva", href: `#/paths/${path.id}/assessment` }),
+          element("a", { className: "button quiet", text: "Esame finale · non ancora disponibile", href: `#/paths/${path.id}/final-exam` })
+        ]),
+        element("small", { text: "Gratis, senza API: risultati e cronologia rimangono in questo browser." })
+      ])
+    : null;
   return element("section", { className: "content-page" }, [
     element("nav", { className: "breadcrumbs", attrs: { "aria-label": "Breadcrumb" } }, [
       element("a", { text: "Percorsi", href: "#/paths" }),
@@ -27,6 +39,7 @@ export function renderPathView(path) {
       element("span", { text: path.title, attrs: { "aria-current": "page" } })
     ]),
     pageHeader(`${path.code} · Percorso`, path.title, path.description),
-    lessons
+    lessons,
+    assessment
   ]);
 }

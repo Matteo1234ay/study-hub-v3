@@ -9,6 +9,7 @@ import { renderProgressView } from "./views/progress-view.js";
 import { renderSearchView } from "./views/search-view.js";
 import { renderReviewView } from "./views/review-view.js";
 import { renderAssessmentView } from "./views/assessment-view.js";
+import { renderPathAssessmentView } from "./views/path-assessment-view.js";
 import { createPreferencesStore } from "./study/preferences.js";
 
 const app = document.querySelector("#app");
@@ -29,6 +30,12 @@ async function render(route) {
   if (route.name === "home") view = renderHomeView();
   else if (route.name === "paths") view = renderPathsView();
   else if (route.name === "path") view = renderPathView(findPath(route.params.pathId));
+  else if (route.name === "path-assessment" || route.name === "path-final-exam") {
+    view = await renderPathAssessmentView({
+      path: findPath(route.params.pathId),
+      mode: route.name === "path-final-exam" ? "final" : "progressive"
+    });
+  }
   else if (route.name === "lesson" || route.name === "chapter") {
     view = await renderLessonView({
       lesson: findLesson(route.params.lessonId),

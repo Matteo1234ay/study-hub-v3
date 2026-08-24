@@ -1,0 +1,21 @@
+{
+  "id": "smm-path-assessment",
+  "pathId": "smm",
+  "version": 1,
+  "status": "in-progress",
+  "lessons": [
+    { "lessonId": "SMM-01", "assessmentUrl": "data/assessments/SMM-01.json" }
+  ],
+  "competencies": [
+    { "id": "objectives", "label": "Obiettivi e strategia", "weight": 1, "mandatory": true },
+    { "id": "metrics", "label": "Metriche e KPI", "weight": 1, "mandatory": true },
+    { "id": "interpretation", "label": "Interpretazione dei dati", "weight": 1, "mandatory": true },
+    { "id": "testing", "label": "Test e metodo", "weight": 1, "mandatory": true },
+    { "id": "reporting", "label": "Reporting e decisioni", "weight": 1, "mandatory": true }
+  ],
+  "selection": { "minQuestions": 10, "maxQuestions": 15 },
+  "thresholds": {
+    "progressive": { "solid": 85, "good": 70, "partial": 55 },
+    "final": { "pass": 75, "mandatoryMin": 60 }
+  }
+}

@@ -7,6 +7,7 @@ import { createPreferencesStore } from "../study/preferences.js";
 import { createAssessmentStore } from "../assessment/assessment-store.js";
 import { deriveAssessmentInsights, summarizeAssessmentProgress } from "../assessment/insights.js";
 import { validateAssessment } from "../assessment/assessment-schema.js";
+import { createPathAssessmentStore } from "../path-assessment/path-store.js";
 
 function downloadBackup() {
   const blob = new Blob([JSON.stringify(exportLocalData(), null, 2)], { type: "application/json" });
@@ -98,6 +99,28 @@ export async function renderProgressView() {
   const grid = element("div", { className: "progress-grid" });
   const store = createProgressStore();
   const assessmentStore = createAssessmentStore();
+  const pathAssessmentStore = createPathAssessmentStore();
+  for (const path of PATHS.filter(item => item.assessmentManifestUrl)) {
+    const attempts = pathAssessmentStore.getAttempts(path.id);
+    const latest = attempts[0];
+    const scores = attempts.map(item => item.result?.total?.percent).filter(Number.isFinite);
+    const panel = element("section", { className: "assessment-progress-card path-progress-card" }, [
+      element("p", { className: "eyebrow", text: `${path.code} · Verifica progressiva` }),
+      element("h2", { text: latest ? `Ultimo risultato: ${latest.result.total.percent}%` : "Nessuna verifica progressiva" }),
+      element("p", { text: attempts.length ? `${attempts.length} tentativi · migliore ${Math.max(...scores)}% · dati salvati solo qui` : "Valuta con poche domande rappresentative tutte le lezioni finora disponibili." }),
+      element("a", { className: "button primary", text: "Apri verifica progressiva", href: `#/paths/${path.id}/assessment` })
+    ]);
+    if (latest?.result?.weakCompetencyIds?.length) panel.append(element("p", { text: `${latest.result.weakCompetencyIds.length} aree da consolidare influenzeranno moderatamente il prossimo tentativo.` }));
+    const clear = element("button", { className: "button quiet", text: "Cancella verifiche del percorso", attrs: { type: "button" } });
+    clear.addEventListener("click", () => {
+      if (confirm(`Cancellare sessioni e risultati progressivi di ${path.title}? Le valutazioni delle singole lezioni resteranno intatte.`)) {
+        pathAssessmentStore.clearPath(path.id);
+        location.reload();
+      }
+    });
+    panel.append(clear);
+    grid.append(panel);
+  }
   const lessons = PATHS.flatMap((path) => path.lessons.map((lesson) => ({ lesson, path })));
   for (const { lesson, path } of lessons) {
     let chapters = [];

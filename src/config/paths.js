@@ -5,6 +5,7 @@ export const PATHS = Object.freeze([
     title: "Social Media Manager",
     description: "Strategia, contenuti, metriche e decisioni sostenute dai dati.",
     accent: "blue",
+    assessmentManifestUrl: "data/path-assessments/smm.json",
     lessons: [{
       id: "SMM-01",
       pathId: "smm",
