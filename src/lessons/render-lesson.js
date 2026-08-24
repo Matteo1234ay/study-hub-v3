@@ -39,7 +39,7 @@ function renderBlock(block) {
   return node;
 }
 
-export function renderLesson(model, { lessonId, activeChapterId = null } = {}) {
+export function renderLesson(model, { lessonId, activeChapterId = null, completedChapterIds = new Set(), onToggleChapter = () => {} } = {}) {
   const layout = element("div", { className: "lesson-layout" });
   const index = element("nav", { className: "chapter-index", attrs: { "aria-label": "Indice dei capitoli" } }, [
     element("p", { className: "eyebrow", text: "Indice capitoli" })
@@ -48,6 +48,7 @@ export function renderLesson(model, { lessonId, activeChapterId = null } = {}) {
   const content = element("article", { className: "lesson-content" });
 
   model.chapters.forEach((chapter, indexNumber) => {
+    const isCompleted = completedChapterIds.has(chapter.id);
     const href = chapterHref(lessonId, chapter.id);
     const indexLink = element("a", {
       href,
@@ -60,6 +61,12 @@ export function renderLesson(model, { lessonId, activeChapterId = null } = {}) {
     indexList.append(element("li", {}, indexLink));
 
     const heading = element("h2", { text: chapter.title, attrs: { tabindex: "-1" } });
+    const completionButton = element("button", {
+      className: `chapter-completion${isCompleted ? " is-complete" : ""}`,
+      text: isCompleted ? "✓ Completato" : "Segna come completato",
+      attrs: { type: "button", "aria-pressed": String(isCompleted) }
+    });
+    completionButton.addEventListener("click", () => onToggleChapter(chapter.id));
     const section = element("section", {
       className: "lesson-chapter",
       attrs: { id: chapter.id, "data-chapter-id": chapter.id }
@@ -67,6 +74,7 @@ export function renderLesson(model, { lessonId, activeChapterId = null } = {}) {
       element("div", { className: "chapter-number", text: String(indexNumber + 1).padStart(2, "0") }),
       heading,
       element("div", { className: "chapter-blocks" }, chapter.blocks.map(renderBlock)),
+      completionButton,
       element("div", { className: "chapter-controls" }, [
         indexNumber > 0 ? element("a", { href: chapterHref(lessonId, model.chapters[indexNumber - 1].id), text: "← Capitolo precedente" }) : null,
         indexNumber < model.chapters.length - 1 ? element("a", { href: chapterHref(lessonId, model.chapters[indexNumber + 1].id), text: "Capitolo successivo →" }) : null

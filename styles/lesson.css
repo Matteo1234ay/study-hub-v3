@@ -37,4 +37,6 @@
 .callout-example { --callout-accent: var(--green); --callout-bg: rgba(123,228,183,.07); --callout-line: rgba(123,228,183,.25); }
 .chapter-controls { display: flex; justify-content: space-between; gap: 18px; margin-top: 55px; padding-top: 22px; border-top: 1px solid var(--line); }
 .chapter-controls a { color: var(--blue); font-size: .8rem; font-weight: 800; }
+.chapter-completion { margin-top: 34px; padding: 12px 16px; border: 1px solid rgba(123,228,183,.32); border-radius: 12px; color: var(--green); background: rgba(123,228,183,.06); font: inherit; font-size: .8rem; font-weight: 850; cursor: pointer; }
+.chapter-completion.is-complete { color: #061d17; background: var(--green); border-color: transparent; }
 @media (max-width: 820px) { .lesson-layout { grid-template-columns: 1fr; } .chapter-index { position: relative; top: 0; max-height: none; } .lesson-chapter { min-height: 0; padding: 30px 24px; } .source-pending { padding: 34px 24px; } }

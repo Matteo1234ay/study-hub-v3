@@ -1,6 +1,7 @@
 import { renderLesson } from "../lessons/render-lesson.js";
 import { createLessonCache } from "../lessons/lesson-cache.js";
 import { element } from "../ui/components.js";
+import { calculateLessonProgress, createProgressStore } from "../progress/local-progress.js";
 
 export async function renderLessonView({ lesson, activeChapterId = null }) {
   if (!lesson) {
@@ -60,7 +61,24 @@ export async function renderLessonView({ lesson, activeChapterId = null }) {
     }
   }
   view.querySelector(".lesson-source-state").textContent = fromCache ? `${model.chapters.length} capitoli · copia salvata` : `${model.chapters.length} capitoli · sincronizzato`;
-  body.append(renderLesson(model, { lessonId: lesson.id, activeChapterId }));
+  const store = createProgressStore();
+  const progressState = element("span", { className: "lesson-progress-state" });
+  view.querySelector(".lesson-meta").prepend(progressState);
+  function paintLesson() {
+    const saved = store.get(lesson.id);
+    const completed = new Set(saved.completed);
+    progressState.textContent = `${calculateLessonProgress(model.chapters, completed)}% completato`;
+    body.replaceChildren(renderLesson(model, {
+      lessonId: lesson.id,
+      activeChapterId,
+      completedChapterIds: completed,
+      onToggleChapter(chapterId) {
+        store.toggle(lesson.id, chapterId);
+        paintLesson();
+      }
+    }));
+  }
+  paintLesson();
   if (activeChapterId) {
     requestAnimationFrame(() => {
       const chapter = document.getElementById(activeChapterId);

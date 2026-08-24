@@ -5,6 +5,7 @@ import { renderHomeView } from "./views/home-view.js";
 import { renderPathView } from "./views/path-view.js";
 import { renderPathsView } from "./views/paths-view.js";
 import { renderLessonView } from "./views/lesson-view.js";
+import { renderProgressView } from "./views/progress-view.js";
 
 const app = document.querySelector("#app");
 
@@ -29,7 +30,7 @@ async function render(route) {
       activeChapterId: route.params.chapterId ?? null
     });
   } else if (route.name === "progress") {
-    view = placeholder("Progressi", "La sincronizzazione privata con Google Sheets verrà attivata dopo il renderer.");
+    view = await renderProgressView();
   } else {
     view = placeholder("Pagina non trovata", "Controlla l’indirizzo oppure torna alla raccolta dei percorsi.");
   }
