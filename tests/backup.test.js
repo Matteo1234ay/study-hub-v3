@@ -41,3 +41,12 @@ test("imports validated namespaced entries and preserves unrelated data", () => 
 test("rejects backups containing foreign keys", () => {
   assert.throws(() => importLocalData({ schemaVersion: 1, entries: { token: "secret" } }, memoryStorage()), /Backup non valido/);
 });
+
+test("exports study history notes and preferences", () => {
+  const storage = memoryStorage({
+    "study-hub-v3:study": '{"history":[]}',
+    "study-hub-v3:note:SMM-01:reach": "nota",
+    "study-hub-v3:preferences": '{"fontSize":"large"}'
+  });
+  assert.equal(Object.keys(exportLocalData(storage, () => "2026-08-24T12:00:00.000Z").entries).length, 3);
+});
