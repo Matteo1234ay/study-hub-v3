@@ -10,4 +10,6 @@ Il codice e il contenuto dei Google Docs pubblicati sul web sono pubblici. Pubbl
 
 Progressi e futuri risultati personali restano nel `localStorage` del browser. Il backup JSON viene creato solo su richiesta dell’utente e non viene inviato automaticamente ad alcun servizio.
 
+Note, preferiti, segnalibri, preferenze e gli ultimi 500 eventi della cronologia seguono la stessa regola. Il pulsante Approfondisci non include questi dati e non effettua richieste verso OpenAI: apre soltanto un collegamento dopo che l’utente ha controllato il prompt pubblico.
+
 Non inserire nel repository credenziali, risposte private, valutazioni personali o URL contenenti segreti.
