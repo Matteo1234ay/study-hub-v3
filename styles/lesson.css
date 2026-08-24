@@ -39,4 +39,15 @@
 .chapter-controls a { color: var(--blue); font-size: .8rem; font-weight: 800; }
 .chapter-completion { margin-top: 34px; padding: 12px 16px; border: 1px solid rgba(123,228,183,.32); border-radius: 12px; color: var(--green); background: rgba(123,228,183,.06); font: inherit; font-size: .8rem; font-weight: 850; cursor: pointer; }
 .chapter-completion.is-complete { color: #061d17; background: var(--green); border-color: transparent; }
+.chapter-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 34px; }
+.chapter-actions .chapter-completion { margin-top: 0; }
+.chapter-action { padding: 12px 16px; border: 1px solid var(--line); border-radius: 12px; color: var(--blue); background: rgba(121,168,255,.05); font: inherit; font-size: .8rem; font-weight: 850; cursor: pointer; }
+.chapter-action.is-active, .favorite-button.is-active { color: #211902; background: #ffd76d; border-color: transparent; }
+.personal-note { margin-top: 28px; padding: 22px; border: 1px dashed rgba(155,124,255,.38); border-radius: var(--radius-md); background: rgba(155,124,255,.045); }
+.chapter-note { width: 100%; min-height: 100px; resize: vertical; margin-top: 12px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; color: var(--text); background: rgba(2,5,14,.64); font: inherit; line-height: 1.55; }
+[data-font-size="small"] .lesson-paragraph, [data-font-size="small"] .lesson-list { font-size: .95rem; }
+[data-font-size="large"] .lesson-paragraph, [data-font-size="large"] .lesson-list { font-size: 1.28rem; }
+[data-reading-width="narrow"] .chapter-blocks { max-width: 58ch; }
+[data-focus-mode="true"] .chapter-index, [data-focus-mode="true"] .site-header, [data-focus-mode="true"] .site-footer { display: none; }
+[data-focus-mode="true"] .lesson-layout { grid-template-columns: minmax(0, 1fr); max-width: 900px; margin: 0 auto; }
 @media (max-width: 820px) { .lesson-layout { grid-template-columns: 1fr; } .chapter-index { position: relative; top: 0; max-height: none; } .lesson-chapter { min-height: 0; padding: 30px 24px; } .source-pending { padding: 34px 24px; } }

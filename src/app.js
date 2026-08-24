@@ -6,8 +6,12 @@ import { renderPathView } from "./views/path-view.js";
 import { renderPathsView } from "./views/paths-view.js";
 import { renderLessonView } from "./views/lesson-view.js";
 import { renderProgressView } from "./views/progress-view.js";
+import { renderSearchView } from "./views/search-view.js";
+import { renderReviewView } from "./views/review-view.js";
+import { createPreferencesStore } from "./study/preferences.js";
 
 const app = document.querySelector("#app");
+createPreferencesStore().applyTo(document.documentElement);
 
 function placeholder(title, description) {
   return element("section", { className: "content-page" }, [
@@ -31,6 +35,10 @@ async function render(route) {
     });
   } else if (route.name === "progress") {
     view = await renderProgressView();
+  } else if (route.name === "search") {
+    view = await renderSearchView(route.params.query);
+  } else if (route.name === "review") {
+    view = await renderReviewView();
   } else {
     view = placeholder("Pagina non trovata", "Controlla l’indirizzo oppure torna alla raccolta dei percorsi.");
   }

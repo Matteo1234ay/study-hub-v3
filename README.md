@@ -8,8 +8,11 @@ Piattaforma personale di apprendimento statica, gratuita e pubblicabile con GitH
 - Google Docs pubblicati sul web sono la fonte ufficiale delle lezioni.
 - GitHub Actions controlla periodicamente le fonti pubblicate e rigenera i JSON.
 - Il browser conserva localmente progressi e backup.
+- Ricerca, preferiti, segnalibri, cronologia, note e preferenze di lettura funzionano interamente nel browser.
 
 Non sono usati Google Cloud, Apps Script, OAuth, API a pagamento, backend o segreti.
+
+Il comando **Approfondisci** prepara un testo basato soltanto sul capitolo pubblico: non usa API e non invia nulla automaticamente. L’utente controlla e copia personalmente la richiesta prima di aprire ChatGPT. L’adattatore è separato per consentire in futuro un modello locale senza modificare le lezioni.
 
 ## Sviluppo
 

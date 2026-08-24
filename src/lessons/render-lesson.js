@@ -39,7 +39,10 @@ function renderBlock(block) {
   return node;
 }
 
-export function renderLesson(model, { lessonId, activeChapterId = null, completedChapterIds = new Set(), onToggleChapter = () => {} } = {}) {
+export function renderLesson(model, {
+  lessonId, activeChapterId = null, completedChapterIds = new Set(), bookmarkedChapterIds = new Set(),
+  noteForChapter = () => "", onToggleChapter = () => {}, onToggleBookmark = () => {}, onNote = () => {}, onDeepen = () => {}
+} = {}) {
   const layout = element("div", { className: "lesson-layout" });
   const index = element("nav", { className: "chapter-index", attrs: { "aria-label": "Indice dei capitoli" } }, [
     element("p", { className: "eyebrow", text: "Indice capitoli" })
@@ -49,6 +52,7 @@ export function renderLesson(model, { lessonId, activeChapterId = null, complete
 
   model.chapters.forEach((chapter, indexNumber) => {
     const isCompleted = completedChapterIds.has(chapter.id);
+    const isBookmarked = bookmarkedChapterIds.has(chapter.id);
     const href = chapterHref(lessonId, chapter.id);
     const indexLink = element("a", {
       href,
@@ -67,6 +71,17 @@ export function renderLesson(model, { lessonId, activeChapterId = null, complete
       attrs: { type: "button", "aria-pressed": String(isCompleted) }
     });
     completionButton.addEventListener("click", () => onToggleChapter(chapter.id));
+    const bookmarkButton = element("button", {
+      className: `chapter-action${isBookmarked ? " is-active" : ""}`,
+      text: isBookmarked ? "★ Salvato" : "☆ Salva capitolo",
+      attrs: { type: "button", "aria-pressed": String(isBookmarked) }
+    });
+    bookmarkButton.addEventListener("click", () => onToggleBookmark(chapter.id));
+    const deepenButton = element("button", { className: "chapter-action", text: "Approfondisci ↗", attrs: { type: "button" } });
+    deepenButton.addEventListener("click", () => onDeepen(chapter));
+    const note = element("textarea", { className: "chapter-note", attrs: { rows: "4", placeholder: "Scrivi una nota personale…", "aria-label": `Note personali: ${chapter.title}` } });
+    note.value = noteForChapter(chapter.id);
+    note.addEventListener("input", () => onNote(chapter.id, note.value));
     const section = element("section", {
       className: "lesson-chapter",
       attrs: { id: chapter.id, "data-chapter-id": chapter.id }
@@ -74,7 +89,10 @@ export function renderLesson(model, { lessonId, activeChapterId = null, complete
       element("div", { className: "chapter-number", text: String(indexNumber + 1).padStart(2, "0") }),
       heading,
       element("div", { className: "chapter-blocks" }, chapter.blocks.map(renderBlock)),
-      completionButton,
+      element("div", { className: "chapter-actions" }, [completionButton, bookmarkButton, deepenButton]),
+      element("aside", { className: "personal-note" }, [
+        element("span", { className: "callout-label", text: "Appunti personali · solo su questo dispositivo" }), note
+      ]),
       element("div", { className: "chapter-controls" }, [
         indexNumber > 0 ? element("a", { href: chapterHref(lessonId, model.chapters[indexNumber - 1].id), text: "← Capitolo precedente" }) : null,
         indexNumber < model.chapters.length - 1 ? element("a", { href: chapterHref(lessonId, model.chapters[indexNumber + 1].id), text: "Capitolo successivo →" }) : null
