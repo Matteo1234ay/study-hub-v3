@@ -1,7 +1,12 @@
 import { PATHS } from "../config/paths.js";
 import { element } from "../ui/components.js";
+import { createStudyStore } from "../study/study-store.js";
+import { findLesson } from "../config/paths.js";
 
 export function renderHomeView() {
+  const last = createStudyStore().getState().lastPosition;
+  const recentLesson = last ? findLesson(last.lessonId) : null;
+  const continueHref = recentLesson ? `#/lessons/${recentLesson.id}${last.chapterId ? `/${last.chapterId}` : ""}` : "#/lessons/SMM-01";
   const section = element("section", { className: "home-view" });
   const hero = element("section", { className: "hero" }, [
     element("div", { className: "hero-copy" }, [
@@ -10,7 +15,9 @@ export function renderHomeView() {
       element("p", { className: "hero-lead", text: "Uno spazio in cui i documenti diventano lezioni, le lezioni diventano competenze e il ripasso non richiede più di cercare dentro una dispensa." }),
       element("div", { className: "hero-actions" }, [
         element("a", { className: "button primary", text: "Esplora i percorsi", href: "#/paths" }),
-        element("a", { className: "button quiet", text: "Continua SMM-01", href: "#/lessons/SMM-01" })
+        element("a", { className: "button quiet", text: recentLesson ? `Continua ${recentLesson.id}` : "Continua SMM-01", href: continueHref }),
+        element("a", { className: "button quiet", text: "Cerca", href: "#/search" }),
+        element("a", { className: "button quiet", text: "Ripassa", href: "#/review" })
       ])
     ]),
     element("div", { className: "hero-orbit", attrs: { "aria-hidden": "true" } }, [
