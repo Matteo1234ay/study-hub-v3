@@ -1,5 +1,6 @@
 export function parseRoute(hash = "#/home") {
-  const parts = hash.replace(/^#\/?/, "").split("/").filter(Boolean);
+  const path = hash.split("?")[0];
+  const parts = path.replace(/^#\/?/, "").split("/").filter(Boolean);
   if (parts.length === 0 || (parts[0] === "home" && parts.length === 1)) {
     return { name: "home", params: {} };
   }

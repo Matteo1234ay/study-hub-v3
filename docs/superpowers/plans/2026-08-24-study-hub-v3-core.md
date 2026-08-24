@@ -424,7 +424,7 @@ Store only lesson content and revision metadata in IndexedDB or localStorage; ne
 
 - [ ] **Step 6: Configure SMM-01 live source**
 
-Insert the existing SMM-01 Google Doc ID from the provided V3 reference into `paths.js`: `1dL6pZCoC3hRfgf9kDaKzI4yX2ylHkx6INxqtTqABxus`. Keep the ID in configuration only; do not copy the lesson body.
+Insert the existing SMM-01 Google Doc ID from the provided V3 reference into `paths.js`: `1A-hkkknz7F4uMnbizJFq53cPu_crfXGLP4Sf42x-O0A`. Keep the ID in configuration only; do not copy the lesson body.
 
 - [ ] **Step 7: One-time manual Google Cloud authorization checkpoint**
 

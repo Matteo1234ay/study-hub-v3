@@ -27,3 +27,10 @@ test("unknown routes become not-found", () => {
     params: {}
   });
 });
+
+test("ignores query parameters used by authorization actions", () => {
+  assert.deepEqual(parseRoute("#/lessons/SMM-01?authorize=1"), {
+    name: "lesson",
+    params: { lessonId: "SMM-01" }
+  });
+});

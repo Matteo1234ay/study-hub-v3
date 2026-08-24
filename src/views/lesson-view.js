@@ -1,7 +1,12 @@
 import { renderLesson } from "../lessons/render-lesson.js";
+import { buildLesson } from "../lessons/build-lesson.js";
+import { createLessonCache } from "../lessons/lesson-cache.js";
+import { getAccessToken } from "../google/auth.js";
+import { fetchGoogleDoc } from "../google/docs-client.js";
 import { element } from "../ui/components.js";
+import { renderErrorState, StudyHubError } from "../ui/errors.js";
 
-export function renderLessonView({ lesson, model = null, activeChapterId = null }) {
+export async function renderLessonView({ lesson, activeChapterId = null, interactive = false }) {
   if (!lesson) {
     return element("section", { className: "content-page" }, [
       element("p", { className: "eyebrow", text: "Errore 404" }),
@@ -25,21 +30,37 @@ export function renderLessonView({ lesson, model = null, activeChapterId = null 
       element("p", { className: "page-lead", text: lesson.description }),
       element("div", { className: "lesson-meta" }, [
         element("span", { text: lesson.estimated }),
-        element("span", { text: model ? `${model.chapters.length} capitoli` : "Fonte da collegare" })
+        element("span", { className: "lesson-source-state", text: "Caricamento fonte…" })
       ])
     ])
   );
-
-  if (!model) {
-    view.append(element("section", { className: "source-pending", attrs: { "role": "status" } }, [
-      element("span", { className: "empty-mark", text: "↗", attrs: { "aria-hidden": "true" } }),
-      element("h2", { text: "Contenuto live non ancora collegato" }),
-      element("p", { text: "La struttura della lezione è pronta. Il testo comparirà qui esclusivamente dopo il collegamento al Google Doc ufficiale, senza contenuti inventati o duplicati nel codice." })
-    ]));
-    return view;
+  const body = element("div", { className: "lesson-live-region", attrs: { "aria-live": "polite" } });
+  view.append(body);
+  const cache = createLessonCache();
+  let document;
+  let fromCache = false;
+  try {
+    const token = await getAccessToken({ interactive });
+    document = await fetchGoogleDoc(lesson.docId, token);
+    cache.set(lesson.id, document, document.revisionId ?? null);
+  } catch (error) {
+    const cached = cache.get(lesson.id);
+    if (cached && error.code !== "google-not-configured") {
+      document = cached.document;
+      fromCache = true;
+    } else {
+      const safeError = error instanceof StudyHubError ? error : new StudyHubError("invalid-google-response", "Errore inatteso.");
+      body.append(renderErrorState(safeError, {
+        onAuthorize: () => location.assign(`${location.hash}?authorize=1`),
+        onRetry: () => location.reload()
+      }));
+      view.querySelector(".lesson-source-state").textContent = "Fonte non disponibile";
+      return view;
+    }
   }
-
-  view.append(renderLesson(model, { lessonId: lesson.id, activeChapterId }));
+  const model = buildLesson(document);
+  view.querySelector(".lesson-source-state").textContent = fromCache ? `${model.chapters.length} capitoli · copia salvata` : `${model.chapters.length} capitoli · Google Docs`;
+  body.append(renderLesson(model, { lessonId: lesson.id, activeChapterId }));
   if (activeChapterId) {
     requestAnimationFrame(() => {
       const chapter = document.getElementById(activeChapterId);

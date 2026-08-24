@@ -12,7 +12,7 @@ export const PATHS = Object.freeze([
       description: "Leggere le performance organiche e trasformarle in decisioni motivate.",
       level: "Fondamenta",
       estimated: "5 ore",
-      docId: null
+      docId: "1A-hkkknz7F4uMnbizJFq53cPu_crfXGLP4Sf42x-O0A"
     }]
   },
   {

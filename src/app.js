@@ -15,21 +15,27 @@ function placeholder(title, description) {
   ]);
 }
 
-function render(route) {
+let renderSequence = 0;
+
+async function render(route) {
+  const sequence = ++renderSequence;
   let view;
   if (route.name === "home") view = renderHomeView();
   else if (route.name === "paths") view = renderPathsView();
   else if (route.name === "path") view = renderPathView(findPath(route.params.pathId));
   else if (route.name === "lesson" || route.name === "chapter") {
-    view = renderLessonView({
+    const authorize = new URLSearchParams(location.hash.split("?")[1] ?? "").has("authorize");
+    view = await renderLessonView({
       lesson: findLesson(route.params.lessonId),
-      activeChapterId: route.params.chapterId ?? null
+      activeChapterId: route.params.chapterId ?? null,
+      interactive: authorize
     });
   } else if (route.name === "progress") {
     view = placeholder("Progressi", "La sincronizzazione privata con Google Sheets verrà attivata dopo il renderer.");
   } else {
     view = placeholder("Pagina non trovata", "Controlla l’indirizzo oppure torna alla raccolta dei percorsi.");
   }
+  if (sequence !== renderSequence) return;
   app.replaceChildren(view);
   document.title = `Study Hub V3 · ${route.name}`;
   app.focus({ preventScroll: true });
