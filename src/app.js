@@ -1,9 +1,10 @@
-import { findPath } from "./config/paths.js";
+import { findLesson, findPath } from "./config/paths.js";
 import { startRouter } from "./router.js";
 import { element, pageHeader } from "./ui/components.js";
 import { renderHomeView } from "./views/home-view.js";
 import { renderPathView } from "./views/path-view.js";
 import { renderPathsView } from "./views/paths-view.js";
+import { renderLessonView } from "./views/lesson-view.js";
 
 const app = document.querySelector("#app");
 
@@ -20,7 +21,10 @@ function render(route) {
   else if (route.name === "paths") view = renderPathsView();
   else if (route.name === "path") view = renderPathView(findPath(route.params.pathId));
   else if (route.name === "lesson" || route.name === "chapter") {
-    view = placeholder("Lezione in preparazione", "Il renderer didattico verrà collegato nella prossima fase.");
+    view = renderLessonView({
+      lesson: findLesson(route.params.lessonId),
+      activeChapterId: route.params.chapterId ?? null
+    });
   } else if (route.name === "progress") {
     view = placeholder("Progressi", "La sincronizzazione privata con Google Sheets verrà attivata dopo il renderer.");
   } else {
