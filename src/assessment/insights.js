@@ -25,6 +25,7 @@ export function deriveAssessmentInsights(assessment, attempts) {
   }
   const competencies = assessment.competencies.map(competency => {
     const values = competencyValues.get(competency.id) ?? [];
+    if (!values.length) return { ...competency, percent: null, status: "not-assessed" };
     const percent = values.length ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length) : 0;
     return { ...competency, percent, status: percent >= 80 ? "solid" : percent >= 60 ? "improving" : "review" };
   });

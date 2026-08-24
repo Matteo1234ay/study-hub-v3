@@ -25,3 +25,9 @@ test("classifies competency from recent weighted performance", () => {
   assert.equal(deriveAssessmentInsights(assessment, [attempt("1", 1)]).competencies[0].status, "solid");
   assert.equal(deriveAssessmentInsights(assessment, [attempt("1", 0)]).competencies[0].status, "review");
 });
+
+test("keeps untouched competencies as not assessed", () => {
+  const expanded = { ...assessment, competencies: [...assessment.competencies, { id: "k2", label: "Retention" }] };
+  const competency = deriveAssessmentInsights(expanded, [attempt("1", 1)]).competencies.find(item => item.id === "k2");
+  assert.deepEqual(competency, { id: "k2", label: "Retention", percent: null, status: "not-assessed" });
+});

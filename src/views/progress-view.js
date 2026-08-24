@@ -130,7 +130,7 @@ export async function renderProgressView() {
       if (assessment && attempts.length) {
         const insights = deriveAssessmentInsights(assessment, attempts);
         const competencyList = element("ul", { className: "competency-list" });
-        for (const competency of insights.competencies) competencyList.append(element("li", { text: `${competency.label}: ${competency.percent}% · ${competency.status === "solid" ? "consolidata" : competency.status === "improving" ? "in miglioramento" : "da ripassare"}` }));
+        for (const competency of insights.competencies) competencyList.append(element("li", { text: competency.status === "not-assessed" ? `${competency.label}: non ancora valutata` : `${competency.label}: ${competency.percent}% · ${competency.status === "solid" ? "consolidata" : competency.status === "improving" ? "in miglioramento" : "da ripassare"}` }));
         panel.append(element("h3", { text: "Competenze" }), competencyList);
         if (insights.recurringErrors.length) panel.append(element("p", { text: `${insights.recurringErrors.length} errori ricorrenti individuati.` }));
         const reviewLinks = element("div", { className: "review-links" });
