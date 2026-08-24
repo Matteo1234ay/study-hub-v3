@@ -1,4 +1,4 @@
-import { renderLesson } from "../lessons/render-lesson.js?v=20260824-study2";
+import { renderLesson } from "../lessons/render-lesson.js";
 import { createLessonCache } from "../lessons/lesson-cache.js";
 import { element } from "../ui/components.js";
 import { calculateLessonProgress, createProgressStore } from "../progress/local-progress.js";
