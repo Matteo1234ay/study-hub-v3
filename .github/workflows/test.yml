@@ -1,0 +1,25 @@
+name: Test
+
+on:
+  push:
+    branches: [main, codex/study-hub-v3-core]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test
+      - name: Check for committed secrets
+        run: |
+          if grep -RInE '(client[_-]?secret|api[_-]?key|access[_-]?token|private[_-]?key|GOOGLE_CLIENT_ID|AIza[0-9A-Za-z_-]{20,}|ghp_[0-9A-Za-z]{20,})' --exclude-dir=.git .; then
+            echo "Potential secret found"
+            exit 1
+          fi

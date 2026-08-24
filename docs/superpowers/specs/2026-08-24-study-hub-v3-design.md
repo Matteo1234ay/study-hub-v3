@@ -1,5 +1,7 @@
 # Study Hub V3 — Specifica di progettazione
 
+> **Architettura aggiornata:** le sezioni relative a OAuth, Google Cloud, API Docs/Drive/Sheets e sincronizzazione privata automatica sono superate dall’addendum [2026-08-24-zero-cost-sync-amendment.md](./2026-08-24-zero-cost-sync-amendment.md). La decisione più recente prevale in caso di conflitto.
+
 **Data:** 24 agosto 2026  
 **Stato:** approvata per la pianificazione  
 **Repository:** `Matteo1234ay/study-hub-v3`

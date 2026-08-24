@@ -1,0 +1,17 @@
+{
+  "title": "SMM-01 – Metriche e KPI organici",
+  "body": {
+    "content": [
+      { "paragraph": { "paragraphStyle": { "namedStyleType": "TITLE" }, "elements": [{ "textRun": { "content": "SMM-01 – Metriche e KPI organici\n" } }] } },
+      { "paragraph": { "paragraphStyle": { "namedStyleType": "HEADING_1" }, "elements": [{ "textRun": { "content": "Metrica, KPI e obiettivo\n" } }] } },
+      { "paragraph": { "paragraphStyle": { "namedStyleType": "NORMAL_TEXT" }, "elements": [{ "textRun": { "content": "Una metrica è una misura quantitativa.\n" } }] } },
+      { "paragraph": { "paragraphStyle": { "namedStyleType": "NORMAL_TEXT" }, "elements": [{ "textRun": { "content": "Punto chiave: il dato diventa utile quando sostiene una decisione.\n" } }] } },
+      { "paragraph": { "paragraphStyle": { "namedStyleType": "HEADING_1" }, "elements": [{ "textRun": { "content": "Retention\n" } }] } },
+      { "paragraph": { "paragraphStyle": { "namedStyleType": "NORMAL_TEXT" }, "elements": [{ "textRun": { "content": "Formula: Retention = spettatori rimasti / spettatori iniziali × 100\n" } }] } },
+      { "paragraph": { "paragraphStyle": { "namedStyleType": "NORMAL_TEXT" }, "elements": [{ "textRun": { "content": "Errore: un picco non dimostra da solo la causa.\n" } }] } },
+      { "paragraph": { "paragraphStyle": { "namedStyleType": "HEADING_1" }, "elements": [{ "textRun": { "content": "Retention\n" } }] } },
+      { "paragraph": { "bullet": { "listId": "check-1" }, "paragraphStyle": { "namedStyleType": "NORMAL_TEXT" }, "elements": [{ "textRun": { "content": "Dichiara il denominatore\n" } }] } },
+      { "paragraph": { "bullet": { "listId": "check-1" }, "paragraphStyle": { "namedStyleType": "NORMAL_TEXT" }, "elements": [{ "textRun": { "content": "Confronta periodi equivalenti\n" } }] } }
+    ]
+  }
+}

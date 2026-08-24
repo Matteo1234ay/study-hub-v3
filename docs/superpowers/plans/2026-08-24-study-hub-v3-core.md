@@ -1,5 +1,7 @@
 # Study Hub V3 Core Platform Implementation Plan
 
+> **Piano parzialmente superato:** i Task 4 e 5 relativi a OAuth e API Google sono sostituiti dal piano [2026-08-24-zero-cost-remaining.md](./2026-08-24-zero-cost-remaining.md). I Task 1–3 restano validi e sono stati completati.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Pubblicare Study Hub V3 su GitHub Pages con navigazione scalabile, renderer didattico universale, SMM-01 live da Google Docs e dati privati sincronizzati con Google Sheets senza Apps Script.
@@ -424,7 +426,7 @@ Store only lesson content and revision metadata in IndexedDB or localStorage; ne
 
 - [ ] **Step 6: Configure SMM-01 live source**
 
-Insert the existing SMM-01 Google Doc ID from the provided V3 reference into `paths.js`: `1dL6pZCoC3hRfgf9kDaKzI4yX2ylHkx6INxqtTqABxus`. Keep the ID in configuration only; do not copy the lesson body.
+Insert the existing SMM-01 Google Doc ID from the provided V3 reference into `paths.js`: `1A-hkkknz7F4uMnbizJFq53cPu_crfXGLP4Sf42x-O0A`. Keep the ID in configuration only; do not copy the lesson body.
 
 - [ ] **Step 7: One-time manual Google Cloud authorization checkpoint**
 
