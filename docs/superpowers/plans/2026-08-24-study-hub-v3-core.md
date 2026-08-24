@@ -617,6 +617,6 @@ git commit -m "docs: prepare Study Hub V3 public release"
 ## Plan Self-Review Result
 
 - Spec coverage: architecture, navigation, renderer, Google Docs, Google Sheets, privacy, cache, errors, accessibility and free deployment are each mapped to a task.
-- Placeholder scan: no `TBD`, `TODO`, `FIXME` or “implement later” instructions.
+- Placeholder scan: no unresolved markers or deferred implementation instructions.
 - Type consistency: `LessonModel`, `Route`, Google client methods and progress functions have a single stable name across tasks.
 - Scope control: later lesson-content improvements remain outside this implementation plan and will modify Google Docs only after the universal renderer is live.
