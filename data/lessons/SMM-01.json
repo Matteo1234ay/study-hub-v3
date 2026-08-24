@@ -1,0 +1,457 @@
+{
+  "title": "SMM-01 – Metriche e KPI organici",
+  "chapters": [
+    {
+      "id": "obiettivo-del-modulo",
+      "title": "Obiettivo del modulo",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Alla fine di SMM-01 devi saper fare una cosa precisa: partire da un obiettivo editoriale, scegliere i dati che servono davvero per valutarlo, interpretarli senza attribuire ai numeri più significato di quello che hanno e trasformare l'analisi in una decisione verificabile. Non basta conoscere i nomi delle metriche: devi saper spiegare che cosa misurano, che cosa NON dimostrano e perché una certa metrica è utile in un caso ma secondaria in un altro."
+        }
+      ]
+    },
+    {
+      "id": "1-metrica-kpi-e-obiettivo-tre-cose-diverse",
+      "title": "1. Metrica, KPI e obiettivo: tre cose diverse",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Una metrica è una misura disponibile: views, reach, impression, watch time, follower acquisiti, commenti e così via. Un KPI, invece, non è una categoria speciale di numero: è una metrica che scegli come indicatore principale perché è coerente con uno specifico obiettivo. L'obiettivo viene prima del KPI."
+        },
+        {
+          "type": "example",
+          "label": "Esempio",
+          "text": "Se l'obiettivo è aumentare la distribuzione di un Reel presso nuove persone pertinenti, reach e views possono essere centrali. Se invece l'obiettivo è trasformare spettatori in follower, le stesse views diventano soprattutto una metrica di contesto: sono utili, ma non dicono da sole se la community è cresciuta."
+        },
+        {
+          "type": "paragraph",
+          "text": "La domanda da farti prima di aprire Insights è sempre: che cosa volevamo ottenere con questo contenuto?"
+        },
+        {
+          "type": "paragraph",
+          "text": "Obiettivi diversi richiedono KPI diversi:"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            "awareness: aumentare l'esposizione presso persone pertinenti;",
+            "consumo del contenuto: ottenere visualizzazioni effettive e mantenere attenzione;",
+            "engagement: stimolare interazioni significative;",
+            "crescita della community: trasformare spettatori in follower o iscritti;",
+            "traffico: portare persone verso una destinazione;",
+            "conversione: ottenere un'azione di valore definita."
+          ]
+        },
+        {
+          "type": "key-concept",
+          "label": "Regola pratica",
+          "text": "non scegliere il KPI dopo aver visto quale numero è più alto. Prima dichiari l'obiettivo, poi scegli il KPI, poi guardi il risultato."
+        }
+      ]
+    },
+    {
+      "id": "2-reach-impression-e-views-non-sono-sinonimi",
+      "title": "2. Reach, impression e views: non sono sinonimi",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Reach indica quante persone o account unici sono stati raggiunti secondo la definizione della piattaforma. Se la stessa persona vede il contenuto più volte, continua normalmente a rappresentare una sola unità di reach per il periodo e la definizione usata dalla piattaforma."
+        },
+        {
+          "type": "paragraph",
+          "text": "Impression indica quante esposizioni vengono registrate. Una stessa persona può quindi generare più impression. Per esempio, una reach di 10.000 e 18.000 impression è compatibile con il fatto che parte del pubblico abbia incontrato il contenuto più di una volta."
+        },
+        {
+          "type": "paragraph",
+          "text": "Views indica invece la fruizione del contenuto secondo le regole specifiche della piattaforma. La definizione concreta di view può dipendere dal formato e dalla piattaforma, quindi va controllata nella documentazione o nell'interfaccia corrente."
+        },
+        {
+          "type": "warning",
+          "label": "Che cosa NON puoi concludere",
+          "text": "più impression della reach non significa automaticamente che il contenuto sia migliore; più views non significa automaticamente che sia più utile, più apprezzato o più efficace strategicamente. Questi numeri descrivono esposizione e fruizione, non da soli la qualità del risultato."
+        }
+      ]
+    },
+    {
+      "id": "3-watch-time-e-durata-media-quanto-contenuto-viene-realmente-consumato",
+      "title": "3. Watch time e durata media: quanto contenuto viene realmente consumato",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Il watch time misura il tempo complessivo consumato dal pubblico. Se cento visualizzazioni generano complessivamente mille minuti di visione, quel totale è watch time."
+        },
+        {
+          "type": "paragraph",
+          "text": "La durata media di visualizzazione descrive invece quanto tempo viene visto mediamente per una visualizzazione secondo la metrica della piattaforma."
+        },
+        {
+          "type": "paragraph",
+          "text": "Queste metriche aggiungono una dimensione che il semplice numero di views non contiene: non dicono solo che il video è stato avviato, ma quanto è stato consumato."
+        },
+        {
+          "type": "paragraph",
+          "text": "La durata media va sempre letta rispetto alla durata del contenuto. Trenta secondi medi su un video di 35 secondi descrivono una situazione molto diversa da trenta secondi medi su un video di dieci minuti."
+        },
+        {
+          "type": "paragraph",
+          "text": "Che cosa NON dimostrano da sole: una durata media alta non dimostra automaticamente che il pubblico diventerà follower o acquisterà qualcosa. Misura consumo del contenuto; il collegamento con obiettivi successivi deve essere verificato con metriche coerenti con quegli obiettivi."
+        }
+      ]
+    },
+    {
+      "id": "4-retention-dove-il-pubblico-rimane-e-dove-lo-perdi",
+      "title": "4. Retention: dove il pubblico rimane e dove lo perdi",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "La retention descrive come l'attenzione del pubblico si mantiene nel tempo. Non è semplicemente una categoria di “visualizzazioni engaged”. È una lettura dell'andamento della permanenza lungo il contenuto."
+        },
+        {
+          "type": "paragraph",
+          "text": "Una curva di retention permette di osservare punti in cui gli spettatori abbandonano, rimangono, saltano o rivedono una parte. Su YouTube, dips e spikes sono segnali da interpretare, non spiegazioni già pronte."
+        },
+        {
+          "type": "example",
+          "label": "Esempio",
+          "text": "se compare un picco al minuto 2, non puoi scrivere “quella parte piace sicuramente di più”. Il picco è compatibile con più interpretazioni: alcune persone potrebbero rivedere un passaggio perché è interessante, oppure perché è poco chiaro, oppure potrebbero arrivare direttamente a quel punto. Il dato ti dice dove indagare; non ti fornisce da solo la causa."
+        },
+        {
+          "type": "paragraph",
+          "text": "Formula mentale corretta: osservazione → possibili spiegazioni → verifica. Non osservazione → causa certa."
+        }
+      ]
+    },
+    {
+      "id": "5-engagement-le-interazioni-non-sono-tutte-uguali",
+      "title": "5. Engagement: le interazioni non sono tutte uguali",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Like, commenti, condivisioni e salvataggi sono comportamenti differenti. Sommarli può essere utile in alcuni report, ma non devi dimenticare che rappresentano azioni diverse."
+        },
+        {
+          "type": "paragraph",
+          "text": "Un salvataggio può essere compatibile con utilità futura; una condivisione con valore sociale o informativo; un commento con coinvolgimento, domanda o anche disaccordo. Per questo “molte interazioni” non equivale automaticamente a “molta fidelizzazione” e non equivale a “molte conversioni”."
+        },
+        {
+          "type": "paragraph",
+          "text": "L'engagement rate è un rapporto. Deve quindi dichiarare il denominatore:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Engagement rate = interazioni considerate / denominatore scelto × 100"
+        },
+        {
+          "type": "paragraph",
+          "text": "Il denominatore può essere, a seconda del report, reach, impression, views o follower. Un 8% calcolato sulla reach e un 8% calcolato sui follower non descrivono la stessa cosa. Se due report usano denominatori diversi, non puoi dire semplicemente che l'engagement è raddoppiato confrontando 4% e 8%."
+        }
+      ]
+    },
+    {
+      "id": "6-follower-e-iscritti-crescita-totale-e-attribuzione-al-singolo-contenuto",
+      "title": "6. Follower e iscritti: crescita totale e attribuzione al singolo contenuto",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "La crescita netta del periodo misura acquisizioni meno perdite. È utile per capire se la community è cresciuta complessivamente."
+        },
+        {
+          "type": "paragraph",
+          "text": "Se però vuoi valutare un singolo contenuto, è preferibile usare, quando disponibili, follower o iscritti attribuiti a quel contenuto. Se nel mese hai guadagnato 300 follower e nello stesso mese hai avuto un Reel virale, non puoi concludere automaticamente che il Reel abbia portato tutti e 300 i follower: potrebbero essere arrivati da altri contenuti, visite al profilo o altre fonti."
+        },
+        {
+          "type": "paragraph",
+          "text": "Un rapporto utile quando vuoi confrontare la capacità di contenuti diversi di trasformare la distribuzione in crescita è:"
+        },
+        {
+          "type": "paragraph",
+          "text": "nuovi follower attribuiti / reach × 100"
+        },
+        {
+          "type": "paragraph",
+          "text": "Questo tasso aggiunge informazione al valore assoluto. Due video possono generare lo stesso numero di follower, ma se uno ha raggiunto molte meno persone ha convertito una quota maggiore della propria reach in follower. Anche qui, però, il dato descrive il risultato osservato; non spiega automaticamente quale caratteristica creativa lo abbia causato."
+        }
+      ]
+    },
+    {
+      "id": "7-ctr-stesso-nome-contesti-diversi",
+      "title": "7. CTR: stesso nome, contesti diversi",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "CTR significa click-through rate, ma il significato operativo dipende da che cosa viene contato al numeratore e al denominatore."
+        },
+        {
+          "type": "paragraph",
+          "text": "Su YouTube, l'impressions CTR riguarda la frequenza con cui determinate impression registrate di una thumbnail portano a una visualizzazione. Non è quindi automaticamente confrontabile con il CTR di un link in bio Instagram: cambia il punto del percorso, cambia il comportamento richiesto e può cambiare la definizione del denominatore."
+        },
+        {
+          "type": "key-concept",
+          "label": "Regola",
+          "text": "prima di confrontare due percentuali con lo stesso nome, controlla sempre come sono definite."
+        }
+      ]
+    },
+    {
+      "id": "8-conversione-engagement-e-fidelizzazione-non-sono-la-stessa-cosa",
+      "title": "8. Conversione, engagement e fidelizzazione non sono la stessa cosa",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Una conversione è un'azione definita come utile per l'obiettivo: iscrizione, richiesta, acquisto, download, prenotazione o altro evento scelto. La conversione deve essere definita prima dell'analisi."
+        },
+        {
+          "type": "paragraph",
+          "text": "Engagement descrive interazioni con il contenuto. Fidelizzazione è un concetto strategico più ampio e, per essere analizzato, deve essere tradotto in indicatori osservabili coerenti con ciò che intendi per “pubblico stabile”: per esempio ritorno dell'audience, iscrizioni/follow, continuità della fruizione o altre metriche effettivamente disponibili e definite dalla piattaforma."
+        },
+        {
+          "type": "paragraph",
+          "text": "Quindi: 1.500 interazioni non sono 1.500 conversioni. E non bastano da sole a dimostrare maggiore fidelizzazione."
+        }
+      ]
+    },
+    {
+      "id": "9-vanity-metric-il-problema-non-e-la-metrica-ma-l-uso-che-ne-fai",
+      "title": "9. Vanity metric: il problema non è la metrica, ma l'uso che ne fai",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Una vanity metric non è automaticamente una metrica inutile. Diventa “vanity” quando viene esibita come prova di successo senza collegarla a un obiettivo o a una decisione."
+        },
+        {
+          "type": "paragraph",
+          "text": "Le views, per esempio, possono essere decisive se stai studiando distribuzione o awareness. Le stesse views possono essere insufficienti se l'obiettivo è generare richieste, acquisti o follower stabili."
+        },
+        {
+          "type": "paragraph",
+          "text": "Per ogni dato chiediti cinque cose:"
+        },
+        {
+          "type": "paragraph",
+          "text": "1. Quale obiettivo dovrebbe rappresentare?"
+        },
+        {
+          "type": "paragraph",
+          "text": "2. Come viene definito dalla piattaforma?"
+        },
+        {
+          "type": "paragraph",
+          "text": "3. Con quale baseline o contenuto comparabile lo confronto?"
+        },
+        {
+          "type": "paragraph",
+          "text": "4. Quali spiegazioni alternative esistono?"
+        },
+        {
+          "type": "paragraph",
+          "text": "5. Quale decisione posso prendere grazie a questo dato?"
+        }
+      ]
+    },
+    {
+      "id": "10-correlazione-attribuzione-e-causa",
+      "title": "10. Correlazione, attribuzione e causa",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Questa è una delle parti più importanti del modulo. Un dato osservazionale può mostrarti che due cose sono accadute insieme, ma non dimostra automaticamente che una abbia causato l'altra."
+        },
+        {
+          "type": "paragraph",
+          "text": "Esempio sbagliato: “Il video ha avuto più follower perché la promessa iniziale era migliore”. I dati possono mostrarti che quel video ha avuto più follower; per dire che la causa è stata la promessa iniziale devi avere un confronto o un test che renda questa ipotesi verificabile."
+        },
+        {
+          "type": "paragraph",
+          "text": "Formula professionale: “Il risultato è compatibile con l'ipotesi che la promessa iniziale abbia contribuito alla performance; da verificare confrontando contenuti comparabili o testando aperture differenti mantenendo il resto il più possibile stabile.”"
+        },
+        {
+          "type": "paragraph",
+          "text": "Le parole contano: “potrebbe”, “è compatibile con”, “suggerisce di verificare” sono corrette quando la causa non è dimostrata."
+        }
+      ]
+    },
+    {
+      "id": "11-come-progettare-un-test-utile",
+      "title": "11. Come progettare un test utile",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Un test successivo non consiste semplicemente nel “guardare meglio il video”. Deve collegare un'ipotesi a una modifica osservabile."
+        },
+        {
+          "type": "example",
+          "label": "Esempio",
+          "text": "ipotesi = un'apertura più chiara aumenta il consumo iniziale. Test = produrre due contenuti il più possibile comparabili cambiando soprattutto l'apertura e confrontare retention iniziale e le altre metriche coerenti con l'obiettivo."
+        },
+        {
+          "type": "paragraph",
+          "text": "Il principio è ridurre, per quanto possibile, le differenze non necessarie tra ciò che stai confrontando. Se cambi contemporaneamente tema, durata, montaggio, titolo, pubblico e apertura, sarà molto più difficile capire quale elemento sia associato alla differenza di performance."
+        }
+      ]
+    },
+    {
+      "id": "12-kpi-primari-e-metriche-diagnostiche",
+      "title": "12. KPI primari e metriche diagnostiche",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Un KPI primario ti dice se stai avanzando verso l'obiettivo. Una metrica diagnostica ti aiuta a capire perché il KPI potrebbe essersi mosso."
+        },
+        {
+          "type": "example",
+          "label": "Esempio",
+          "text": "obiettivo = crescita della community. KPI primari possibili, quando disponibili e coerenti con il caso: follower/iscritti acquisiti, crescita netta, follower attribuiti al contenuto o un tasso di acquisizione costruito con un denominatore esplicito. Metriche diagnostiche: reach, retention, durata media, interazioni, perché possono aiutarti a capire il percorso che ha portato al risultato senza sostituirsi al risultato stesso."
+        },
+        {
+          "type": "paragraph",
+          "text": "Altro esempio: obiettivo = consumo dei video lunghi. In questo caso watch time, durata media e retention possono diventare KPI primari, mentre reach o impression possono essere metriche di distribuzione utili a spiegare il contesto."
+        },
+        {
+          "type": "paragraph",
+          "text": "La stessa metrica può quindi essere KPI in una strategia e diagnostica in un'altra."
+        }
+      ]
+    },
+    {
+      "id": "13-confrontare-contenuti-correttamente",
+      "title": "13. Confrontare contenuti correttamente",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Prima di confrontare due contenuti controlla almeno: formato, durata, periodo di pubblicazione, dimensione dell'audience, distribuzione organica o paid, obiettivo, tempo trascorso dalla pubblicazione e definizione delle metriche."
+        },
+        {
+          "type": "paragraph",
+          "text": "Preferisci confronti con:"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            "performance tipica dello stesso account;",
+            "contenuti dello stesso formato e obiettivo;",
+            "mediane o distribuzioni quando hai abbastanza dati;",
+            "periodi temporali comparabili."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Un confronto è tanto più utile quanto più sai spiegare che cosa è comparabile e che cosa rappresenta invece un limite dell'analisi."
+        }
+      ]
+    },
+    {
+      "id": "14-dalla-metrica-alla-decisione-il-metodo-completo",
+      "title": "14. Dalla metrica alla decisione: il metodo completo",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Usa sempre questa catena:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Obiettivo → KPI → risultato → benchmark/baseline → interpretazione → ipotesi → decisione → test successivo."
+        },
+        {
+          "type": "paragraph",
+          "text": "Esempio completo. Obiettivo: aumentare il consumo dei video lunghi. KPI: watch time, durata media e retention. Osservazione: le impression crescono ma la retention iniziale peggiora. Interpretazione: la distribuzione è aumentata, ma una quota maggiore di pubblico abbandona presto. Ipotesi: titolo/thumbnail potrebbero creare un'aspettativa che l'apertura non mantiene, oppure l'introduzione potrebbe essere troppo lenta. Decisione: non celebrare semplicemente le impression; testare un'apertura differente mantenendo il resto il più possibile comparabile e verificare se la retention iniziale migliora."
+        }
+      ]
+    },
+    {
+      "id": "15-errori-che-devi-saper-riconoscere",
+      "title": "15. Errori che devi saper riconoscere",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            "scegliere il KPI dopo aver visto quale numero è più alto;",
+            "usare reach, impression e views come sinonimi;",
+            "chiamare retention una generica misura di “visualizzazioni engaged”;",
+            "trattare tutte le interazioni come se significassero la stessa cosa;",
+            "confondere engagement, conversione e fidelizzazione;",
+            "ignorare il denominatore di un tasso;",
+            "confrontare metriche con definizioni diverse;",
+            "attribuire causalità a un singolo dato osservazionale;",
+            "confrontare periodi o formati non equivalenti senza segnalarlo;",
+            "usare solo valori assoluti quando cambia molto la dimensione dell'audience;",
+            "dichiarare un successo senza baseline o obiettivo;",
+            "riempire il report di metriche senza arrivare a una decisione."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "16-checklist-per-il-mini-report",
+      "title": "16. Checklist per il mini-report",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Un mini-report professionale deve contenere:"
+        },
+        {
+          "type": "paragraph",
+          "text": "A. obiettivo analizzato;"
+        },
+        {
+          "type": "paragraph",
+          "text": "B. periodo e contenuti inclusi;"
+        },
+        {
+          "type": "paragraph",
+          "text": "C. KPI scelti e relativa definizione;"
+        },
+        {
+          "type": "paragraph",
+          "text": "D. dati principali;"
+        },
+        {
+          "type": "paragraph",
+          "text": "E. confronto con baseline o contenuti comparabili;"
+        },
+        {
+          "type": "paragraph",
+          "text": "F. insight supportati dai dati;"
+        },
+        {
+          "type": "paragraph",
+          "text": "G. limiti e spiegazioni alternative;"
+        },
+        {
+          "type": "paragraph",
+          "text": "H. azioni successive verificabili."
+        },
+        {
+          "type": "paragraph",
+          "text": "Un insight non è una semplice ripetizione del numero. “Il video B ha 260 follower” è un dato. “B genera più follower attribuiti e un rapporto follower/reach superiore rispetto agli altri contenuti del campione” è un insight descrittivo. “Probabilmente è merito dell'hook” è già un'ipotesi e va dichiarata come tale."
+        }
+      ]
+    },
+    {
+      "id": "criterio-di-completamento-smm-01",
+      "title": "Criterio di completamento SMM-01",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Il modulo è completato quando sai spiegare le metriche con precisione, applicarle a dati reali, diagnosticare una lettura errata, motivare la scelta dei KPI e documentare un'analisi che conduca a una decisione verificabile. La sola lettura della dispensa non è sufficiente."
+        }
+      ]
+    },
+    {
+      "id": "nota-sulle-piattaforme-e-sulle-fonti",
+      "title": "Nota sulle piattaforme e sulle fonti",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Le definizioni e le interfacce possono cambiare. Quando lavori su dati reali, verifica sempre la definizione corrente mostrata dalla piattaforma e annota nel report eventuali differenze. Per questo modulo le fonti prioritarie sono le risorse ufficiali raccolte nel file “SMM-01 – Fonti e risorse”, in particolare la documentazione YouTube su Analytics, performance dei contenuti, reach e audience retention. Per Instagram e Meta, controlla le definizioni correnti presenti negli Insights/Meta Business Suite e nel Meta Business Help Center."
+        }
+      ]
+    }
+  ],
+  "syncedAt": "2026-08-24T13:31:58.973Z",
+  "sourceUrl": "https://docs.google.com/document/d/e/2PACX-1vRTVVkxYkCN8QwPRqR4Szdmr0mi4zJRCtasHz1Xw8bvF80nop9Y10VuSXhaNwl_UOUBizJUhAIgRo9F/pub"
+}
+

@@ -24,11 +24,9 @@ async function render(route) {
   else if (route.name === "paths") view = renderPathsView();
   else if (route.name === "path") view = renderPathView(findPath(route.params.pathId));
   else if (route.name === "lesson" || route.name === "chapter") {
-    const authorize = new URLSearchParams(location.hash.split("?")[1] ?? "").has("authorize");
     view = await renderLessonView({
       lesson: findLesson(route.params.lessonId),
-      activeChapterId: route.params.chapterId ?? null,
-      interactive: authorize
+      activeChapterId: route.params.chapterId ?? null
     });
   } else if (route.name === "progress") {
     view = placeholder("Progressi", "La sincronizzazione privata con Google Sheets verrà attivata dopo il renderer.");

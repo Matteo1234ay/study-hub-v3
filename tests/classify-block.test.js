@@ -9,6 +9,14 @@ test("classifies controlled semantic prefixes", () => {
   assert.equal(classifyBlock({ kind: "paragraph", text: "Domanda diagnostica: perché?" }).type, "diagnostic-question");
 });
 
+test("recognizes natural editorial labels ending with a period", () => {
+  assert.deepEqual(classifyBlock({ kind: "paragraph", text: "Esempio. Un caso reale." }), {
+    type: "example",
+    label: "Esempio",
+    text: "Un caso reale."
+  });
+});
+
 test("removes a recognized prefix but preserves its label", () => {
   assert.deepEqual(classifyBlock({ kind: "paragraph", text: "Punto chiave: Il dato non è una conclusione." }), {
     type: "key-concept",

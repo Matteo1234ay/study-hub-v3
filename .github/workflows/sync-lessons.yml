@@ -1,0 +1,29 @@
+name: Sync published lessons
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/sync-published-doc.mjs
+      - name: Commit updated lessons
+        run: |
+          if git diff --quiet -- data/lessons; then
+            exit 0
+          fi
+          git config user.name "study-hub-sync"
+          git config user.email "study-hub-sync@users.noreply.github.com"
+          git add data/lessons
+          git commit -m "content: sync published lessons"
+          git push

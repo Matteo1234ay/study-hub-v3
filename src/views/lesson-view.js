@@ -1,12 +1,8 @@
 import { renderLesson } from "../lessons/render-lesson.js";
-import { buildLesson } from "../lessons/build-lesson.js";
 import { createLessonCache } from "../lessons/lesson-cache.js";
-import { getAccessToken } from "../google/auth.js";
-import { fetchGoogleDoc } from "../google/docs-client.js";
 import { element } from "../ui/components.js";
-import { renderErrorState, StudyHubError } from "../ui/errors.js";
 
-export async function renderLessonView({ lesson, activeChapterId = null, interactive = false }) {
+export async function renderLessonView({ lesson, activeChapterId = null }) {
   if (!lesson) {
     return element("section", { className: "content-page" }, [
       element("p", { className: "eyebrow", text: "Errore 404" }),
@@ -37,29 +33,33 @@ export async function renderLessonView({ lesson, activeChapterId = null, interac
   const body = element("div", { className: "lesson-live-region", attrs: { "aria-live": "polite" } });
   view.append(body);
   const cache = createLessonCache();
-  let document;
+  let model;
   let fromCache = false;
   try {
-    const token = await getAccessToken({ interactive });
-    document = await fetchGoogleDoc(lesson.docId, token);
-    cache.set(lesson.id, document, document.revisionId ?? null);
+    const response = await fetch(lesson.dataUrl, { cache: "no-cache" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    model = await response.json();
+    if (!Array.isArray(model.chapters) || !model.chapters.length) throw new Error("Invalid lesson model");
+    cache.set(lesson.id, model, model.syncedAt ?? null);
   } catch (error) {
     const cached = cache.get(lesson.id);
-    if (cached && error.code !== "google-not-configured") {
-      document = cached.document;
+    if (cached) {
+      model = cached.document;
       fromCache = true;
     } else {
-      const safeError = error instanceof StudyHubError ? error : new StudyHubError("invalid-google-response", "Errore inatteso.");
-      body.append(renderErrorState(safeError, {
-        onAuthorize: () => location.assign(`${location.hash}?authorize=1`),
-        onRetry: () => location.reload()
-      }));
+      const retry = element("button", { className: "button quiet", text: "Riprova", attrs: { type: "button" } });
+      retry.addEventListener("click", () => location.reload());
+      body.append(element("section", { className: "error-state", attrs: { role: "alert" } }, [
+        element("p", { className: "eyebrow", text: "Fonte temporaneamente non disponibile" }),
+        element("h2", { text: "La lezione non è ancora sincronizzata" }),
+        element("p", { text: "GitHub sta preparando la versione pubblicata del documento. Riprova tra qualche minuto." }),
+        retry
+      ]));
       view.querySelector(".lesson-source-state").textContent = "Fonte non disponibile";
       return view;
     }
   }
-  const model = buildLesson(document);
-  view.querySelector(".lesson-source-state").textContent = fromCache ? `${model.chapters.length} capitoli · copia salvata` : `${model.chapters.length} capitoli · Google Docs`;
+  view.querySelector(".lesson-source-state").textContent = fromCache ? `${model.chapters.length} capitoli · copia salvata` : `${model.chapters.length} capitoli · sincronizzato`;
   body.append(renderLesson(model, { lessonId: lesson.id, activeChapterId }));
   if (activeChapterId) {
     requestAnimationFrame(() => {
