@@ -37,6 +37,8 @@
 .progress-card { display: block; padding: 30px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: linear-gradient(145deg, rgba(18,31,76,.65), rgba(5,9,25,.88)); }
 .progress-card h2 { margin: 12px 0 26px; font-size: clamp(1.5rem, 3vw, 2.4rem); }
 .progress-card > p:last-child { margin-top: 12px; color: var(--muted); font-size: .82rem; }
-.progress-track { height: 8px; overflow: hidden; border-radius: 999px; background: rgba(255,255,255,.08); }
-.progress-track span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--blue), var(--green)); }
+.progress-track { width: 100%; height: 8px; overflow: hidden; border: 0; border-radius: 999px; background: rgba(255,255,255,.08); }
+.progress-track::-webkit-progress-bar { background: rgba(255,255,255,.08); }
+.progress-track::-webkit-progress-value { background: linear-gradient(90deg, var(--blue), var(--green)); }
+.progress-track::-moz-progress-bar { background: linear-gradient(90deg, var(--blue), var(--green)); }
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }

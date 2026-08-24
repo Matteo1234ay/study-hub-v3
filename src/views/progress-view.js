@@ -49,9 +49,7 @@ export async function renderProgressView() {
     grid.append(element("a", { className: "progress-card", href: `#/lessons/${lesson.id}` }, [
       element("p", { className: "eyebrow", text: `${path.code} · ${lesson.id}` }),
       element("h2", { text: lesson.title }),
-      element("div", { className: "progress-track", attrs: { role: "progressbar", "aria-valuemin": "0", "aria-valuemax": "100", "aria-valuenow": String(percent) } }, [
-        element("span", { attrs: { style: `width:${percent}%` } })
-      ]),
+      element("progress", { className: "progress-track", attrs: { max: "100", value: String(percent), "aria-label": `Completamento ${lesson.id}` } }),
       element("p", { text: `${percent}% · ${saved.completed.length} capitoli completati` })
     ]));
   }
