@@ -1,11 +1,11 @@
 import { findLesson, findPath } from "./config/paths.js";
-import { startRouter } from "./router.js";
+import { startRouter } from "./router.js?v=20260824-study2";
 import { element, pageHeader } from "./ui/components.js";
-import { renderHomeView } from "./views/home-view.js";
+import { renderHomeView } from "./views/home-view.js?v=20260824-study2";
 import { renderPathView } from "./views/path-view.js";
 import { renderPathsView } from "./views/paths-view.js";
-import { renderLessonView } from "./views/lesson-view.js";
-import { renderProgressView } from "./views/progress-view.js";
+import { renderLessonView } from "./views/lesson-view.js?v=20260824-study2";
+import { renderProgressView } from "./views/progress-view.js?v=20260824-study2";
 import { renderSearchView } from "./views/search-view.js";
 import { renderReviewView } from "./views/review-view.js";
 import { createPreferencesStore } from "./study/preferences.js";
