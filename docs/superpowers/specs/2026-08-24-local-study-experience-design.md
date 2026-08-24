@@ -1,7 +1,7 @@
 # Study Hub V3 — Esperienza di studio completamente locale
 
 **Data:** 2026-08-24  
-**Stato:** approvato in chat, in attesa di revisione del documento
+**Stato:** approvato
 
 ## Obiettivo
 
