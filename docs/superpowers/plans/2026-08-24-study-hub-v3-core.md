@@ -1,5 +1,7 @@
 # Study Hub V3 Core Platform Implementation Plan
 
+> **Piano parzialmente superato:** i Task 4 e 5 relativi a OAuth e API Google sono sostituiti dal piano [2026-08-24-zero-cost-remaining.md](./2026-08-24-zero-cost-remaining.md). I Task 1–3 restano validi e sono stati completati.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Pubblicare Study Hub V3 su GitHub Pages con navigazione scalabile, renderer didattico universale, SMM-01 live da Google Docs e dati privati sincronizzati con Google Sheets senza Apps Script.
