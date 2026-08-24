@@ -1,5 +1,5 @@
 export function parseRoute(hash = "#/home") {
-  const path = hash.split("?")[0];
+  const [path, queryString = ""] = hash.split("?");
   const parts = path.replace(/^#\/?/, "").split("/").filter(Boolean);
   if (parts.length === 0 || (parts[0] === "home" && parts.length === 1)) {
     return { name: "home", params: {} };
@@ -18,6 +18,12 @@ export function parseRoute(hash = "#/home") {
   }
   if (parts[0] === "progress" && parts.length === 1) {
     return { name: "progress", params: {} };
+  }
+  if (parts[0] === "search" && parts.length === 1) {
+    return { name: "search", params: { query: new URLSearchParams(queryString).get("q") ?? "" } };
+  }
+  if (parts[0] === "review" && parts.length === 1) {
+    return { name: "review", params: {} };
   }
   return { name: "not-found", params: {} };
 }
