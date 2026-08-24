@@ -13,6 +13,7 @@ export const PATHS = Object.freeze([
       level: "Fondamenta",
       estimated: "5 ore",
       dataUrl: "data/lessons/SMM-01.json",
+      assessmentUrl: "data/assessments/SMM-01.json",
       publishedUrl: "https://docs.google.com/document/d/e/2PACX-1vRTVVkxYkCN8QwPRqR4Szdmr0mi4zJRCtasHz1Xw8bvF80nop9Y10VuSXhaNwl_UOUBizJUhAIgRo9F/pub"
     }]
   },

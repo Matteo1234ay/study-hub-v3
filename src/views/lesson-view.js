@@ -87,6 +87,13 @@ export async function renderLessonView({ lesson, activeChapterId = null }) {
     favorite.setAttribute("aria-pressed", String(next));
   });
   view.querySelector(".lesson-meta").append(favorite);
+  if (lesson.assessmentUrl) {
+    view.querySelector(".lesson-meta").append(element("a", {
+      className: "button primary",
+      text: "Esercitazione completa",
+      href: `#/lessons/${lesson.id}/assessment`
+    }));
+  }
   const progressState = element("span", { className: "lesson-progress-state" });
   view.querySelector(".lesson-meta").prepend(progressState);
   function paintLesson() {
@@ -96,6 +103,7 @@ export async function renderLessonView({ lesson, activeChapterId = null }) {
     progressState.textContent = `${calculateLessonProgress(model.chapters, completed)}% completato`;
     body.replaceChildren(renderLesson(model, {
       lessonId: lesson.id,
+      assessmentEnabled: Boolean(lesson.assessmentUrl),
       activeChapterId,
       completedChapterIds: completed,
       bookmarkedChapterIds: bookmarks,

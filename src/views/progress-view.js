@@ -4,6 +4,9 @@ import { calculateLessonProgress, createProgressStore } from "../progress/local-
 import { element, pageHeader } from "../ui/components.js";
 import { createStudyStore } from "../study/study-store.js";
 import { createPreferencesStore } from "../study/preferences.js";
+import { createAssessmentStore } from "../assessment/assessment-store.js";
+import { deriveAssessmentInsights, summarizeAssessmentProgress } from "../assessment/insights.js";
+import { validateAssessment } from "../assessment/assessment-schema.js";
 
 function downloadBackup() {
   const blob = new Blob([JSON.stringify(exportLocalData(), null, 2)], { type: "application/json" });
@@ -94,6 +97,7 @@ export async function renderProgressView() {
 
   const grid = element("div", { className: "progress-grid" });
   const store = createProgressStore();
+  const assessmentStore = createAssessmentStore();
   const lessons = PATHS.flatMap((path) => path.lessons.map((lesson) => ({ lesson, path })));
   for (const { lesson, path } of lessons) {
     let chapters = [];
@@ -109,6 +113,40 @@ export async function renderProgressView() {
       element("progress", { className: "progress-track", attrs: { max: "100", value: String(percent), "aria-label": `Completamento ${lesson.id}` } }),
       element("p", { text: `${percent}% · ${saved.completed.length} capitoli completati` })
     ]));
+    if (lesson.assessmentUrl) {
+      const attempts = assessmentStore.getAttempts(lesson.id);
+      const summary = summarizeAssessmentProgress(attempts);
+      let assessment = null;
+      try {
+        const response = await fetch(lesson.assessmentUrl, { cache: "no-cache" });
+        if (response.ok) assessment = validateAssessment(await response.json());
+      } catch {}
+      const panel = element("section", { className: "assessment-progress-card" }, [
+        element("p", { className: "eyebrow", text: `${lesson.id} · Valutazioni` }),
+        element("h2", { text: attempts.length ? `Ultimo risultato: ${summary.latest ?? "solo esercizi capitolo"}${summary.latest === null ? "" : "%"}` : "Nessuna valutazione completata" }),
+        element("p", { text: attempts.length ? `${summary.moduleAttempts} valutazioni complete · ${summary.totalAttempts} tentativi totali${summary.best === null ? "" : ` · migliore ${summary.best}%`}` : "Completa un esercizio o la valutazione finale per vedere competenze ed errori ricorrenti." }),
+        element("a", { className: "button primary", text: "Apri la valutazione", href: `#/lessons/${lesson.id}/assessment` })
+      ]);
+      if (assessment && attempts.length) {
+        const insights = deriveAssessmentInsights(assessment, attempts);
+        const competencyList = element("ul", { className: "competency-list" });
+        for (const competency of insights.competencies) competencyList.append(element("li", { text: `${competency.label}: ${competency.percent}% · ${competency.status === "solid" ? "consolidata" : competency.status === "improving" ? "in miglioramento" : "da ripassare"}` }));
+        panel.append(element("h3", { text: "Competenze" }), competencyList);
+        if (insights.recurringErrors.length) panel.append(element("p", { text: `${insights.recurringErrors.length} errori ricorrenti individuati.` }));
+        const reviewLinks = element("div", { className: "review-links" });
+        for (const item of insights.reviewChapters.slice(0, 3)) reviewLinks.append(element("a", { text: "Ripassa capitolo →", href: `#/lessons/${lesson.id}/${item.chapterId}` }));
+        panel.append(reviewLinks);
+      }
+      const clear = element("button", { className: "button quiet", text: "Cancella valutazioni", attrs: { type: "button" } });
+      clear.addEventListener("click", () => {
+        if (confirm(`Cancellare bozze, risposte e risultati di ${lesson.id}? Note e progressi di lettura resteranno intatti.`)) {
+          assessmentStore.clearAssessments(lesson.id);
+          location.reload();
+        }
+      });
+      panel.append(clear);
+      grid.append(panel);
+    }
   }
   const totals = element("p", { className: "local-summary", text: `${study.favorites.length} preferiti · ${Object.values(study.bookmarks).flat().length} capitoli salvati · ${study.history.length} attività locali` });
   view.append(totals);

@@ -9,6 +9,10 @@ export function chapterHref(lessonId, chapterId) {
   return `#/lessons/${lessonId}/${chapterId}`;
 }
 
+export function assessmentHref(lessonId, chapterId = null) {
+  return chapterId ? `#/lessons/${lessonId}/assessment/${chapterId}` : `#/lessons/${lessonId}/assessment`;
+}
+
 export function blockPresentation(block) {
   if (block.type === "subheading") {
     return { tag: block.level === 3 ? "h4" : "h3", className: "lesson-subheading" };
@@ -41,7 +45,7 @@ function renderBlock(block) {
 
 export function renderLesson(model, {
   lessonId, activeChapterId = null, completedChapterIds = new Set(), bookmarkedChapterIds = new Set(),
-  noteForChapter = () => "", onToggleChapter = () => {}, onToggleBookmark = () => {}, onNote = () => {}, onDeepen = () => {}
+  assessmentEnabled = false, noteForChapter = () => "", onToggleChapter = () => {}, onToggleBookmark = () => {}, onNote = () => {}, onDeepen = () => {}
 } = {}) {
   const layout = element("div", { className: "lesson-layout" });
   const index = element("nav", { className: "chapter-index", attrs: { "aria-label": "Indice dei capitoli" } }, [
@@ -82,6 +86,7 @@ export function renderLesson(model, {
     const note = element("textarea", { className: "chapter-note", attrs: { rows: "4", placeholder: "Scrivi una nota personale…", "aria-label": `Note personali: ${chapter.title}` } });
     note.value = noteForChapter(chapter.id);
     note.addEventListener("input", () => onNote(chapter.id, note.value));
+    const assessmentLink = assessmentEnabled ? element("a", { className: "chapter-action", text: "Esercitati sul capitolo", href: assessmentHref(lessonId, chapter.id) }) : null;
     const section = element("section", {
       className: "lesson-chapter",
       attrs: { id: chapter.id, "data-chapter-id": chapter.id }
@@ -89,7 +94,7 @@ export function renderLesson(model, {
       element("div", { className: "chapter-number", text: String(indexNumber + 1).padStart(2, "0") }),
       heading,
       element("div", { className: "chapter-blocks" }, chapter.blocks.map(renderBlock)),
-      element("div", { className: "chapter-actions" }, [completionButton, bookmarkButton, deepenButton]),
+      element("div", { className: "chapter-actions" }, [completionButton, bookmarkButton, deepenButton, assessmentLink]),
       element("aside", { className: "personal-note" }, [
         element("span", { className: "callout-label", text: "Appunti personali · solo su questo dispositivo" }), note
       ]),

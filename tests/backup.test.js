@@ -50,3 +50,12 @@ test("exports study history notes and preferences", () => {
   });
   assert.equal(Object.keys(exportLocalData(storage, () => "2026-08-24T12:00:00.000Z").entries).length, 3);
 });
+
+test("exports assessment drafts attempts and answers", () => {
+  const storage = memoryStorage({
+    "study-hub-v3:assessment:drafts": '{"SMM-01@1":{"answers":{"q1":"a"}}}',
+    "study-hub-v3:assessment:attempts": '{"SMM-01":[{"answers":{"q1":"a"}}]}'
+  });
+  const entries = exportLocalData(storage, () => "2026-08-24T12:00:00.000Z").entries;
+  assert.deepEqual(Object.keys(entries).sort(), ["study-hub-v3:assessment:attempts", "study-hub-v3:assessment:drafts"]);
+});

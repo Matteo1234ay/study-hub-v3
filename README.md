@@ -9,10 +9,19 @@ Piattaforma personale di apprendimento statica, gratuita e pubblicabile con GitH
 - GitHub Actions controlla periodicamente le fonti pubblicate e rigenera i JSON.
 - Il browser conserva localmente progressi e backup.
 - Ricerca, preferiti, segnalibri, cronologia, note e preferenze di lettura funzionano interamente nel browser.
+- Esercitazioni, valutazioni, risposte, punteggi, competenze ed errori ricorrenti vengono elaborati e conservati localmente.
 
 Non sono usati Google Cloud, Apps Script, OAuth, API a pagamento, backend o segreti.
 
 Il comando **Approfondisci** prepara un testo basato soltanto sul capitolo pubblico: non usa API e non invia nulla automaticamente. L’utente controlla e copia personalmente la richiesta prima di aprire ChatGPT. L’adattatore è separato per consentire in futuro un modello locale senza modificare le lezioni.
+
+## Esercitazioni e valutazioni
+
+SMM-01 include esercizi per ogni capitolo e una valutazione completa. Scelta multipla e vero/falso hanno correzione deterministica; le risposte aperte vengono confrontate con concetti chiave e sinonimi controllati, con esito corretto, parziale o da rivedere. Questo controllo non equivale a una comprensione semantica tramite IA: Study Hub mostra sempre concetti riconosciuti, concetti mancanti e risposta modello.
+
+Tentativi ed errori ripetuti alimentano la sezione Progressi e vengono inclusi nel backup JSON. Le soluzioni sono presenti nei file pubblici del repository: il sistema serve allo studio personale, non a esami ufficiali o controlli antifrode.
+
+Il comando **Verifica con ChatGPT** è facoltativo. Prepara localmente soltanto le domande e risposte selezionate, mostra un'anteprima completa e apre la home di ChatGPT. Non usa API, non inserisce risposte nell'URL e non invia automaticamente alcun contenuto: copia e invio restano azioni dell'utente.
 
 ## Sviluppo
 

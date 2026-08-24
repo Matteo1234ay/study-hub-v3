@@ -13,6 +13,12 @@ export function parseRoute(hash = "#/home") {
   if (parts[0] === "lessons" && parts.length === 2) {
     return { name: "lesson", params: { lessonId: parts[1] } };
   }
+  if (parts[0] === "lessons" && parts[2] === "assessment" && parts.length === 3) {
+    return { name: "assessment", params: { lessonId: parts[1] } };
+  }
+  if (parts[0] === "lessons" && parts[2] === "assessment" && parts.length === 4) {
+    return { name: "chapter-assessment", params: { lessonId: parts[1], chapterId: parts[3] } };
+  }
   if (parts[0] === "lessons" && parts.length === 3) {
     return { name: "chapter", params: { lessonId: parts[1], chapterId: parts[2] } };
   }

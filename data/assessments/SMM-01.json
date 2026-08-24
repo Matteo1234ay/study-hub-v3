@@ -1,0 +1,185 @@
+{
+  "id": "SMM-01-v1",
+  "lessonId": "SMM-01",
+  "version": 1,
+  "competencies": [
+    { "id": "objectives", "label": "Obiettivi e KPI" },
+    { "id": "metrics", "label": "Lettura delle metriche" },
+    { "id": "interpretation", "label": "Interpretazione prudente" },
+    { "id": "testing", "label": "Test e decisioni" },
+    { "id": "reporting", "label": "Reporting professionale" }
+  ],
+  "questions": [
+    {
+      "id": "smm01-q01", "type": "single-choice", "chapterIds": ["obiettivo-del-modulo"], "competencyIds": ["objectives"],
+      "prompt": "Qual è il risultato principale atteso alla fine di SMM-01?",
+      "options": [
+        { "id": "a", "text": "Memorizzare il maggior numero possibile di metriche" },
+        { "id": "b", "text": "Collegare obiettivo, dati, interpretazione e decisione verificabile" },
+        { "id": "c", "text": "Dimostrare che una metrica alta indica sempre successo" }
+      ],
+      "correct": "b", "explanation": "Il modulo richiede di scegliere e interpretare i dati in funzione dell'obiettivo e arrivare a una decisione verificabile."
+    },
+    {
+      "id": "smm01-q02", "type": "single-choice", "chapterIds": ["1-metrica-kpi-e-obiettivo-tre-cose-diverse"], "competencyIds": ["objectives"],
+      "prompt": "Che cosa trasforma una metrica in un KPI?",
+      "options": [
+        { "id": "a", "text": "Il fatto che abbia il valore più alto" },
+        { "id": "b", "text": "La sua coerenza con uno specifico obiettivo" },
+        { "id": "c", "text": "Il fatto che sia mostrata dalla piattaforma" }
+      ],
+      "correct": "b", "explanation": "L'obiettivo viene prima: un KPI è una metrica scelta come indicatore principale perché coerente con quell'obiettivo."
+    },
+    {
+      "id": "smm01-q03", "type": "open", "chapterIds": ["2-reach-impression-e-views-non-sono-sinonimi"], "competencyIds": ["metrics"],
+      "prompt": "Spiega la differenza essenziale tra reach e impression.",
+      "requiredConcepts": [
+        { "id": "unique", "label": "reach come account o persone uniche", "terms": ["account unici", "persone uniche", "pubblico unico"] },
+        { "id": "exposures", "label": "impression come esposizioni totali", "terms": ["esposizioni", "visualizzazioni complessive", "apparizioni totali"] },
+        { "id": "repeat", "label": "una persona può generare più impression", "terms": ["piu impression", "impression ripetute", "piu esposizioni"] }
+      ],
+      "partialThreshold": 0.5,
+      "modelAnswer": "La reach conta gli account o le persone uniche raggiunte secondo la definizione della piattaforma; le impression contano le esposizioni, quindi una stessa persona può produrne più di una.",
+      "explanation": "Reach e impression rispondono a domande diverse e non vanno usate come sinonimi."
+    },
+    {
+      "id": "smm01-q04", "type": "single-choice", "chapterIds": ["3-watch-time-e-durata-media-quanto-contenuto-viene-realmente-consumato"], "competencyIds": ["metrics"],
+      "prompt": "Come va interpretata una durata media di 30 secondi?",
+      "options": [
+        { "id": "a", "text": "È sempre un risultato ottimo" },
+        { "id": "b", "text": "Va confrontata con la durata totale del contenuto" },
+        { "id": "c", "text": "Equivale al watch time complessivo" }
+      ],
+      "correct": "b", "explanation": "Trenta secondi su 35 secondi e trenta secondi su dieci minuti descrivono consumi molto diversi."
+    },
+    {
+      "id": "smm01-q05", "type": "boolean", "chapterIds": ["4-retention-dove-il-pubblico-rimane-e-dove-lo-perdi"], "competencyIds": ["interpretation"],
+      "prompt": "Un picco nella curva di retention dimostra che quella parte piace sicuramente di più.",
+      "correct": false, "explanation": "Un picco è un segnale compatibile con più spiegazioni, comprese rilettura per interesse, poca chiarezza o accesso diretto al passaggio."
+    },
+    {
+      "id": "smm01-q06", "type": "single-choice", "chapterIds": ["5-engagement-le-interazioni-non-sono-tutte-uguali"], "competencyIds": ["metrics"],
+      "prompt": "Perché un engagement rate deve dichiarare il denominatore?",
+      "options": [
+        { "id": "a", "text": "Perché reach, impression, views o follower producono rapporti diversi" },
+        { "id": "b", "text": "Perché tutte le interazioni hanno lo stesso significato" },
+        { "id": "c", "text": "Perché il numeratore non serve" }
+      ],
+      "correct": "a", "explanation": "Una percentuale è interpretabile e confrontabile solo conoscendo cosa è stato usato al denominatore."
+    },
+    {
+      "id": "smm01-q07", "type": "boolean", "chapterIds": ["6-follower-e-iscritti-crescita-totale-e-attribuzione-al-singolo-contenuto"], "competencyIds": ["interpretation"],
+      "prompt": "Se un mese registra 300 nuovi follower e un Reel virale, possiamo attribuire automaticamente tutti i follower a quel Reel.",
+      "correct": false, "explanation": "La crescita del periodo può provenire da più contenuti e fonti; quando disponibile serve l'attribuzione al singolo contenuto."
+    },
+    {
+      "id": "smm01-q08", "type": "single-choice", "chapterIds": ["7-ctr-stesso-nome-contesti-diversi"], "competencyIds": ["metrics"],
+      "prompt": "Prima di confrontare due CTR che provengono da contesti diversi bisogna:",
+      "options": [
+        { "id": "a", "text": "controllare numeratore, denominatore e punto del percorso" },
+        { "id": "b", "text": "confrontare solo la percentuale più alta" },
+        { "id": "c", "text": "assumere che la definizione sia identica" }
+      ],
+      "correct": "a", "explanation": "Lo stesso nome può descrivere comportamenti e denominatori differenti."
+    },
+    {
+      "id": "smm01-q09", "type": "single-choice", "chapterIds": ["8-conversione-engagement-e-fidelizzazione-non-sono-la-stessa-cosa"], "competencyIds": ["objectives"],
+      "prompt": "Quale affermazione è corretta?",
+      "options": [
+        { "id": "a", "text": "Ogni interazione è una conversione" },
+        { "id": "b", "text": "La conversione è un'azione utile definita rispetto all'obiettivo" },
+        { "id": "c", "text": "La fidelizzazione coincide sempre con il numero di like" }
+      ],
+      "correct": "b", "explanation": "Conversione, engagement e fidelizzazione sono concetti distinti e richiedono indicatori coerenti."
+    },
+    {
+      "id": "smm01-q10", "type": "boolean", "chapterIds": ["9-vanity-metric-il-problema-non-e-la-metrica-ma-l-uso-che-ne-fai"], "competencyIds": ["interpretation"],
+      "prompt": "Le views sono sempre una vanity metric e non sono mai utili.",
+      "correct": false, "explanation": "Possono essere decisive per distribuzione o awareness; diventano vanity quando sono esibite senza obiettivo, confronto o decisione."
+    },
+    {
+      "id": "smm01-q11", "type": "open", "chapterIds": ["10-correlazione-attribuzione-e-causa"], "competencyIds": ["interpretation", "testing"],
+      "prompt": "Perché un dato osservazionale non basta a dimostrare che un elemento del contenuto ha causato una performance migliore?",
+      "requiredConcepts": [
+        { "id": "together", "label": "mostra associazione o eventi avvenuti insieme", "terms": ["correlazione", "associazione", "accadute insieme"] },
+        { "id": "alternatives", "label": "esistono spiegazioni alternative", "terms": ["spiegazioni alternative", "altre cause", "altri fattori"] },
+        { "id": "test", "label": "serve un confronto o test", "terms": ["confronto", "test", "esperimento"] }
+      ],
+      "partialThreshold": 0.5,
+      "modelAnswer": "Il dato mostra un'associazione, non isola la causa: possono esistere altri fattori. L'ipotesi va verificata con contenuti comparabili o con un test che modifichi soprattutto l'elemento studiato.",
+      "explanation": "La formulazione professionale distingue ciò che è osservato dall'ipotesi causale da verificare."
+    },
+    {
+      "id": "smm01-q12", "type": "single-choice", "chapterIds": ["11-come-progettare-un-test-utile"], "competencyIds": ["testing"],
+      "prompt": "Quale test rende più interpretabile l'effetto di una nuova apertura?",
+      "options": [
+        { "id": "a", "text": "Cambiare apertura, tema, durata, montaggio e pubblico insieme" },
+        { "id": "b", "text": "Confrontare contenuti il più possibile comparabili cambiando soprattutto l'apertura" },
+        { "id": "c", "text": "Guardare una sola volta il contenuto migliore" }
+      ],
+      "correct": "b", "explanation": "Ridurre le differenze non necessarie rende più verificabile l'ipotesi."
+    },
+    {
+      "id": "smm01-q13", "type": "single-choice", "chapterIds": ["12-kpi-primari-e-metriche-diagnostiche"], "competencyIds": ["objectives", "interpretation"],
+      "prompt": "Con obiettivo crescita della community, quale coppia rappresenta meglio KPI primario e metrica diagnostica?",
+      "options": [
+        { "id": "a", "text": "Follower attribuiti come KPI; retention come diagnostica" },
+        { "id": "b", "text": "Reach come unico KPI; follower acquisiti irrilevanti" },
+        { "id": "c", "text": "Like come KPI universale; nessuna diagnostica" }
+      ],
+      "correct": "a", "explanation": "Il KPI misura l'avanzamento verso l'obiettivo; la diagnostica aiuta a capire il percorso che ha prodotto il risultato."
+    },
+    {
+      "id": "smm01-q14", "type": "boolean", "chapterIds": ["13-confrontare-contenuti-correttamente"], "competencyIds": ["interpretation"],
+      "prompt": "Due contenuti con formati, durate e tempi dalla pubblicazione molto diversi sono direttamente confrontabili senza segnalare limiti.",
+      "correct": false, "explanation": "Comparabilità e limiti vanno controllati e dichiarati, includendo formato, durata, periodo, audience, distribuzione e obiettivo."
+    },
+    {
+      "id": "smm01-q15", "type": "scenario", "chapterIds": ["14-dalla-metrica-alla-decisione-il-metodo-completo"], "competencyIds": ["testing", "reporting"],
+      "prompt": "Le impression di un video lungo aumentano ma la retention iniziale peggiora. Descrivi una decisione professionale coerente.",
+      "requiredConcepts": [
+        { "id": "notcelebrate", "label": "non fermarsi alla crescita delle impression", "terms": ["non celebrare", "non basta", "non fermarsi"] },
+        { "id": "hypothesis", "label": "formulare un'ipotesi sull'aspettativa o sull'apertura", "terms": ["ipotesi", "aspettativa", "apertura lenta", "introduzione lenta"] },
+        { "id": "test", "label": "testare una modifica mantenendo il resto comparabile", "terms": ["testare", "confrontare", "mantenendo il resto", "comparabile"] }
+      ],
+      "partialThreshold": 0.5,
+      "modelAnswer": "Non basta celebrare le impression. Formulerei l'ipotesi che promessa e apertura non siano allineate o che l'introduzione sia lenta, quindi testerei un'apertura diversa mantenendo il resto comparabile e misurando la retention iniziale.",
+      "explanation": "La catena completa deve arrivare dall'osservazione a un'ipotesi e a un test successivo verificabile."
+    },
+    {
+      "id": "smm01-q16", "type": "single-choice", "chapterIds": ["15-errori-che-devi-saper-riconoscere"], "competencyIds": ["interpretation"],
+      "prompt": "Quale comportamento è un errore di analisi?",
+      "options": [
+        { "id": "a", "text": "Dichiarare il denominatore di un tasso" },
+        { "id": "b", "text": "Scegliere il KPI dopo aver visto quale numero è più alto" },
+        { "id": "c", "text": "Segnalare i limiti del confronto" }
+      ],
+      "correct": "b", "explanation": "Il KPI deve derivare dall'obiettivo, non essere scelto retrospettivamente per mostrare il numero migliore."
+    },
+    {
+      "id": "smm01-q17", "type": "single-choice", "chapterIds": ["16-checklist-per-il-mini-report"], "competencyIds": ["reporting"],
+      "prompt": "Quale frase è un insight descrittivo e non soltanto la ripetizione di un dato?",
+      "options": [
+        { "id": "a", "text": "Il video B ha 260 follower attribuiti" },
+        { "id": "b", "text": "B genera più follower attribuiti e un rapporto follower/reach superiore agli altri contenuti del campione" },
+        { "id": "c", "text": "È sicuramente merito dell'hook" }
+      ],
+      "correct": "b", "explanation": "L'insight mette il dato in relazione con un confronto; la causa resta invece un'ipotesi."
+    },
+    {
+      "id": "smm01-q18", "type": "boolean", "chapterIds": ["criterio-di-completamento-smm-01"], "competencyIds": ["reporting"],
+      "prompt": "La sola lettura della dispensa è sufficiente per considerare completato SMM-01.",
+      "correct": false, "explanation": "Il completamento richiede spiegazione precisa, applicazione, diagnosi degli errori, scelta motivata dei KPI e una decisione verificabile."
+    },
+    {
+      "id": "smm01-q19", "type": "single-choice", "chapterIds": ["nota-sulle-piattaforme-e-sulle-fonti"], "competencyIds": ["reporting"],
+      "prompt": "Come gestire definizioni e interfacce delle piattaforme che possono cambiare?",
+      "options": [
+        { "id": "a", "text": "Usare sempre la definizione ricordata senza controlli" },
+        { "id": "b", "text": "Verificare la definizione corrente e annotare eventuali differenze" },
+        { "id": "c", "text": "Evitare del tutto le fonti ufficiali" }
+      ],
+      "correct": "b", "explanation": "Sui dati reali vanno controllate le definizioni correnti della piattaforma e documentate le differenze."
+    }
+  ]
+}

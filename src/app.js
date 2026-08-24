@@ -8,6 +8,7 @@ import { renderLessonView } from "./views/lesson-view.js";
 import { renderProgressView } from "./views/progress-view.js";
 import { renderSearchView } from "./views/search-view.js";
 import { renderReviewView } from "./views/review-view.js";
+import { renderAssessmentView } from "./views/assessment-view.js";
 import { createPreferencesStore } from "./study/preferences.js";
 
 const app = document.querySelector("#app");
@@ -39,6 +40,11 @@ async function render(route) {
     view = await renderSearchView(route.params.query);
   } else if (route.name === "review") {
     view = await renderReviewView();
+  } else if (route.name === "assessment" || route.name === "chapter-assessment") {
+    view = await renderAssessmentView({
+      lesson: findLesson(route.params.lessonId),
+      chapterId: route.params.chapterId ?? null
+    });
   } else {
     view = placeholder("Pagina non trovata", "Controlla l’indirizzo oppure torna alla raccolta dei percorsi.");
   }
