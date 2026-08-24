@@ -34,3 +34,8 @@ test("ignores query parameters used by authorization actions", () => {
     params: { lessonId: "SMM-01" }
   });
 });
+
+test("parses search and review routes", () => {
+  assert.deepEqual(parseRoute("#/search?q=retention"), { name: "search", params: { query: "retention" } });
+  assert.deepEqual(parseRoute("#/review"), { name: "review", params: {} });
+});
