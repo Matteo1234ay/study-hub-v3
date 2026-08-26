@@ -21,4 +21,5 @@ test("focus mode always exposes a fixed exit control", () => {
 test("versioned assets prevent Safari from mixing deployments", () => {
   assert.match(indexHtml, /styles\/lesson\.css\?v=/);
   assert.match(indexHtml, /src\/app\.js\?v=/);
+  assert.match(appJs, /views\/progress-view\.js\?v=/);
 });
