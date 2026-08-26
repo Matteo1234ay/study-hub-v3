@@ -17,7 +17,7 @@ const preferences = createPreferencesStore();
 preferences.applyTo(document.documentElement);
 
 const focusExit = document.querySelector(".focus-exit");
-focusExit.addEventListener("click", () => {
+focusExit?.addEventListener("click", () => {
   preferences.update({ focus: false });
   preferences.applyTo(document.documentElement);
   document.querySelector(".site-header a")?.focus();
