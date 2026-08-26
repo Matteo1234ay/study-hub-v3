@@ -69,7 +69,11 @@ export async function renderProgressView() {
   fontSelect.addEventListener("change", applyPreferences);
   widthSelect.addEventListener("change", applyPreferences);
   focus.addEventListener("change", applyPreferences);
-  preferencePanel.append(fontSelect, widthSelect, focusLabel);
+  const readingPreview = element("div", { className: "reading-preview" }, [
+    element("p", { className: "eyebrow", text: "Anteprima dal vivo" }),
+    element("p", { text: "Questa frase mostra subito la dimensione del testo e la larghezza di lettura selezionate." })
+  ]);
+  preferencePanel.append(fontSelect, widthSelect, focusLabel, readingPreview);
   view.append(preferencePanel);
 
   const activity = element("section", { className: "activity-panel" }, [
