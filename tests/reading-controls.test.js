@@ -14,5 +14,11 @@ test("reading preferences visibly affect study content and the settings preview"
 test("focus mode always exposes a fixed exit control", () => {
   assert.match(indexHtml, /class="focus-exit"/);
   assert.match(appJs, /focus-exit/);
+  assert.match(appJs, /focusExit\?\.addEventListener/);
   assert.match(lessonCss, /data-focus-mode="true"[^}]*\.focus-exit/);
+});
+
+test("versioned assets prevent Safari from mixing deployments", () => {
+  assert.match(indexHtml, /styles\/lesson\.css\?v=/);
+  assert.match(indexHtml, /src\/app\.js\?v=/);
 });
