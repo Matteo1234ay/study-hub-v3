@@ -13,7 +13,15 @@ import { renderPathAssessmentView } from "./views/path-assessment-view.js";
 import { createPreferencesStore } from "./study/preferences.js";
 
 const app = document.querySelector("#app");
-createPreferencesStore().applyTo(document.documentElement);
+const preferences = createPreferencesStore();
+preferences.applyTo(document.documentElement);
+
+const focusExit = document.querySelector(".focus-exit");
+focusExit.addEventListener("click", () => {
+  preferences.update({ focus: false });
+  preferences.applyTo(document.documentElement);
+  document.querySelector(".site-header a")?.focus();
+});
 
 function placeholder(title, description) {
   return element("section", { className: "content-page" }, [
