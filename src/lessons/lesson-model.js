@@ -9,11 +9,9 @@ function normalizeSection(section = {}, index = 0) {
   };
 }
 
-function normalizeChapter(chapter = {}, index = 0) {
-  const sections = Array.isArray(chapter.sections)
-    ? chapter.sections.map(normalizeSection)
-    : [{ id: `${chapter.id || `chapter-${index + 1}`}-content`, title: chapter.title || `Capitolo ${index + 1}`, blocks: Array.isArray(chapter.blocks) ? chapter.blocks : [] }];
-  return { ...chapter, sections, blocks: Array.isArray(chapter.blocks) ? chapter.blocks : [] };
+function normalizeChapter(chapter = {}) {
+  if (!Array.isArray(chapter.sections)) return chapter;
+  return { ...chapter, sections: chapter.sections.map(normalizeSection), blocks: Array.isArray(chapter.blocks) ? chapter.blocks : [] };
 }
 
 export function normalizeLessonExperience(model = {}) {
@@ -34,7 +32,7 @@ export function resolveLessonLocation(model = {}, requestedId = null) {
   if (!requestedId) return { chapterId: normalized.chapters[0]?.id ?? null, sectionId: null, legacy: false };
   for (const chapter of normalized.chapters) {
     if (chapter.id === requestedId) return { chapterId: chapter.id, sectionId: null, legacy: false };
-    const section = chapter.sections.find(candidate => candidate.id === requestedId);
+    const section = (chapter.sections || []).find(candidate => candidate.id === requestedId);
     if (section) return { chapterId: chapter.id, sectionId: section.id, legacy: false };
   }
   const mapped = normalized.legacyMap[requestedId];
