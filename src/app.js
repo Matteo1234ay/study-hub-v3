@@ -1,7 +1,7 @@
 import { findLesson, findPath } from "./config/paths.js?v=20260827-2";
 import { startRouter } from "./router.js?v=20260827-2";
 import { element, pageHeader } from "./ui/components.js?v=20260827-2";
-import { renderHomeView } from "./views/home-view.js?v=20260827-8";
+import { renderHomeView } from "./views/home-view.js?v=20260827-9";
 import { renderPathView } from "./views/path-view.js?v=20260827-2";
 import { renderPathsView } from "./views/paths-view.js?v=20260827-2";
 import { renderLessonView } from "./views/lesson-view.js?v=20260827-2";
