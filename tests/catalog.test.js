@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { PATHS, findLesson, findPath } from "../src/config/paths.js";
+import { PATHS, findLesson, findPath, studentVisibleLessons } from "../src/config/paths.js";
 
 test("catalog exposes exactly the four approved paths", () => {
   assert.deepEqual(PATHS.map((path) => path.id), ["smm", "ai", "design", "video"]);
@@ -14,4 +14,12 @@ test("only SMM-01 is initially available", () => {
 test("unknown catalog entries return null", () => {
   assert.equal(findPath("missing"), null);
   assert.equal(findLesson("AI-01"), null);
+});
+
+test("student catalog hides explicit drafts but keeps legacy lessons", () => {
+  assert.deepEqual(studentVisibleLessons([
+    { id: "legacy" },
+    { id: "draft", editorial: { status: "draft" } },
+    { id: "published", editorial: { status: "published" } }
+  ]).map(lesson => lesson.id), ["legacy", "published"]);
 });

@@ -1,13 +1,13 @@
-import { PATHS } from "../config/paths.js";
-import { exportLocalData, importLocalData } from "../progress/backup.js";
-import { calculateLessonProgress, createProgressStore } from "../progress/local-progress.js";
-import { element, pageHeader } from "../ui/components.js";
-import { createStudyStore } from "../study/study-store.js";
-import { createPreferencesStore } from "../study/preferences.js";
-import { createAssessmentStore } from "../assessment/assessment-store.js";
-import { deriveAssessmentInsights, summarizeAssessmentProgress } from "../assessment/insights.js";
-import { validateAssessment } from "../assessment/assessment-schema.js";
-import { createPathAssessmentStore } from "../path-assessment/path-store.js";
+import { PATHS } from "../config/paths.js?v=20260827-1";
+import { exportLocalData, importLocalData } from "../progress/backup.js?v=20260827-1";
+import { calculateLessonProgress, createProgressStore } from "../progress/local-progress.js?v=20260827-1";
+import { element, pageHeader } from "../ui/components.js?v=20260827-1";
+import { createStudyStore } from "../study/study-store.js?v=20260827-1";
+import { createPreferencesStore } from "../study/preferences.js?v=20260827-1";
+import { createAssessmentStore } from "../assessment/assessment-store.js?v=20260827-1";
+import { deriveAssessmentInsights, summarizeAssessmentProgress } from "../assessment/insights.js?v=20260827-1";
+import { validateAssessment } from "../assessment/assessment-schema.js?v=20260827-1";
+import { createPathAssessmentStore } from "../path-assessment/path-store.js?v=20260827-1";
 
 function downloadBackup() {
   const blob = new Blob([JSON.stringify(exportLocalData(), null, 2)], { type: "application/json" });
@@ -56,24 +56,30 @@ export async function renderProgressView() {
     element("option", { text: "Larghezza comoda", attrs: { value: "comfortable" } }),
     element("option", { text: "Larghezza stretta", attrs: { value: "narrow" } })
   ]);
+  const motionSelect = element("select", { attrs: { "aria-label": "Movimento dell’interfaccia" } }, [
+    element("option", { text: "Movimento: segui il dispositivo", attrs: { value: "system" } }),
+    element("option", { text: "Riduci il movimento", attrs: { value: "reduced" } })
+  ]);
   const focusLabel = element("label", { className: "toggle-label", text: "Modalità concentrazione" });
   const focus = element("input", { attrs: { type: "checkbox" } });
   focus.checked = preferences.get().focus;
   focusLabel.prepend(focus);
   fontSelect.value = preferences.get().fontSize;
   widthSelect.value = preferences.get().width;
+  motionSelect.value = preferences.get().motion;
   const applyPreferences = () => {
-    preferences.update({ fontSize: fontSelect.value, width: widthSelect.value, focus: focus.checked });
+    preferences.update({ fontSize: fontSelect.value, width: widthSelect.value, focus: focus.checked, motion: motionSelect.value });
     preferences.applyTo(document.documentElement);
   };
   fontSelect.addEventListener("change", applyPreferences);
   widthSelect.addEventListener("change", applyPreferences);
+  motionSelect.addEventListener("change", applyPreferences);
   focus.addEventListener("change", applyPreferences);
   const readingPreview = element("div", { className: "reading-preview" }, [
     element("p", { className: "eyebrow", text: "Anteprima dal vivo" }),
     element("p", { text: "Questa frase mostra subito la dimensione del testo e la larghezza di lettura selezionate." })
   ]);
-  preferencePanel.append(fontSelect, widthSelect, focusLabel, readingPreview);
+  preferencePanel.append(fontSelect, widthSelect, motionSelect, focusLabel, readingPreview);
   view.append(preferencePanel);
 
   const activity = element("section", { className: "activity-panel" }, [

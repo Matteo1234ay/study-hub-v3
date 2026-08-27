@@ -16,6 +16,13 @@ test("focus mode always exposes a fixed exit control", () => {
   assert.match(appJs, /focus-exit/);
   assert.match(appJs, /focusExit\?\.addEventListener/);
   assert.match(lessonCss, /data-focus-mode="true"[^}]*\.focus-exit/);
+  assert.match(appJs, /event\.key === "Escape"/);
+  assert.match(appJs, /preferences\.update\(\{ focus: false \}\)/);
+});
+
+test("reduced motion works through both system and internal preferences", () => {
+  assert.match(lessonCss, /prefers-reduced-motion: reduce/);
+  assert.match(lessonCss, /data-motion="reduced"/);
 });
 
 test("versioned assets prevent Safari from mixing deployments", () => {

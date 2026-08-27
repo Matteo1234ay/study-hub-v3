@@ -1,3 +1,9 @@
+import { isStudentVisibleLesson } from "../lessons/lesson-model.js?v=20260827-1";
+
+export function studentVisibleLessons(lessons = []) {
+  return lessons.filter(isStudentVisibleLesson);
+}
+
 export const PATHS = Object.freeze([
   {
     id: "smm",

@@ -1,26 +1,30 @@
-import { findLesson, findPath } from "./config/paths.js?v=20260826-3";
-import { startRouter } from "./router.js?v=20260826-3";
-import { element, pageHeader } from "./ui/components.js?v=20260826-3";
-import { renderHomeView } from "./views/home-view.js?v=20260826-3";
-import { renderPathView } from "./views/path-view.js?v=20260826-3";
-import { renderPathsView } from "./views/paths-view.js?v=20260826-3";
-import { renderLessonView } from "./views/lesson-view.js?v=20260826-3";
-import { renderProgressView } from "./views/progress-view.js?v=20260826-3";
-import { renderSearchView } from "./views/search-view.js?v=20260826-3";
-import { renderReviewView } from "./views/review-view.js?v=20260826-3";
-import { renderAssessmentView } from "./views/assessment-view.js?v=20260826-3";
-import { renderPathAssessmentView } from "./views/path-assessment-view.js?v=20260826-3";
-import { createPreferencesStore } from "./study/preferences.js?v=20260826-3";
+import { findLesson, findPath } from "./config/paths.js?v=20260827-1";
+import { startRouter } from "./router.js?v=20260827-1";
+import { element, pageHeader } from "./ui/components.js?v=20260827-1";
+import { renderHomeView } from "./views/home-view.js?v=20260827-1";
+import { renderPathView } from "./views/path-view.js?v=20260827-1";
+import { renderPathsView } from "./views/paths-view.js?v=20260827-1";
+import { renderLessonView } from "./views/lesson-view.js?v=20260827-1";
+import { renderProgressView } from "./views/progress-view.js?v=20260827-1";
+import { renderSearchView } from "./views/search-view.js?v=20260827-1";
+import { renderReviewView } from "./views/review-view.js?v=20260827-1";
+import { renderAssessmentView } from "./views/assessment-view.js?v=20260827-1";
+import { renderPathAssessmentView } from "./views/path-assessment-view.js?v=20260827-1";
+import { createPreferencesStore } from "./study/preferences.js?v=20260827-1";
 
 const app = document.querySelector("#app");
 const preferences = createPreferencesStore();
 preferences.applyTo(document.documentElement);
 
 const focusExit = document.querySelector(".focus-exit");
-focusExit?.addEventListener("click", () => {
+function exitFocusMode() {
   preferences.update({ focus: false });
   preferences.applyTo(document.documentElement);
   document.querySelector(".site-header a")?.focus();
+}
+focusExit?.addEventListener("click", exitFocusMode);
+addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && preferences.get().focus) exitFocusMode();
 });
 
 function placeholder(title, description) {
@@ -47,7 +51,8 @@ async function render(route) {
   else if (route.name === "lesson" || route.name === "chapter") {
     view = await renderLessonView({
       lesson: findLesson(route.params.lessonId),
-      activeChapterId: route.params.chapterId ?? null
+      activeChapterId: route.params.chapterId ?? null,
+      viewMode: route.params.view ?? "chapter"
     });
   } else if (route.name === "progress") {
     view = await renderProgressView();
@@ -67,7 +72,8 @@ async function render(route) {
   app.replaceChildren(view);
   document.title = `Study Hub V3 · ${route.name}`;
   app.focus({ preventScroll: true });
-  scrollTo({ top: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  const reducedMotion = preferences.get().motion === "reduced" || matchMedia("(prefers-reduced-motion: reduce)").matches;
+  scrollTo({ top: 0, behavior: reducedMotion ? "auto" : "smooth" });
 }
 
 startRouter(render);

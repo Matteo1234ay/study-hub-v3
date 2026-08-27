@@ -1,4 +1,6 @@
-import { element } from "../ui/components.js";
+import { element } from "../ui/components.js?v=20260827-1";
+import { renderSourceRefs } from "./sources.js?v=20260827-1";
+import { renderMicroQuestion } from "./micro-question.js?v=20260827-1";
 
 const CALLOUT_TYPES = new Set([
   "example", "warning", "error", "key-concept", "note",
@@ -7,6 +9,17 @@ const CALLOUT_TYPES = new Set([
 
 export function chapterHref(lessonId, chapterId) {
   return `#/lessons/${lessonId}/${chapterId}`;
+}
+
+export function lessonHref(lessonId, { chapterId = null, view = "chapter" } = {}) {
+  const base = chapterId ? chapterHref(lessonId, chapterId) : `#/lessons/${lessonId}`;
+  return view === "full" ? `${base}?view=full` : base;
+}
+
+export function selectVisibleChapters(model, activeChapterId = null, viewMode = "chapter") {
+  if (viewMode === "full") return model.chapters;
+  const active = model.chapters.find(chapter => chapter.id === activeChapterId);
+  return active ? [active] : model.chapters.slice(0, 1);
 }
 
 export function assessmentHref(lessonId, chapterId = null) {
@@ -24,42 +37,60 @@ export function blockPresentation(block) {
   return { tag: "p", className: "lesson-paragraph" };
 }
 
-function renderBlock(block) {
+function renderBlock(block, sources = []) {
   const presentation = blockPresentation(block);
   const node = element(presentation.tag, { className: presentation.className });
 
   if (block.type === "list") {
     for (const item of block.items) node.append(element("li", { text: item }));
-    return node;
+    const sourceRefs = renderSourceRefs(block, sources);
+    return sourceRefs ? element("div", { className: "sourced-block" }, [node, sourceRefs]) : node;
   }
   if (CALLOUT_TYPES.has(block.type)) {
     node.append(
       element("span", { className: "callout-label", text: block.label ?? block.type.replaceAll("-", " ") }),
       element("p", { text: block.text })
     );
-    return node;
+    const sourceRefs = renderSourceRefs(block, sources);
+    return sourceRefs ? element("div", { className: "sourced-block" }, [node, sourceRefs]) : node;
   }
   node.textContent = block.text;
-  return node;
+  const sourceRefs = renderSourceRefs(block, sources);
+  return sourceRefs ? element("div", { className: "sourced-block" }, [node, sourceRefs]) : node;
 }
 
 export function renderLesson(model, {
   lessonId, activeChapterId = null, completedChapterIds = new Set(), bookmarkedChapterIds = new Set(),
-  assessmentEnabled = false, noteForChapter = () => "", onToggleChapter = () => {}, onToggleBookmark = () => {}, onNote = () => {}, onDeepen = () => {}
+  viewMode = "chapter", assessmentEnabled = false, noteForChapter = () => "", onToggleChapter = () => {}, onToggleBookmark = () => {}, onNote = () => {}, onDeepen = () => {}, onReviewConcept = () => {}, onConsolidateConcept = () => {}
 } = {}) {
   const layout = element("div", { className: "lesson-layout" });
   const index = element("nav", { className: "chapter-index", attrs: { "aria-label": "Indice dei capitoli" } }, [
     element("p", { className: "eyebrow", text: "Indice capitoli" })
   ]);
   const indexList = element("ol", { className: "chapter-index-list" });
-  const content = element("article", { className: "lesson-content" });
+  const content = element("article", { className: "lesson-content" }, [
+    element("nav", { className: "lesson-view-switcher", attrs: { "aria-label": "Modalità di visualizzazione" } }, [
+      element("a", {
+        href: lessonHref(lessonId, { chapterId: activeChapterId }),
+        text: "Un capitolo alla volta",
+        className: viewMode === "chapter" ? "active" : "",
+        attrs: viewMode === "chapter" ? { "aria-current": "page" } : {}
+      }),
+      element("a", {
+        href: lessonHref(lessonId, { chapterId: activeChapterId, view: "full" }),
+        text: "Lezione completa",
+        className: viewMode === "full" ? "active" : "",
+        attrs: viewMode === "full" ? { "aria-current": "page" } : {}
+      })
+    ])
+  ]);
 
   model.chapters.forEach((chapter, indexNumber) => {
     const isCompleted = completedChapterIds.has(chapter.id);
     const isBookmarked = bookmarkedChapterIds.has(chapter.id);
     const href = chapterHref(lessonId, chapter.id);
     const indexLink = element("a", {
-      href,
+      href: viewMode === "full" ? lessonHref(lessonId, { chapterId: chapter.id, view: "full" }) : href,
       className: chapter.id === activeChapterId ? "active" : "",
       attrs: chapter.id === activeChapterId ? { "aria-current": "location" } : {}
     }, [
@@ -68,6 +99,12 @@ export function renderLesson(model, {
     ]);
     indexList.append(element("li", {}, indexLink));
 
+  });
+
+  selectVisibleChapters(model, activeChapterId, viewMode).forEach((chapter) => {
+    const indexNumber = model.chapters.findIndex(candidate => candidate.id === chapter.id);
+    const isCompleted = completedChapterIds.has(chapter.id);
+    const isBookmarked = bookmarkedChapterIds.has(chapter.id);
     const heading = element("h2", { text: chapter.title, attrs: { tabindex: "-1" } });
     const completionButton = element("button", {
       className: `chapter-completion${isCompleted ? " is-complete" : ""}`,
@@ -93,7 +130,9 @@ export function renderLesson(model, {
     }, [
       element("div", { className: "chapter-number", text: String(indexNumber + 1).padStart(2, "0") }),
       heading,
-      element("div", { className: "chapter-blocks" }, chapter.blocks.map(renderBlock)),
+      element("div", { className: "chapter-blocks" }, chapter.blocks.map(block => block.type === "micro-question"
+        ? renderMicroQuestion(block, { lessonId, chapterId: chapter.id, onReview: onReviewConcept, onConsolidate: onConsolidateConcept })
+        : renderBlock(block, model.sources))),
       element("div", { className: "chapter-actions" }, [completionButton, bookmarkButton, deepenButton, assessmentLink]),
       element("aside", { className: "personal-note" }, [
         element("span", { className: "callout-label", text: "Appunti personali · solo su questo dispositivo" }), note

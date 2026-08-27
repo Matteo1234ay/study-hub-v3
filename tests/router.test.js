@@ -35,6 +35,17 @@ test("ignores query parameters used by authorization actions", () => {
   });
 });
 
+test("parses the optional full lesson view", () => {
+  assert.deepEqual(parseRoute("#/lessons/SMM-01?view=full"), {
+    name: "lesson",
+    params: { lessonId: "SMM-01", view: "full" }
+  });
+  assert.deepEqual(parseRoute("#/lessons/SMM-01/retention?view=full"), {
+    name: "chapter",
+    params: { lessonId: "SMM-01", chapterId: "retention", view: "full" }
+  });
+});
+
 test("parses search and review routes", () => {
   assert.deepEqual(parseRoute("#/search?q=retention"), { name: "search", params: { query: "retention" } });
   assert.deepEqual(parseRoute("#/review"), { name: "review", params: {} });

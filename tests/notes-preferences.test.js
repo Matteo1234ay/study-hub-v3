@@ -20,8 +20,14 @@ test("keeps notes separate by lesson and chapter", () => {
 test("accepts only controlled reading preferences", () => {
   const store = createPreferencesStore(memoryStorage());
   assert.deepEqual(store.update({ fontSize: "large", width: "narrow", focus: true, unsafe: "x" }), {
-    fontSize: "large", width: "narrow", focus: true
+    fontSize: "large", width: "narrow", focus: true, motion: "system"
   });
+});
+
+test("accepts only controlled motion preferences", () => {
+  const store = createPreferencesStore(memoryStorage());
+  assert.equal(store.update({ motion: "reduced" }).motion, "reduced");
+  assert.equal(store.update({ motion: "unsafe" }).motion, "system");
 });
 
 test("applies preferences through controlled data attributes", () => {
@@ -29,5 +35,5 @@ test("applies preferences through controlled data attributes", () => {
   store.update({ fontSize: "small", width: "narrow", focus: true });
   const attributes = {};
   store.applyTo({ setAttribute: (key, value) => { attributes[key] = value; } });
-  assert.deepEqual(attributes, { "data-font-size": "small", "data-reading-width": "narrow", "data-focus-mode": "true" });
+  assert.deepEqual(attributes, { "data-font-size": "small", "data-reading-width": "narrow", "data-focus-mode": "true", "data-motion": "system" });
 });

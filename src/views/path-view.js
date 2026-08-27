@@ -1,4 +1,5 @@
-import { element, emptyState, pageHeader } from "../ui/components.js";
+import { element, emptyState, pageHeader } from "../ui/components.js?v=20260827-1";
+import { studentVisibleLessons } from "../config/paths.js?v=20260827-1";
 
 export function renderPathView(path) {
   if (!path) {
@@ -7,8 +8,9 @@ export function renderPathView(path) {
       element("a", { className: "button primary", text: "Torna ai percorsi", href: "#/paths" })
     ]);
   }
-  const lessons = path.lessons.length
-    ? element("div", { className: "lesson-grid" }, path.lessons.map((lesson) =>
+  const visibleLessons = studentVisibleLessons(path.lessons);
+  const lessons = visibleLessons.length
+    ? element("div", { className: "lesson-grid" }, visibleLessons.map((lesson) =>
         element("a", { className: "lesson-card", href: `#/lessons/${lesson.id}` }, [
           element("div", { className: "lesson-topline" }, [
             element("span", { className: "card-code", text: lesson.id }),

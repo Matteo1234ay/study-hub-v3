@@ -1,5 +1,5 @@
-import { PATHS } from "../config/paths.js";
-import { element, pageHeader } from "../ui/components.js";
+import { PATHS } from "../config/paths.js?v=20260827-1";
+import { element, pageHeader } from "../ui/components.js?v=20260827-1";
 
 export function renderPathsView() {
   return element("section", { className: "content-page" }, [

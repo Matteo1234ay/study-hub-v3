@@ -1,5 +1,61 @@
 {
   "title": "SMM-01 – Dispensa – Metriche e KPI organici",
+  "editorial": {
+    "status": "published",
+    "lastReviewedAt": "2026-08-27",
+    "lastReviewedBy": "Matteo Paredi",
+    "reviewMode": "full-control-pilot"
+  },
+  "sources": [
+    {
+      "id": "meta-reach",
+      "title": "About reach metrics in Meta Business Suite",
+      "authors": "Meta Business Help Center",
+      "year": "2026",
+      "url": "https://www.facebook.com/business/help/1109973216315602",
+      "type": "Documentazione ufficiale della piattaforma",
+      "accessedAt": "2026-08-27",
+      "evidenceQuality": "Fonte primaria per la definizione operativa della metrica nella piattaforma Meta",
+      "limitations": "La definizione e il metodo di stima possono cambiare; non dimostra da sola qualità o causalità.",
+      "editorialNote": "Usata per distinguere reach e impression nel contesto Meta."
+    },
+    {
+      "id": "meta-impressions",
+      "title": "Impressions",
+      "authors": "Meta Business Help Center",
+      "year": "2026",
+      "url": "https://www.facebook.com/business/help/675615482516035",
+      "type": "Documentazione ufficiale della piattaforma",
+      "accessedAt": "2026-08-27",
+      "evidenceQuality": "Fonte primaria per la definizione operativa di impression in Meta",
+      "limitations": "La pagina riguarda la metrica Meta e non rende identiche le definizioni adottate da altre piattaforme.",
+      "editorialNote": "Usata solo per spiegare conteggi di esposizione, non efficacia del contenuto."
+    },
+    {
+      "id": "youtube-reach",
+      "title": "Understand your YouTube video reach",
+      "authors": "YouTube Help",
+      "year": "2026",
+      "url": "https://support.google.com/youtube/answer/9314355?hl=en",
+      "type": "Documentazione ufficiale della piattaforma",
+      "accessedAt": "2026-08-27",
+      "evidenceQuality": "Fonte primaria per le definizioni operative di views, unique viewers, impression e watch time in YouTube Analytics",
+      "limitations": "Le metriche dipendono dal formato e dalle regole correnti di YouTube; unique viewers è una stima.",
+      "editorialNote": "La lezione invita per questo a verificare sempre la definizione corrente nella piattaforma."
+    },
+    {
+      "id": "youtube-engagement",
+      "title": "Understand your YouTube engagement",
+      "authors": "YouTube Help",
+      "year": "2026",
+      "url": "https://support.google.com/youtube/answer/9313698?hl=en",
+      "type": "Documentazione ufficiale della piattaforma",
+      "accessedAt": "2026-08-27",
+      "evidenceQuality": "Fonte primaria per watch time e average view duration in YouTube Analytics",
+      "limitations": "Descrive misure di consumo, non prova conversione, apprezzamento o causalità.",
+      "editorialNote": "Usata per separare consumo del contenuto dagli esiti successivi."
+    }
+  ],
   "chapters": [
     {
       "id": "obiettivo-del-modulo",
@@ -48,6 +104,23 @@
           "type": "key-concept",
           "label": "Regola pratica",
           "text": "non scegliere il KPI dopo aver visto quale numero è più alto. Prima dichiari l'obiettivo, poi scegli il KPI, poi guardi il risultato."
+        },
+        {
+          "type": "micro-question",
+          "id": "smm01-kpi-coerenza",
+          "concept": "Coerenza tra obiettivo e KPI",
+          "prompt": "L’obiettivo è trasformare gli spettatori in follower. Qual è l’indicatore più diretto?",
+          "options": [
+            { "id": "views", "text": "Il numero totale di views", "correct": false, "feedback": "Le views descrivono quante fruizioni sono state registrate, ma non quante persone hanno scelto di seguire il profilo." },
+            { "id": "followers", "text": "I follower acquisiti dal contenuto", "correct": true, "feedback": "Esatto: è l’esito più vicino all’obiettivo dichiarato. Le views restano una metrica di contesto." },
+            { "id": "impressions", "text": "Le impression", "correct": false, "feedback": "Le impression misurano esposizioni, non la trasformazione in follower." }
+          ],
+          "retryPrompt": "Quale domanda permette di scegliere il KPI prima di vedere i risultati?",
+          "retryOptions": [
+            { "id": "highest", "text": "Quale numero è più alto?", "correct": false, "feedback": "Scegliere dopo aver visto il numero più alto produce una lettura opportunistica." },
+            { "id": "goal", "text": "Quale misura rappresenta meglio l’obiettivo?", "correct": true, "feedback": "Esatto: l’obiettivo viene prima e determina il KPI." }
+          ],
+          "reviewOnError": true
         }
       ]
     },
@@ -57,20 +130,40 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Reach indica quante persone o account unici sono stati raggiunti secondo la definizione della piattaforma. Se la stessa persona vede il contenuto più volte, continua normalmente a rappresentare una sola unità di reach per il periodo e la definizione usata dalla piattaforma."
+          "text": "Reach indica quante persone o account unici sono stati raggiunti secondo la definizione della piattaforma. Se la stessa persona vede il contenuto più volte, continua normalmente a rappresentare una sola unità di reach per il periodo e la definizione usata dalla piattaforma.",
+          "sourceRefs": ["meta-reach", "youtube-reach"]
         },
         {
           "type": "paragraph",
-          "text": "Impression indica quante esposizioni vengono registrate. Una stessa persona può quindi generare più impression. Per esempio, una reach di 10.000 e 18.000 impression è compatibile con il fatto che parte del pubblico abbia incontrato il contenuto più di una volta."
+          "text": "Impression indica quante esposizioni vengono registrate. Una stessa persona può quindi generare più impression. Per esempio, una reach di 10.000 e 18.000 impression è compatibile con il fatto che parte del pubblico abbia incontrato il contenuto più di una volta.",
+          "sourceRefs": ["meta-impressions", "meta-reach"]
         },
         {
           "type": "paragraph",
-          "text": "Views indica invece la fruizione del contenuto secondo le regole specifiche della piattaforma. La definizione concreta di view può dipendere dal formato e dalla piattaforma, quindi va controllata nella documentazione o nell'interfaccia corrente."
+          "text": "Views indica invece la fruizione del contenuto secondo le regole specifiche della piattaforma. La definizione concreta di view può dipendere dal formato e dalla piattaforma, quindi va controllata nella documentazione o nell'interfaccia corrente.",
+          "sourceRefs": ["youtube-reach"]
         },
         {
           "type": "warning",
           "label": "Che cosa NON puoi concludere",
           "text": "più impression della reach non significa automaticamente che il contenuto sia migliore; più views non significa automaticamente che sia più utile, più apprezzato o più efficace strategicamente. Questi numeri descrivono esposizione e fruizione, non da soli la qualità del risultato."
+        },
+        {
+          "type": "micro-question",
+          "id": "smm01-reach-impression",
+          "concept": "Differenza tra reach e impression",
+          "prompt": "Un contenuto registra 10.000 account raggiunti e 18.000 impression. Che cosa puoi concludere?",
+          "options": [
+            { "id": "repeat", "text": "Parte del pubblico può averlo incontrato più volte", "correct": true, "feedback": "Esatto: più impression della reach è compatibile con esposizioni ripetute agli stessi account." },
+            { "id": "quality", "text": "Il contenuto è sicuramente di qualità", "correct": false, "feedback": "No: esposizione ripetuta e qualità sono concetti diversi; questi dati non dimostrano la causa né il valore del contenuto." },
+            { "id": "unique", "text": "18.000 persone diverse lo hanno visto", "correct": false, "feedback": "No: le impression non corrispondono necessariamente a persone uniche." }
+          ],
+          "retryPrompt": "Quale metrica è progettata per evitare di contare più volte lo stesso account nel periodo considerato?",
+          "retryOptions": [
+            { "id": "reach", "text": "Reach", "correct": true, "feedback": "Esatto: la reach riguarda persone o account unici secondo la definizione della piattaforma." },
+            { "id": "impressions", "text": "Impression", "correct": false, "feedback": "Le impression possono includere esposizioni ripetute." }
+          ],
+          "reviewOnError": true
         }
       ]
     },
@@ -80,11 +173,13 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Il watch time misura il tempo complessivo consumato dal pubblico. Se cento visualizzazioni generano complessivamente mille minuti di visione, quel totale è watch time."
+          "text": "Il watch time misura il tempo complessivo consumato dal pubblico. Se cento visualizzazioni generano complessivamente mille minuti di visione, quel totale è watch time.",
+          "sourceRefs": ["youtube-engagement"]
         },
         {
           "type": "paragraph",
-          "text": "La durata media di visualizzazione descrive invece quanto tempo viene visto mediamente per una visualizzazione secondo la metrica della piattaforma."
+          "text": "La durata media di visualizzazione descrive invece quanto tempo viene visto mediamente per una visualizzazione secondo la metrica della piattaforma.",
+          "sourceRefs": ["youtube-engagement"]
         },
         {
           "type": "paragraph",
@@ -96,7 +191,25 @@
         },
         {
           "type": "paragraph",
-          "text": "Che cosa NON dimostrano da sole: una durata media alta non dimostra automaticamente che il pubblico diventerà follower o acquisterà qualcosa. Misura consumo del contenuto; il collegamento con obiettivi successivi deve essere verificato con metriche coerenti con quegli obiettivi."
+          "text": "Che cosa NON dimostrano da sole: una durata media alta non dimostra automaticamente che il pubblico diventerà follower o acquisterà qualcosa. Misura consumo del contenuto; il collegamento con obiettivi successivi deve essere verificato con metriche coerenti con quegli obiettivi.",
+          "sourceRefs": ["youtube-engagement"]
+        },
+        {
+          "type": "micro-question",
+          "id": "smm01-watch-time",
+          "concept": "Limiti interpretativi del watch time",
+          "prompt": "Un video ha una durata media molto alta. Qual è la conclusione più rigorosa?",
+          "options": [
+            { "id": "purchase", "text": "Genererà sicuramente acquisti", "correct": false, "feedback": "La durata media non misura direttamente acquisti o conversioni." },
+            { "id": "consumption", "text": "È stato consumato a lungo rispetto alla sua durata e al contesto", "correct": true, "feedback": "Esatto: descrive consumo del contenuto; altri risultati richiedono metriche coerenti con quegli obiettivi." },
+            { "id": "quality", "text": "È oggettivamente un contenuto migliore", "correct": false, "feedback": "Una metrica di consumo non dimostra da sola qualità universale o causalità." }
+          ],
+          "retryPrompt": "Per verificare se quel video ha generato iscrizioni, quale dato va aggiunto?",
+          "retryOptions": [
+            { "id": "subscribers", "text": "Iscritti attribuiti al contenuto", "correct": true, "feedback": "Esatto: è un indicatore più vicino all’esito che vuoi verificare." },
+            { "id": "duration", "text": "Ancora la durata media", "correct": false, "feedback": "La durata media continua a descrivere consumo, non iscrizioni." }
+          ],
+          "reviewOnError": true
         }
       ]
     },

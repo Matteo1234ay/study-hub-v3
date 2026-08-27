@@ -1,5 +1,11 @@
 # Study Hub V3
 
+## Prototipo SMM-01 basato sulle evidenze
+
+SMM-01 usa una struttura ibrida: un capitolo alla volta per lo studio guidato e una vista completa per consultazione. I primi capitoli includono fonti contestuali espandibili e micro-domande non bloccanti con feedback e ripasso locale.
+
+Le lezioni supportano gli stati editoriali `draft`, `review` e `published`; le lezioni legacy restano compatibili. Progressi, note, preferiti e concetti da riprendere rimangono nel browser. Il prototipo non usa account, backend, API a consumo o servizi a pagamento.
+
 Piattaforma personale di apprendimento statica, gratuita e pubblicabile con GitHub Pages.
 
 ## Architettura
