@@ -1,7 +1,7 @@
 import { PATHS, findLesson } from "../config/paths.js?v=20260827-2";
 import { element } from "../ui/components.js?v=20260827-2";
 import { createStudyStore } from "../study/study-store.js?v=20260827-2";
-import { mountStudyHubWebGL } from "../home/study-hub-webgl.js?v=20260827-9";
+import { mountStudyHubWebGL } from "../home/study-hub-webgl.js?v=20260827-10";
 
 function station({className="",eyebrow,title,detail,href,center,span=.10,hold=.055}){
   const children=[element("span",{className:"station-eyebrow",text:eyebrow}),element("strong",{text:title}),detail?element("small",{text:detail}):null,href?element("b",{text:"OPEN ↗"}):null].filter(Boolean);
