@@ -1,167 +1,45 @@
-import { renderLesson } from "../lessons/render-lesson.js?v=20260827-1";
+import { renderLesson } from "../lessons/render-lesson.js?v=20260827-3";
 import { createLessonCache } from "../lessons/lesson-cache.js?v=20260827-1";
 import { element } from "../ui/components.js?v=20260827-1";
 import { calculateLessonProgress, createProgressStore } from "../progress/local-progress.js?v=20260827-1";
+import { createActivityStore } from "../progress/activity-store.js?v=20260827-1";
+import { chapterActivityState } from "../progress/activity-progress.js?v=20260827-1";
 import { createStudyStore } from "../study/study-store.js?v=20260827-1";
-import { createNotesStore } from "../study/notes-store.js?v=20260827-1";
+import { createNotesStore } from "../study/notes-store.js?v=20260827-2";
+import { downloadNotesDocx } from "../study/docx-export.js?v=20260827-1";
 import { buildPublicChapterContext } from "../assistant/study-assistant.js?v=20260827-1";
 import { createChatGptAdapter } from "../assistant/chatgpt-adapter.js?v=20260827-1";
 import { createStudyDialog } from "../ui/study-dialog.js?v=20260827-1";
-import { normalizeLessonExperience } from "../lessons/lesson-model.js?v=20260827-1";
+import { normalizeLessonExperience, resolveLessonLocation } from "../lessons/lesson-model.js?v=20260827-2";
 import { createReviewConceptsStore } from "../study/review-concepts-store.js?v=20260827-1";
 
 export async function renderLessonView({ lesson, activeChapterId = null, viewMode = "chapter" }) {
-  if (!lesson) {
-    return element("section", { className: "content-page" }, [
-      element("p", { className: "eyebrow", text: "Errore 404" }),
-      element("h1", { text: "Lezione non trovata" }),
-      element("a", { className: "button primary", text: "Torna ai percorsi", href: "#/paths" })
-    ]);
-  }
-
+  if (!lesson) return element("section", { className: "content-page" }, [element("p", { className: "eyebrow", text: "Errore 404" }), element("h1", { text: "Lezione non trovata" }), element("a", { className: "button primary", text: "Torna ai percorsi", href: "#/paths" })]);
   const view = element("section", { className: "lesson-page" });
-  view.append(
-    element("nav", { className: "breadcrumbs lesson-breadcrumbs", attrs: { "aria-label": "Breadcrumb" } }, [
-      element("a", { text: "Percorsi", href: "#/paths" }),
-      element("span", { text: "/" }),
-      element("a", { text: "Social Media Manager", href: "#/paths/smm" }),
-      element("span", { text: "/" }),
-      element("span", { text: lesson.id, attrs: { "aria-current": "page" } })
-    ]),
-    element("header", { className: "lesson-hero" }, [
-      element("p", { className: "eyebrow", text: `${lesson.id} · ${lesson.level}` }),
-      element("h1", { text: lesson.title }),
-      element("p", { className: "page-lead", text: lesson.description }),
-      element("div", { className: "lesson-meta" }, [
-        element("span", { text: lesson.estimated }),
-        element("span", { className: "lesson-source-state", text: "Caricamento fonte…" })
-      ])
-    ])
-  );
-  const body = element("div", { className: "lesson-live-region", attrs: { "aria-live": "polite" } });
-  view.append(body);
-  const cache = createLessonCache();
-  let model;
-  let fromCache = false;
-  try {
-    const response = await fetch(lesson.dataUrl, { cache: "no-cache" });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    model = await response.json();
-    if (!Array.isArray(model.chapters) || !model.chapters.length) throw new Error("Invalid lesson model");
-    cache.set(lesson.id, model, model.syncedAt ?? null);
-  } catch (error) {
-    const cached = cache.get(lesson.id);
-    if (cached) {
-      model = cached.document;
-      fromCache = true;
-    } else {
-      const retry = element("button", { className: "button quiet", text: "Riprova", attrs: { type: "button" } });
-      retry.addEventListener("click", () => location.reload());
-      body.append(element("section", { className: "error-state", attrs: { role: "alert" } }, [
-        element("p", { className: "eyebrow", text: "Fonte temporaneamente non disponibile" }),
-        element("h2", { text: "La lezione non è ancora sincronizzata" }),
-        element("p", { text: "GitHub sta preparando la versione pubblicata del documento. Riprova tra qualche minuto." }),
-        retry
-      ]));
-      view.querySelector(".lesson-source-state").textContent = "Fonte non disponibile";
-      return view;
-    }
-  }
-  model = normalizeLessonExperience(model);
-  const requestedChapterMissing = Boolean(activeChapterId && !model.chapters.some(chapter => chapter.id === activeChapterId));
-  const effectiveChapterId = activeChapterId ?? model.chapters[0]?.id ?? null;
-  if (requestedChapterMissing) {
-    activeChapterId = null;
-  }
-  const resolvedChapterId = requestedChapterMissing ? (model.chapters[0]?.id ?? null) : effectiveChapterId;
-  view.querySelector(".lesson-source-state").textContent = fromCache ? `${model.chapters.length} capitoli · copia salvata` : `${model.chapters.length} capitoli · sincronizzato`;
-  const store = createProgressStore();
-  const studyStore = createStudyStore();
-  const notesStore = createNotesStore();
-  const reviewConceptsStore = createReviewConceptsStore();
-  const assistant = createChatGptAdapter();
-  const assistantDialog = createStudyDialog();
-  view.append(assistantDialog.node);
-  const studyState = studyStore.getState();
-  studyStore.recordVisit({ type: "lesson", lessonId: lesson.id, title: lesson.title });
-  studyStore.setLastPosition(lesson.id, resolvedChapterId);
-  const favorite = element("button", {
-    className: `button quiet favorite-button${studyState.favorites.includes(lesson.id) ? " is-active" : ""}`,
-    text: studyState.favorites.includes(lesson.id) ? "★ Nei preferiti" : "☆ Aggiungi ai preferiti",
-    attrs: { type: "button", "aria-pressed": String(studyState.favorites.includes(lesson.id)) }
-  });
-  favorite.addEventListener("click", () => {
-    const next = studyStore.toggleFavorite(lesson.id).favorites.includes(lesson.id);
-    favorite.textContent = next ? "★ Nei preferiti" : "☆ Aggiungi ai preferiti";
-    favorite.classList.toggle("is-active", next);
-    favorite.setAttribute("aria-pressed", String(next));
-  });
-  view.querySelector(".lesson-meta").append(favorite);
-  if (lesson.assessmentUrl) {
-    view.querySelector(".lesson-meta").append(element("a", {
-      className: "button primary",
-      text: "Esercitazione completa",
-      href: `#/lessons/${lesson.id}/assessment`
-    }));
-  }
-  const progressState = element("span", { className: "lesson-progress-state" });
-  const progressBar = element("progress", { className: "lesson-progress-bar", attrs: { max: "100", value: "0", "aria-label": "Avanzamento della lezione" } });
-  view.querySelector(".lesson-meta").prepend(progressState);
-  view.querySelector(".lesson-hero").append(progressBar);
-  const missingNotice = requestedChapterMissing
-    ? element("div", { className: "chapter-missing", attrs: { role: "status" } }, [
-      element("b", { text: "Il capitolo richiesto non esiste più." }),
-      element("span", { text: " Ti mostro il primo capitolo disponibile." })
-    ])
-    : null;
+  view.append(element("nav", { className: "breadcrumbs lesson-breadcrumbs", attrs: { "aria-label": "Breadcrumb" } }, [element("a", { text: "Percorsi", href: "#/paths" }), element("span", { text: "/" }), element("a", { text: "Social Media Manager", href: "#/paths/smm" }), element("span", { text: "/" }), element("span", { text: lesson.id, attrs: { "aria-current": "page" } })]), element("header", { className: "lesson-hero" }, [element("p", { className: "eyebrow", text: `${lesson.id} · ${lesson.level}` }), element("h1", { text: lesson.title }), element("p", { className: "page-lead", text: lesson.description }), element("div", { className: "lesson-meta" }, [element("span", { text: lesson.estimated }), element("span", { className: "lesson-source-state", text: "Caricamento fonte…" })]) ]));
+  const body = element("div", { className: "lesson-live-region", attrs: { "aria-live": "polite" } }); view.append(body);
+  const cache = createLessonCache(); let model; let fromCache = false;
+  try { const response = await fetch(lesson.dataUrl, { cache: "no-cache" }); if (!response.ok) throw new Error(`HTTP ${response.status}`); model = await response.json(); if (!Array.isArray(model.chapters) || !model.chapters.length) throw new Error("Invalid lesson model"); cache.set(lesson.id, model, model.syncedAt ?? null); }
+  catch { const cached = cache.get(lesson.id); if (cached) { model = cached.document; fromCache = true; } else { body.append(element("section", { className: "error-state", attrs: { role: "alert" } }, [element("h2", { text: "La lezione non è disponibile" }), element("p", { text: "Riprova tra qualche minuto." })])); return view; } }
+  model = normalizeLessonExperience(model); const resolution = resolveLessonLocation(model, activeChapterId), resolvedChapterId = resolution.chapterId;
+  view.querySelector(".lesson-source-state").textContent = `${model.chapters.length} macro-capitoli · ${model.editorial.status === "review" ? "in revisione" : fromCache ? "copia salvata" : "sincronizzato"}`;
+  const store = createProgressStore(), activityStore = createActivityStore(), studyStore = createStudyStore(), notesStore = createNotesStore(), reviewConceptsStore = createReviewConceptsStore();
+  const assistant = createChatGptAdapter(), assistantDialog = createStudyDialog(); view.append(assistantDialog.node); studyStore.recordVisit({ type: "lesson", lessonId: lesson.id, title: lesson.title }); studyStore.setLastPosition(lesson.id, resolvedChapterId);
+  const favorite = element("button", { className: `button quiet favorite-button${studyStore.getState().favorites.includes(lesson.id) ? " is-active" : ""}`, text: studyStore.getState().favorites.includes(lesson.id) ? "★ Nei preferiti" : "☆ Aggiungi ai preferiti", attrs: { type: "button" } }); favorite.addEventListener("click", () => { const next = studyStore.toggleFavorite(lesson.id).favorites.includes(lesson.id); favorite.textContent = next ? "★ Nei preferiti" : "☆ Aggiungi ai preferiti"; favorite.classList.toggle("is-active", next); }); view.querySelector(".lesson-meta").append(favorite);
+  if (lesson.assessmentUrl) view.querySelector(".lesson-meta").append(element("a", { className: "button primary", text: "Esercitazione completa", href: `#/lessons/${lesson.id}/assessment` }));
+  const progressState = element("span", { className: "lesson-progress-state" }), progressBar = element("progress", { className: "lesson-progress-bar", attrs: { max: "100", value: "0", "aria-label": "Avanzamento della lezione" } }); view.querySelector(".lesson-meta").prepend(progressState); view.querySelector(".lesson-hero").append(progressBar);
+
+  const notesPanel = element("aside", { className: "lesson-notes-panel", attrs: { "aria-label": "Note della lezione" } }), notesTitle = element("h2", { text: "Note" }), notesStatus = element("p", { className: "notes-status", text: "Salvate sul dispositivo" }), notesList = element("div", { className: "structured-notes-list" });
+  const closeNotes = element("button", { className: "chapter-action", text: "Chiudi", attrs: { type: "button" } }); closeNotes.addEventListener("click", () => notesPanel.classList.remove("is-open"));
+  const copyNotes = element("button", { className: "chapter-action", text: "Copia per Google Docs", attrs: { type: "button" } }); copyNotes.addEventListener("click", async () => { const text = notesStore.exportText(lesson.id, lesson.title); try { await navigator.clipboard.writeText(text); notesStatus.textContent = "Copiato negli appunti"; } catch { notesStatus.textContent = "Copia non disponibile: le note restano salvate"; } });
+  const exportDocx = element("button", { className: "chapter-action", text: "Esporta .docx", attrs: { type: "button" } }); exportDocx.addEventListener("click", () => { downloadNotesDocx({ title: `${lesson.title} — Note`, notes: notesStore.list(lesson.id) }, `${lesson.id}-note.docx`); notesStatus.textContent = "Documento .docx creato sul dispositivo"; });
+  notesPanel.append(element("div", { className: "notes-panel-head" }, [notesTitle, closeNotes]), notesStatus, notesList, element("div", { className: "notes-export-actions" }, [copyNotes, exportDocx])); view.append(notesPanel);
+  function paintNotes() { notesList.replaceChildren(); const notes = notesStore.list(lesson.id); if (!notes.length) notesList.append(element("p", { text: "Nessuna nota strutturata. Usa “+ Nota su questa sezione”." })); for (const note of notes) { const textarea = element("textarea", { attrs: { rows: "3", "aria-label": "Modifica nota" } }); textarea.value = note.text; textarea.addEventListener("change", () => { notesStore.update(lesson.id, note.id, textarea.value); notesStatus.textContent = "Salvata sul dispositivo"; }); const remove = element("button", { className: "chapter-action", text: "Rimuovi", attrs: { type: "button" } }); remove.addEventListener("click", () => { if (confirm("Rimuovere questa nota?")) { notesStore.removeNote(lesson.id, note.id); paintNotes(); } }); notesList.append(element("article", { className: "structured-note" }, [element("small", { text: `${note.chapterId}${note.sectionId ? ` · ${note.sectionId}` : ""}` }), textarea, remove])); } }
+  paintNotes();
+  const notice = resolution.legacy ? element("div", { className: "chapter-missing", attrs: { role: "status" } }, [element("b", { text: "Collegamento aggiornato." }), element("span", { text: " Questa vecchia sezione ora appartiene a uno dei quattro macro-capitoli." })]) : resolution.missing ? element("div", { className: "chapter-missing", attrs: { role: "status" } }, [element("b", { text: "Sezione non trovata." }), element("span", { text: " Ti mostro il primo macro-capitolo." })]) : null;
   function paintLesson() {
-    const saved = store.get(lesson.id);
-    const completed = new Set(saved.completed);
-    const bookmarks = new Set(studyStore.getState().bookmarks[lesson.id] ?? []);
-    const percentage = calculateLessonProgress(model.chapters, completed);
-    progressState.textContent = `${percentage}% completato`;
-    progressBar.value = percentage;
-    const lessonNode = renderLesson(model, {
-      lessonId: lesson.id,
-      assessmentEnabled: Boolean(lesson.assessmentUrl),
-      activeChapterId: resolvedChapterId,
-      viewMode,
-      completedChapterIds: completed,
-      bookmarkedChapterIds: bookmarks,
-      noteForChapter: chapterId => notesStore.get(lesson.id, chapterId),
-      onToggleChapter(chapterId) {
-        store.toggle(lesson.id, chapterId);
-        studyStore.recordVisit({ type: "complete", lessonId: lesson.id, chapterId });
-        paintLesson();
-      },
-      onToggleBookmark(chapterId) {
-        studyStore.toggleBookmark(lesson.id, chapterId);
-        paintLesson();
-      },
-      onNote(chapterId, text) {
-        notesStore.set(lesson.id, chapterId, text);
-      },
-      onDeepen(chapter) {
-        assistantDialog.open(assistant.prepare(buildPublicChapterContext({ lesson, chapter })));
-      },
-      onReviewConcept(lessonId, question) {
-        reviewConceptsStore.markForReview(lessonId, question);
-      },
-      onConsolidateConcept(lessonId, question) {
-        reviewConceptsStore.clear(lessonId, question.id);
-      }
-    });
-    body.replaceChildren(...[missingNotice, lessonNode].filter(Boolean));
+    const saved = store.get(lesson.id), completed = new Set(saved.completed), bookmarks = new Set(studyStore.getState().bookmarks[lesson.id] ?? []), percentage = calculateLessonProgress(model.chapters, completed); progressState.textContent = `${percentage}% completato`; progressBar.value = percentage;
+    const lessonNode = renderLesson(model, { lessonId: lesson.id, assessmentEnabled: Boolean(lesson.assessmentUrl), activeChapterId: resolvedChapterId, viewMode, completedChapterIds: completed, bookmarkedChapterIds: bookmarks, noteForChapter: id => notesStore.get(lesson.id, id), activityForChapter: chapter => chapterActivityState(chapter, activityStore.getChapter(lesson.id, chapter.id)), onToggleChapter(id) { store.toggle(lesson.id, id); paintLesson(); }, onToggleBookmark(id) { studyStore.toggleBookmark(lesson.id, id); paintLesson(); }, onNote(id, text) { notesStore.set(lesson.id, id, text); }, onSectionNote(chapter, section) { const text = prompt(`Nota — ${section.title}`); if (text?.trim()) { notesStore.add(lesson.id, { chapterId: chapter.id, sectionId: section.id, text }); paintNotes(); notesPanel.classList.add("is-open"); } }, onDeepen(chapter) { assistantDialog.open(assistant.prepare(buildPublicChapterContext({ lesson, chapter }))); }, onReviewConcept(id, q) { reviewConceptsStore.markForReview(id, q); }, onConsolidateConcept(id, q) { reviewConceptsStore.clear(id, q.id); }, onVisitSection(chapterId, sectionId) { activityStore.visitSection(lesson.id, chapterId, sectionId); }, onAnsweredQuestion(id, chapterId, questionId) { activityStore.answerQuestion(id, chapterId, questionId); paintLesson(); } }); body.replaceChildren(...[notice, lessonNode].filter(Boolean));
   }
-  paintLesson();
-  if (resolvedChapterId) {
-    const active = model.chapters.find(chapter => chapter.id === resolvedChapterId);
-    studyStore.recordVisit({ type: "chapter", lessonId: lesson.id, chapterId: resolvedChapterId, title: active?.title ?? resolvedChapterId });
-    requestAnimationFrame(() => {
-      const chapter = document.getElementById(resolvedChapterId);
-      chapter?.scrollIntoView({ block: "start" });
-      chapter?.querySelector("h2")?.focus({ preventScroll: true });
-    });
-  }
-  return view;
+  paintLesson(); requestAnimationFrame(() => { const chapter = document.getElementById(resolvedChapterId); chapter?.scrollIntoView({ block: "start" }); chapter?.querySelector("h2")?.focus({ preventScroll: true }); if (resolution.sectionId) document.getElementById(resolution.sectionId)?.scrollIntoView({ block: "start" }); }); return view;
 }
