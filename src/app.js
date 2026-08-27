@@ -1,7 +1,7 @@
 import { findLesson, findPath } from "./config/paths.js?v=20260827-2";
 import { startRouter } from "./router.js?v=20260827-2";
 import { element, pageHeader } from "./ui/components.js?v=20260827-2";
-import { renderHomeView } from "./views/home-view.js?v=20260827-11";
+import { renderHomeView } from "./views/home-view.js?v=20260827-12";
 import { renderPathView } from "./views/path-view.js?v=20260827-2";
 import { renderPathsView } from "./views/paths-view.js?v=20260827-2";
 import { renderLessonView } from "./views/lesson-view.js?v=20260827-2";
@@ -11,48 +11,4 @@ import { renderReviewView } from "./views/review-view.js?v=20260827-2";
 import { renderAssessmentView } from "./views/assessment-view.js?v=20260827-2";
 import { renderPathAssessmentView } from "./views/path-assessment-view.js?v=20260827-2";
 import { createPreferencesStore } from "./study/preferences.js?v=20260827-2";
-
-const app = document.querySelector("#app");
-const preferences = createPreferencesStore();
-preferences.applyTo(document.documentElement);
-
-const focusExit = document.querySelector(".focus-exit");
-function exitFocusMode() {
-  preferences.update({ focus: false });
-  preferences.applyTo(document.documentElement);
-  document.querySelector(".site-header a")?.focus();
-}
-focusExit?.addEventListener("click", exitFocusMode);
-addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && preferences.get().focus) exitFocusMode();
-});
-
-function placeholder(title, description) {
-  return element("section", { className: "content-page" }, [
-    pageHeader("Study Hub V3", title, description),
-    element("a", { className: "button primary", text: "Torna ai percorsi", href: "#/paths" })
-  ]);
-}
-
-let renderSequence = 0;
-async function render(route) {
-  const sequence = ++renderSequence;
-  let view;
-  if (route.name === "home") view = renderHomeView();
-  else if (route.name === "paths") view = renderPathsView();
-  else if (route.name === "path") view = renderPathView(findPath(route.params.pathId));
-  else if (route.name === "path-assessment" || route.name === "path-final-exam") view = await renderPathAssessmentView({ path: findPath(route.params.pathId), mode: route.name === "path-final-exam" ? "final" : "progressive" });
-  else if (route.name === "lesson" || route.name === "chapter") view = await renderLessonView({ lesson: findLesson(route.params.lessonId), activeChapterId: route.params.chapterId ?? null, activeSectionId: route.params.sectionId ?? null, viewMode: route.params.view ?? "chapter" });
-  else if (route.name === "progress") view = await renderProgressView();
-  else if (route.name === "search") view = await renderSearchView(route.params.query);
-  else if (route.name === "review") view = await renderReviewView();
-  else if (route.name === "assessment" || route.name === "chapter-assessment") view = await renderAssessmentView({ lesson: findLesson(route.params.lessonId), chapterId: route.params.chapterId ?? null });
-  else view = placeholder("Pagina non trovata", "Controlla l’indirizzo oppure torna alla raccolta dei percorsi.");
-  if (sequence !== renderSequence) return;
-  app.replaceChildren(view);
-  document.title = `Study Hub V3 · ${route.name}`;
-  app.focus({ preventScroll: true });
-  const reducedMotion = preferences.get().motion === "reduced" || matchMedia("(prefers-reduced-motion: reduce)").matches;
-  scrollTo({ top: 0, behavior: reducedMotion ? "auto" : "smooth" });
-}
-startRouter(render);
+const app=document.querySelector("#app");const preferences=createPreferencesStore();preferences.applyTo(document.documentElement);const focusExit=document.querySelector(".focus-exit");function exitFocusMode(){preferences.update({focus:false});preferences.applyTo(document.documentElement);document.querySelector(".site-header a")?.focus()}focusExit?.addEventListener("click",exitFocusMode);addEventListener("keydown",(event)=>{if(event.key === "Escape"&&preferences.get().focus)exitFocusMode()});function placeholder(title,description){return element("section",{className:"content-page"},[pageHeader("Study Hub V3",title,description),element("a",{className:"button primary",text:"Torna ai percorsi",href:"#/paths"})])}let renderSequence=0;async function render(route){const sequence=++renderSequence;let view;if(route.name==="home")view=renderHomeView();else if(route.name==="paths")view=renderPathsView();else if(route.name==="path")view=renderPathView(findPath(route.params.pathId));else if(route.name==="path-assessment"||route.name==="path-final-exam")view=await renderPathAssessmentView({path:findPath(route.params.pathId),mode:route.name==="path-final-exam"?"final":"progressive"});else if(route.name==="lesson"||route.name==="chapter")view=await renderLessonView({lesson:findLesson(route.params.lessonId),activeChapterId:route.params.chapterId??null,activeSectionId:route.params.sectionId??null,viewMode:route.params.view??"chapter"});else if(route.name==="progress")view=await renderProgressView();else if(route.name==="search")view=await renderSearchView(route.params.query);else if(route.name==="review")view=await renderReviewView();else if(route.name==="assessment"||route.name==="chapter-assessment")view=await renderAssessmentView({lesson:findLesson(route.params.lessonId),chapterId:route.params.chapterId??null});else view=placeholder("Pagina non trovata","Controlla l’indirizzo oppure torna alla raccolta dei percorsi.");if(sequence!==renderSequence)return;app.replaceChildren(view);document.title=`Study Hub V3 · ${route.name}`;app.focus({preventScroll:true});const reducedMotion=preferences.get().motion==="reduced"||matchMedia("(prefers-reduced-motion: reduce)").matches;scrollTo({top:0,behavior:reducedMotion?"auto":"smooth"})}startRouter(render);
