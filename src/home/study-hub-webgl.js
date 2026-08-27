@@ -10,33 +10,68 @@ float sdTorus(vec3 p,vec2 q){vec2 d=vec2(length(p.xz)-q.x,p.y);return length(d)-
 float sdCapsule(vec3 p,vec3 a,vec3 b,float rad){vec3 pa=p-a,ba=b-a;float h=clamp(dot(pa,ba)/dot(ba,ba),0.,1.);return length(pa-ba*h)-rad;}
 vec2 opU(vec2 a,vec2 b){return a.x<b.x?a:b;}
 vec2 map(vec3 p){float open=smoothstep(.10,.24,j);vec2 d=vec2(99.,0.);
-// room shell: thin architectural planes frame the hub instead of becoming the subject
-d=opU(d,vec2(sdRoundBox(p-vec3(0.,-1.12,0.),vec3(2.65,.08,2.12),.06),1.));d=opU(d,vec2(sdRoundBox(p-vec3(-2.52-.20*open,.15,-.08),vec3(.06,1.32,2.02),.05),1.));d=opU(d,vec2(sdRoundBox(p-vec3(2.52+.20*open,.15,-.08),vec3(.06,1.32,2.02),.05),1.));d=opU(d,vec2(sdRoundBox(p-vec3(0.,.18,-2.02),vec3(2.54,1.28,.055),.04),1.));
-// curved desk: top, rounded front edge and tapered pedestal
-d=opU(d,vec2(sdRoundBox(p-vec3(0.,-.49,.24),vec3(1.12,.065,.57),.12),2.));d=opU(d,vec2(sdCylinder(p-vec3(0.,-.82,.24),.30,.34),2.));d=opU(d,vec2(sdTorus(p-vec3(0.,-.49,.24),vec2(.72,.025)),5.));
-// monitor with neck and luminous display
-d=opU(d,vec2(sdRoundBox(p-vec3(0.,-.12,.02),vec3(.62,.36,.035),.055),3.));d=opU(d,vec2(sdCapsule(p,vec3(0.,-.50,.04),vec3(0.,-.42,.04),.035),2.));d=opU(d,vec2(sdRoundBox(p-vec3(0.,-.42,.04),vec3(.22,.025,.14),.03),2.));
-// keyboard and desk lamp make the station read as a place for studying
-d=opU(d,vec2(sdRoundBox(p-vec3(0.,-.405,.56),vec3(.40,.018,.13),.035),4.)); // keyboard
-d=opU(d,vec2(sdCapsule(p,vec3(-.78,-.42,.36),vec3(-.82,.08,.30),.035),2.)); // lamp arm
-d=opU(d,vec2(sdTorus(p-vec3(-.82,.12,.30),vec2(.15,.035)),5.)); // lamp head
-// chair: seat, back and soft cylindrical base
-d=opU(d,vec2(sdRoundBox(p-vec3(0.,-.72,1.12),vec3(.42,.07,.38),.13),2.));d=opU(d,vec2(sdRoundBox(p-vec3(0.,-.30,1.38),vec3(.42,.43,.075),.16),2.));d=opU(d,vec2(sdCylinder(p-vec3(0.,-1.00,1.14),.17,.11),2.));
-// wall displays and integrated light ribbon
-d=opU(d,vec2(sdRoundBox(p-vec3(-.80,.48,-1.94),vec3(.64,.42,.018),.06),3.));d=opU(d,vec2(sdRoundBox(p-vec3(.80,.48,-1.94),vec3(.64,.42,.018),.06),4.));d=opU(d,vec2(sdCapsule(p,vec3(-1.72,1.15,-1.92),vec3(1.72,1.15,-1.92),.025),5.));
-// notes wall: staggered shelves + floating note sheets
-for(int k=0;k<4;k++){float f=float(k);d=opU(d,vec2(sdRoundBox(p-vec3(-1.94,-.70+f*.46,-1.42),vec3(.36,.035,.32),.04),2.));}d=opU(d,vec2(sdRoundBox(p-vec3(-2.18,.34,-.78),vec3(.018,.72,.60),.06),4.));d=opU(d,vec2(sdRoundBox(p-vec3(-2.14,.52,-.70),vec3(.025,.19,.15),.03),3.));d=opU(d,vec2(sdRoundBox(p-vec3(-2.13,.04,-.91),vec3(.025,.16,.20),.03),5.));
-// active SMM nucleus: rings around a luminous core; dormant paths are quieter pods
-float pulse=.025*sin(t*1.25);d=opU(d,vec2(sdSphere(p-vec3(1.76,.42,-.86),.22+pulse),5.));d=opU(d,vec2(sdTorus(p-vec3(1.76,.42,-.86),vec2(.38,.025)),5.));vec3 rp=p-vec3(1.76,.42,-.86);rp.xy=mat2(0.,-1.,1.,0.)*rp.xy;d=opU(d,vec2(sdTorus(rp,vec2(.46,.018)),3.));d=opU(d,vec2(sdCylinder(p-vec3(1.92,-.54,-1.18),.23,.30),6.));d=opU(d,vec2(sdCylinder(p-vec3(1.72,.98,-1.20),.18,.25),6.));
-// assessment and progress controls use round interfaces rather than boxes
-d=opU(d,vec2(sdCylinder(p-vec3(.98,-.83,1.10),.18,.34),4.));d=opU(d,vec2(sdTorus(p-vec3(-1.06,-.66,1.08),vec2(.34,.045)),3.));
-return d;}
+// Architecture: matte charcoal floor and wall planes with realistic thickness.
+d=opU(d,vec2(sdRoundBox(p-vec3(0.,-1.12,0.),vec3(2.72,.075,2.18),.045),1.));
+d=opU(d,vec2(sdRoundBox(p-vec3(-2.58-.18*open,.16,-.10),vec3(.055,1.34,2.06),.035),1.));
+d=opU(d,vec2(sdRoundBox(p-vec3(2.58+.18*open,.16,-.10),vec3(.055,1.34,2.06),.035),1.));
+d=opU(d,vec2(sdRoundBox(p-vec3(0.,.18,-2.08),vec3(2.60,1.30,.05),.035),1.));
+// Rug anchors the furniture visually.
+d=opU(d,vec2(sdRoundBox(p-vec3(0.,-1.025,.35),vec3(1.50,.018,1.18),.18),5.));
+// Warm walnut/composite desk with satin metal pedestal.
+d=opU(d,vec2(sdRoundBox(p-vec3(0.,-.49,.24),vec3(1.13,.065,.58),.12),2.));
+d=opU(d,vec2(sdCylinder(p-vec3(0.,-.82,.24),.30,.33),3.));
+d=opU(d,vec2(sdTorus(p-vec3(0.,-.49,.24),vec2(.73,.022)),3.));
+// Monitor: metal frame, dark glass panel, satin stand.
+d=opU(d,vec2(sdRoundBox(p-vec3(0.,-.12,.02),vec3(.64,.38,.035),.055),3.));
+d=opU(d,vec2(sdRoundBox(p-vec3(0.,-.12,.058),vec3(.585,.325,.009),.035),4.));
+d=opU(d,vec2(sdCapsule(p,vec3(0.,-.50,.04),vec3(0.,-.42,.04),.032),3.));
+d=opU(d,vec2(sdRoundBox(p-vec3(0.,-.42,.04),vec3(.22,.022,.14),.03),3.));
+// Keyboard: low neutral body instead of emissive block.
+d=opU(d,vec2(sdRoundBox(p-vec3(0.,-.405,.56),vec3(.40,.018,.13),.035),3.));
+// Lamp: satin metal arm and warm practical head.
+d=opU(d,vec2(sdCapsule(p,vec3(-.78,-.42,.36),vec3(-.82,.08,.30),.032),3.));
+d=opU(d,vec2(sdTorus(p-vec3(-.82,.12,.30),vec2(.15,.032)),3.));
+d=opU(d,vec2(sdSphere(p-vec3(-.82,.10,.30),.055),8.));
+// Chair: upholstered seat/back with metal base.
+d=opU(d,vec2(sdRoundBox(p-vec3(0.,-.72,1.12),vec3(.42,.07,.38),.13),5.));
+d=opU(d,vec2(sdRoundBox(p-vec3(0.,-.30,1.38),vec3(.42,.43,.075),.16),5.));
+d=opU(d,vec2(sdCylinder(p-vec3(0.,-1.00,1.14),.17,.10),3.));
+// Real study props: book stack and ceramic mug on the desk.
+d=opU(d,vec2(sdRoundBox(p-vec3(.63,-.395,.15),vec3(.23,.025,.16),.022),7.)); // book 1
+d=opU(d,vec2(sdRoundBox(p-vec3(.61,-.345,.14),vec3(.20,.022,.15),.020),7.)); // book 2
+d=opU(d,vec2(sdCylinder(p-vec3(.78,-.31,.55),.085,.075),7.)); // mug body
+vec3 mugHandle=p-vec3(.865,-.31,.55);mugHandle.xy=mat2(0.,-1.,1.,0.)*mugHandle.xy;d=opU(d,vec2(sdTorus(mugHandle,vec2(.075,.018)),7.)); // mug handle
+// Wall displays: restrained cool glass, not full neon.
+d=opU(d,vec2(sdRoundBox(p-vec3(-.80,.48,-2.015),vec3(.66,.44,.022),.055),3.));
+d=opU(d,vec2(sdRoundBox(p-vec3(-.80,.48,-1.986),vec3(.60,.38,.008),.032),4.));
+d=opU(d,vec2(sdRoundBox(p-vec3(.80,.48,-2.015),vec3(.66,.44,.022),.055),3.));
+d=opU(d,vec2(sdRoundBox(p-vec3(.80,.48,-1.986),vec3(.60,.38,.008),.032),4.));
+d=opU(d,vec2(sdCapsule(p,vec3(-1.72,1.15,-2.00),vec3(1.72,1.15,-2.00),.018),6.));
+// Notes wall with wood shelves and paper cards.
+for(int k=0;k<4;k++){float f=float(k);d=opU(d,vec2(sdRoundBox(p-vec3(-1.94,-.70+f*.46,-1.42),vec3(.36,.035,.32),.04),2.));}
+d=opU(d,vec2(sdRoundBox(p-vec3(-2.18,.34,-.78),vec3(.018,.72,.60),.06),1.));
+d=opU(d,vec2(sdRoundBox(p-vec3(-2.14,.52,-.70),vec3(.025,.19,.15),.03),7.));
+d=opU(d,vec2(sdRoundBox(p-vec3(-2.13,.04,-.91),vec3(.025,.16,.20),.03),7.));
+// Active SMM nucleus remains technological, but only as an accent inside the room.
+float pulse=.018*sin(t*1.15);d=opU(d,vec2(sdSphere(p-vec3(1.76,.42,-.86),.20+pulse),6.));
+d=opU(d,vec2(sdTorus(p-vec3(1.76,.42,-.86),vec2(.36,.018)),6.));vec3 rp=p-vec3(1.76,.42,-.86);rp.xy=mat2(0.,-1.,1.,0.)*rp.xy;d=opU(d,vec2(sdTorus(rp,vec2(.44,.014)),4.));
+// Dormant paths and assessment/progress controls.
+d=opU(d,vec2(sdCylinder(p-vec3(1.92,-.54,-1.18),.23,.30),1.));d=opU(d,vec2(sdCylinder(p-vec3(1.72,.98,-1.20),.18,.25),1.));
+d=opU(d,vec2(sdCylinder(p-vec3(.98,-.83,1.10),.18,.34),3.));d=opU(d,vec2(sdTorus(p-vec3(-1.06,-.66,1.08),vec2(.34,.040)),3.));return d;}
 vec3 normalAt(vec3 p){vec2 e=vec2(.002,0.);return normalize(vec3(map(p+e.xyy).x-map(p-e.xyy).x,map(p+e.yxy).x-map(p-e.yxy).x,map(p+e.yyx).x-map(p-e.yyx).x));}
+float softShadow(vec3 ro,vec3 rd,float mint,float maxt){float res=1.,ph=1e10,tv=mint;for(int i=0;i<20;i++){float h=map(ro+rd*tv).x;if(h<.001)return .12;float y=h*h/(2.*ph);float d=sqrt(max(0.,h*h-y*y));res=min(res,12.*d/max(.001,tv-y));ph=h;tv+=clamp(h,.025,.18);if(tv>maxt)break;}return clamp(res,.12,1.);}
+float ambientOcclusion(vec3 p,vec3 n){float occ=0.,sca=1.;for(int i=0;i<4;i++){float h=.045+.085*float(i);float d=map(p+n*h).x;occ+=(h-d)*sca;sca*=.62;}return clamp(1.-occ*1.7,0.42,1.);}
 mat3 lookAt(vec3 ro,vec3 ta){vec3 f=normalize(ta-ro),rr=normalize(cross(vec3(0.,1.,0.),f)),u=cross(f,rr);return mat3(rr,u,f);}
 float ease(float a,float b,float q){return smoothstep(a,b,q);}
 void cameraJourney(float q,out vec3 ro,out vec3 target){q=clamp(q,0.,1.);if(q<.15){float s=ease(0.,.10,q);ro=mix(vec3(0.,2.25,8.1),vec3(0.,1.55,5.35),s);target=vec3(0.,0.,-.12);}else if(q<.24){float s=ease(.15,.24,q);ro=mix(vec3(0.,1.55,5.35),vec3(0.,.62,2.18),s);target=mix(vec3(0.,0.,-.12),vec3(0.,-.10,-.52),s);}else if(q<.36){float s=ease(.24,.28,q);ro=mix(vec3(0.,.62,2.18),vec3(.20,.12,1.42),s);target=mix(vec3(0.,-.10,-.52),vec3(0.,-.34,.30),s);}else if(q<.49){float s=ease(.40,.47,q);ro=mix(vec3(.20,.12,1.42),vec3(-1.38,.24,.82),s);target=mix(vec3(0.,-.34,.30),vec3(-2.02,.22,-.86),s);}else if(q<.62){float s=ease(.52,.60,q);ro=mix(vec3(-1.38,.24,.82),vec3(.98,.43,1.00),s);target=mix(vec3(-2.02,.22,-.86),vec3(1.76,.42,-.86),s);}else if(q<.74){float s=ease(.65,.72,q);ro=mix(vec3(.98,.43,1.00),vec3(.78,-.12,1.72),s);target=mix(vec3(1.76,.42,-.86),vec3(.98,-.83,1.10),s);}else if(q<.84){float s=ease(.76,.82,q);ro=mix(vec3(.78,-.12,1.72),vec3(-.72,.02,1.72),s);target=mix(vec3(.98,-.83,1.10),vec3(-1.06,-.66,1.08),s);}else if(q<.94){float s=ease(.86,.93,q);ro=mix(vec3(-.72,.02,1.72),vec3(3.72,1.68,4.82),s);target=mix(vec3(-1.06,-.66,1.08),vec3(.45,.08,-.58),s);}else{float s=ease(.95,1.,q);ro=mix(vec3(3.72,1.68,4.82),vec3(0.,2.55,6.85),s);target=vec3(0.,.04,-.38);}}
-vec3 material(float id){if(id<1.5)return vec3(.045,.060,.105);if(id<2.5)return vec3(.16,.17,.20);if(id<3.5)return vec3(.20,.42,.95);if(id<4.5)return vec3(.56,.29,.98);if(id<5.5)return vec3(.20,.72,1.0);return vec3(.075,.10,.16);}
-void main(){vec2 uv=(gl_FragCoord.xy*2.-r)/r.y;uv+=m*.012;vec3 ro,target;cameraJourney(j,ro,target);vec3 rd=lookAt(ro,target)*normalize(vec3(uv,1.62));float dist=0.;vec3 p=ro;vec2 hit=vec2(99.,0.);for(int i=0;i<132;i++){p=ro+rd*dist;hit=map(p);if(hit.x<.0014||dist>13.)break;dist+=hit.x*.70;}vec3 col=vec3(.005,.009,.022)+vec3(.014,.022,.055)*(1.-max(uv.y,0.)*.2);if(dist<13.){vec3 n=normalAt(p),key=normalize(vec3(-.55,.82,.65)),fill=normalize(vec3(.72,.28,.35));float dif=max(dot(n,key),0.),dif2=max(dot(n,fill),0.),rim=pow(1.-max(dot(n,-rd),0.),2.4);vec3 base=material(hit.y);col+=base*(.22+.92*dif+.20*dif2);col+=rim*vec3(.25,.45,1.)*.38;col+=pow(max(dot(reflect(-key,n),-rd),0.),28.)*.42;if(hit.y>2.5&&hit.y<5.6)col+=base*(.28+.12*sin(t*1.2+p.x*2.));}float glow=.0045/(abs(length(uv-vec2(.18,-.04))-.64)+.05);col+=vec3(.07,.15,.48)*glow;col*=1.-.16*length(uv);o=vec4(pow(max(col,0.),vec3(.84)),1.);}`;
+vec3 woodMaterial(vec3 p){float grain=.5+.5*sin(p.z*18.+sin(p.x*7.)*.8);return mix(vec3(.18,.075,.035),vec3(.34,.16,.075),grain*.32);}
+vec3 metalMaterial(vec3 p){return vec3(.32,.34,.36)+.015*sin((p.x+p.z)*20.);}
+vec3 glassMaterial(vec3 p){return vec3(.018,.024,.030)+vec3(.014,.020,.028)*sin(p.x*3.);}
+vec3 baseMaterial(float id,vec3 p){if(id<1.5)return vec3(.105,.100,.095);if(id<2.5)return woodMaterial(p);if(id<3.5)return metalMaterial(p);if(id<4.5)return glassMaterial(p);if(id<5.5)return vec3(.055,.052,.050);if(id<6.5)return vec3(.055,.22,.42);if(id<7.5)return vec3(.47,.39,.29);return vec3(.80,.55,.24);}
+float roughness(float id){if(id<1.5)return .88;if(id<2.5)return .62;if(id<3.5)return .24;if(id<4.5)return .16;if(id<5.5)return .92;if(id<6.5)return .34;if(id<7.5)return .76;return .38;}
+float emission(float id){if(id>5.5&&id<6.5)return .55;if(id>7.5)return .25;if(id>3.5&&id<4.5)return .10;return 0.;}
+vec3 warmLamp(vec3 p,vec3 n){vec3 lp=vec3(-.82,.10,.30),lv=lp-p;float d2=max(.08,dot(lv,lv));float nd=max(dot(n,normalize(lv)),0.);return vec3(1.0,.58,.28)*nd*(.19/d2);}
+void main(){vec2 uv=(gl_FragCoord.xy*2.-r)/r.y;uv+=m*.010;vec3 ro,target;cameraJourney(j,ro,target);vec3 rd=lookAt(ro,target)*normalize(vec3(uv,1.62));float dist=0.;vec3 p=ro;vec2 hit=vec2(99.,0.);for(int i=0;i<132;i++){p=ro+rd*dist;hit=map(p);if(hit.x<.0014||dist>13.)break;dist+=hit.x*.70;}vec3 col=vec3(.025,.022,.020)+vec3(.018,.020,.024)*(1.-max(uv.y,0.)*.2);if(dist<13.){vec3 n=normalAt(p);vec3 keyPos=vec3(-1.8,2.8,2.2),keyDir=normalize(keyPos-p);float shadow=softShadow(p+n*.006,keyDir,.025,5.5);float ao=ambientOcclusion(p,n);float nd=max(dot(n,keyDir),0.);vec3 base=baseMaterial(hit.y,p);float rough=roughness(hit.y);vec3 halfV=normalize(keyDir-rd);float spec=pow(max(dot(n,halfV),0.),mix(64.,8.,rough))*(1.-rough*.65);vec3 neutralKey=vec3(1.0,.90,.78)*nd*shadow*.72;vec3 screenPos=vec3(0.,-.10,.08),sv=screenPos-p;float screenLight=max(dot(n,normalize(sv)),0.)*.08/max(.30,dot(sv,sv));vec3 coolFill=vec3(.28,.48,.72)*screenLight;col+=base*(.20*ao+neutralKey*.78)+spec*vec3(.86,.88,.90)*shadow*.38;col+=warmLamp(p,n)*ao+coolFill;if(hit.y>3.5&&hit.y<4.5)col+=vec3(.035,.075,.105);if(hit.y>5.5&&hit.y<6.5)col+=vec3(.05,.24,.48)*emission(hit.y)*(1.+.12*sin(t*1.1));if(hit.y>7.5)col+=vec3(1.0,.55,.24)*emission(hit.y);float rim=pow(1.-max(dot(n,-rd),0.),3.0);col+=rim*vec3(.06,.07,.08)*(1.-rough)*.24;}col*=1.-.14*length(uv);o=vec4(pow(max(col,0.),vec3(.88)),1.);}`;
 function compileShader(gl,type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s));return s;}
 export function mountStudyHubWebGL(canvas,{getJourney}){const gl=canvas.getContext("webgl2",{antialias:true,alpha:true,powerPreference:"high-performance"});if(!gl)return()=>{};const program=gl.createProgram();gl.attachShader(program,compileShader(gl,gl.VERTEX_SHADER,VERT));gl.attachShader(program,compileShader(gl,gl.FRAGMENT_SHADER,FRAG));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(program));const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);gl.useProgram(program);const position=gl.getAttribLocation(program,"p");gl.enableVertexAttribArray(position);gl.vertexAttribPointer(position,2,gl.FLOAT,false,0,0);const uR=gl.getUniformLocation(program,"r"),uT=gl.getUniformLocation(program,"t"),uJ=gl.getUniformLocation(program,"j"),uM=gl.getUniformLocation(program,"m");let mx=0,my=0,dead=false,frame;const pointer=e=>{mx=(e.clientX/innerWidth-.5)*2;my=(e.clientY/innerHeight-.5)*2};addEventListener("pointermove",pointer,{passive:true});function draw(ms){if(dead||!canvas.isConnected){dead=true;removeEventListener("pointermove",pointer);return}const dpr=Math.min(devicePixelRatio||1,1.5),w=Math.floor(canvas.clientWidth*dpr),h=Math.floor(canvas.clientHeight*dpr);if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}gl.viewport(0,0,w,h);gl.useProgram(program);gl.uniform2f(uR,w,h);gl.uniform1f(uT,ms*.001);gl.uniform1f(uJ,getJourney());gl.uniform2f(uM,mx,my);gl.drawArrays(gl.TRIANGLES,0,3);frame=requestAnimationFrame(draw)}frame=requestAnimationFrame(draw);return()=>{dead=true;cancelAnimationFrame(frame);removeEventListener("pointermove",pointer)}}
-export const hubNodes=["DESK","CHAIR","LAMP","KEYBOARD","NOTES","SMM","ASSESSMENT","PROGRESS","PATHS"];
+export const hubNodes=["DESK","CHAIR","LAMP","KEYBOARD","BOOKS","MUG","NOTES","SMM","ASSESSMENT","PROGRESS","PATHS"];
