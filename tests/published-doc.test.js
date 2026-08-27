@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { parsePublishedDocument } from "../scripts/sync-published-doc.mjs";
+import { parsePublishedDocument, shouldProtectEditorialLesson } from "../scripts/sync-published-doc.mjs";
 
 const html = await readFile(new URL("./fixtures/published-smm-01.html", import.meta.url), "utf8");
 
@@ -39,4 +39,11 @@ test("does not include Google style or script content", () => {
   const lesson = parsePublishedDocument(`<html><head><style>.x{color:red}</style><script>bad()</script></head><body><p>Titolo</p><p>1. Capitolo</p><p>Testo sicuro</p></body></html>`);
   assert.equal(JSON.stringify(lesson).includes("color:red"), false);
   assert.equal(JSON.stringify(lesson).includes("bad()"), false);
+});
+
+test("protects reviewed or structured lessons from flat document overwrite", () => {
+  assert.equal(shouldProtectEditorialLesson({ editorial: { status: "review" }, chapters: [] }), true);
+  assert.equal(shouldProtectEditorialLesson({ editorial: { status: "published" }, chapters: [] }), true);
+  assert.equal(shouldProtectEditorialLesson({ chapters: [{ sections: [] }] }), true);
+  assert.equal(shouldProtectEditorialLesson({ chapters: [{ blocks: [] }] }), false);
 });

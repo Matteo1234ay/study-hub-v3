@@ -46,6 +46,17 @@ test("parses the optional full lesson view", () => {
   });
 });
 
+test("parses a section target inside a macro chapter", () => {
+  assert.deepEqual(parseRoute("#/lessons/SMM-01/leggere-dati-piattaforme?section=ctr-denominatori"), {
+    name: "chapter",
+    params: {
+      lessonId: "SMM-01",
+      chapterId: "leggere-dati-piattaforme",
+      sectionId: "ctr-denominatori"
+    }
+  });
+});
+
 test("parses search and review routes", () => {
   assert.deepEqual(parseRoute("#/search?q=retention"), { name: "search", params: { query: "retention" } });
   assert.deepEqual(parseRoute("#/review"), { name: "review", params: {} });

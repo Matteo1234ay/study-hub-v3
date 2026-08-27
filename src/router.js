@@ -2,6 +2,7 @@ export function parseRoute(hash = "#/home") {
   const [path, queryString = ""] = hash.split("?");
   const query = new URLSearchParams(queryString);
   const lessonView = query.get("view") === "full" ? "full" : null;
+  const lessonSection = query.get("section") || null;
   const parts = path.replace(/^#\/?/, "").split("/").filter(Boolean);
   if (parts.length === 0 || (parts[0] === "home" && parts.length === 1)) {
     return { name: "home", params: {} };
@@ -28,7 +29,11 @@ export function parseRoute(hash = "#/home") {
     return { name: "chapter-assessment", params: { lessonId: parts[1], chapterId: parts[3] } };
   }
   if (parts[0] === "lessons" && parts.length === 3) {
-    return { name: "chapter", params: { lessonId: parts[1], chapterId: parts[2], ...(lessonView ? { view: lessonView } : {}) } };
+    return { name: "chapter", params: {
+      lessonId: parts[1], chapterId: parts[2],
+      ...(lessonView ? { view: lessonView } : {}),
+      ...(lessonSection ? { sectionId: lessonSection } : {})
+    } };
   }
   if (parts[0] === "progress" && parts.length === 1) {
     return { name: "progress", params: {} };

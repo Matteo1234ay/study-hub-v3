@@ -79,6 +79,11 @@ export function parsePublishedDocument(html) {
   return { title, chapters };
 }
 
+export function shouldProtectEditorialLesson(existing = {}) {
+  return Boolean(existing?.editorial)
+    || (Array.isArray(existing?.chapters) && existing.chapters.some(chapter => Array.isArray(chapter.sections)));
+}
+
 export async function syncPublishedSources(fetchImpl = fetch) {
   const results = [];
   for (const [lessonId, source] of Object.entries(PUBLISHED_SOURCES)) {
@@ -90,6 +95,12 @@ export async function syncPublishedSources(fetchImpl = fetch) {
     await mkdir(source.output.split("/").slice(0, -1).join("/"), { recursive: true });
     let previous = "";
     try { previous = await readFile(source.output, "utf8"); } catch {}
+    try {
+      if (shouldProtectEditorialLesson(JSON.parse(previous))) {
+        results.push({ lessonId, changed: false, protected: true, chapters: lesson.chapters.length });
+        continue;
+      }
+    } catch {}
     const comparable = (value) => value.replace(/"syncedAt":\s*"[^"]+",?\n?/g, "");
     if (comparable(previous) !== comparable(next)) await writeFile(source.output, next, "utf8");
     results.push({ lessonId, changed: comparable(previous) !== comparable(next), chapters: lesson.chapters.length });

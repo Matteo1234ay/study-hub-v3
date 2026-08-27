@@ -1,4 +1,4 @@
-import { isStudentVisibleLesson } from "../lessons/lesson-model.js?v=20260827-1";
+import { isStudentVisibleLesson } from "../lessons/lesson-model.js?v=20260827-2";
 
 export function studentVisibleLessons(lessons = []) {
   return lessons.filter(isStudentVisibleLesson);

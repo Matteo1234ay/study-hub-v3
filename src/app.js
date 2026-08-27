@@ -1,16 +1,16 @@
-import { findLesson, findPath } from "./config/paths.js?v=20260827-1";
-import { startRouter } from "./router.js?v=20260827-1";
-import { element, pageHeader } from "./ui/components.js?v=20260827-1";
-import { renderHomeView } from "./views/home-view.js?v=20260827-1";
-import { renderPathView } from "./views/path-view.js?v=20260827-1";
-import { renderPathsView } from "./views/paths-view.js?v=20260827-1";
-import { renderLessonView } from "./views/lesson-view.js?v=20260827-1";
-import { renderProgressView } from "./views/progress-view.js?v=20260827-1";
-import { renderSearchView } from "./views/search-view.js?v=20260827-1";
-import { renderReviewView } from "./views/review-view.js?v=20260827-1";
-import { renderAssessmentView } from "./views/assessment-view.js?v=20260827-1";
-import { renderPathAssessmentView } from "./views/path-assessment-view.js?v=20260827-1";
-import { createPreferencesStore } from "./study/preferences.js?v=20260827-1";
+import { findLesson, findPath } from "./config/paths.js?v=20260827-2";
+import { startRouter } from "./router.js?v=20260827-2";
+import { element, pageHeader } from "./ui/components.js?v=20260827-2";
+import { renderHomeView } from "./views/home-view.js?v=20260827-2";
+import { renderPathView } from "./views/path-view.js?v=20260827-2";
+import { renderPathsView } from "./views/paths-view.js?v=20260827-2";
+import { renderLessonView } from "./views/lesson-view.js?v=20260827-2";
+import { renderProgressView } from "./views/progress-view.js?v=20260827-2";
+import { renderSearchView } from "./views/search-view.js?v=20260827-2";
+import { renderReviewView } from "./views/review-view.js?v=20260827-2";
+import { renderAssessmentView } from "./views/assessment-view.js?v=20260827-2";
+import { renderPathAssessmentView } from "./views/path-assessment-view.js?v=20260827-2";
+import { createPreferencesStore } from "./study/preferences.js?v=20260827-2";
 
 const app = document.querySelector("#app");
 const preferences = createPreferencesStore();
@@ -52,6 +52,7 @@ async function render(route) {
     view = await renderLessonView({
       lesson: findLesson(route.params.lessonId),
       activeChapterId: route.params.chapterId ?? null,
+      activeSectionId: route.params.sectionId ?? null,
       viewMode: route.params.view ?? "chapter"
     });
   } else if (route.name === "progress") {

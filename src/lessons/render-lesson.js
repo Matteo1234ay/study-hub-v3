@@ -1,11 +1,7 @@
-import { element } from "../ui/components.js?v=20260827-1";
-import { renderSourceRefs } from "./sources.js?v=20260827-1";
-import { renderMicroQuestion } from "./micro-question.js?v=20260827-1";
+import { element } from "../ui/components.js?v=20260827-2";
+import { blockPresentation, renderSection, sectionHref } from "./render-section.js?v=20260827-2";
 
-const CALLOUT_TYPES = new Set([
-  "example", "warning", "error", "key-concept", "note",
-  "diagnostic-question", "formula", "checklist", "checkpoint"
-]);
+export { blockPresentation } from "./render-section.js?v=20260827-2";
 
 export function chapterHref(lessonId, chapterId) {
   return `#/lessons/${lessonId}/${chapterId}`;
@@ -24,39 +20,6 @@ export function selectVisibleChapters(model, activeChapterId = null, viewMode = 
 
 export function assessmentHref(lessonId, chapterId = null) {
   return chapterId ? `#/lessons/${lessonId}/assessment/${chapterId}` : `#/lessons/${lessonId}/assessment`;
-}
-
-export function blockPresentation(block) {
-  if (block.type === "subheading") {
-    return { tag: block.level === 3 ? "h4" : "h3", className: "lesson-subheading" };
-  }
-  if (block.type === "list") return { tag: block.ordered ? "ol" : "ul", className: "lesson-list" };
-  if (CALLOUT_TYPES.has(block.type)) {
-    return { tag: "div", className: `lesson-callout callout-${block.type}` };
-  }
-  return { tag: "p", className: "lesson-paragraph" };
-}
-
-function renderBlock(block, sources = []) {
-  const presentation = blockPresentation(block);
-  const node = element(presentation.tag, { className: presentation.className });
-
-  if (block.type === "list") {
-    for (const item of block.items) node.append(element("li", { text: item }));
-    const sourceRefs = renderSourceRefs(block, sources);
-    return sourceRefs ? element("div", { className: "sourced-block" }, [node, sourceRefs]) : node;
-  }
-  if (CALLOUT_TYPES.has(block.type)) {
-    node.append(
-      element("span", { className: "callout-label", text: block.label ?? block.type.replaceAll("-", " ") }),
-      element("p", { text: block.text })
-    );
-    const sourceRefs = renderSourceRefs(block, sources);
-    return sourceRefs ? element("div", { className: "sourced-block" }, [node, sourceRefs]) : node;
-  }
-  node.textContent = block.text;
-  const sourceRefs = renderSourceRefs(block, sources);
-  return sourceRefs ? element("div", { className: "sourced-block" }, [node, sourceRefs]) : node;
 }
 
 export function renderLesson(model, {
@@ -106,6 +69,9 @@ export function renderLesson(model, {
     const isCompleted = completedChapterIds.has(chapter.id);
     const isBookmarked = bookmarkedChapterIds.has(chapter.id);
     const heading = element("h2", { text: chapter.title, attrs: { tabindex: "-1" } });
+    const sections = Array.isArray(chapter.sections)
+      ? chapter.sections
+      : [{ id: `${chapter.id}-content`, title: chapter.title, blocks: chapter.blocks ?? [] }];
     const completionButton = element("button", {
       className: `chapter-completion${isCompleted ? " is-complete" : ""}`,
       text: isCompleted ? "✓ Completato" : "Segna come completato",
@@ -120,23 +86,34 @@ export function renderLesson(model, {
     bookmarkButton.addEventListener("click", () => onToggleBookmark(chapter.id));
     const deepenButton = element("button", { className: "chapter-action", text: "Approfondisci ↗", attrs: { type: "button" } });
     deepenButton.addEventListener("click", () => onDeepen(chapter));
-    const note = element("textarea", { className: "chapter-note", attrs: { rows: "4", placeholder: "Scrivi una nota personale…", "aria-label": `Note personali: ${chapter.title}` } });
-    note.value = noteForChapter(chapter.id);
-    note.addEventListener("input", () => onNote(chapter.id, note.value));
     const assessmentLink = assessmentEnabled ? element("a", { className: "chapter-action", text: "Esercitati sul capitolo", href: assessmentHref(lessonId, chapter.id) }) : null;
     const section = element("section", {
       className: "lesson-chapter",
       attrs: { id: chapter.id, "data-chapter-id": chapter.id }
     }, [
       element("div", { className: "chapter-number", text: String(indexNumber + 1).padStart(2, "0") }),
+      element("p", {
+        className: "chapter-position",
+        text: `Capitolo ${indexNumber + 1} di ${model.chapters.length}${chapter.estimated ? ` · ${chapter.estimated}` : ""}`
+      }),
       heading,
-      element("div", { className: "chapter-blocks" }, chapter.blocks.map(block => block.type === "micro-question"
-        ? renderMicroQuestion(block, { lessonId, chapterId: chapter.id, onReview: onReviewConcept, onConsolidate: onConsolidateConcept })
-        : renderBlock(block, model.sources))),
+      chapter.objective ? element("p", { className: "chapter-objective", text: chapter.objective }) : null,
+      element("nav", {
+        className: "section-index",
+        attrs: { "aria-label": `Sezioni di ${chapter.title}` }
+      }, sections.map((item, sectionNumber) => element("a", {
+        href: sectionHref(lessonId, chapter.id, item.id),
+        text: `${sectionNumber + 1}. ${item.title}`
+      }))),
+      element("div", { className: "chapter-blocks" }, sections.map(item => renderSection(item, {
+        lessonId,
+        chapterId: chapter.id,
+        sources: model.sources,
+        reducedMotion: document.documentElement.dataset.motion === "reduced" || matchMedia("(prefers-reduced-motion: reduce)").matches,
+        onReviewConcept,
+        onConsolidateConcept
+      }))),
       element("div", { className: "chapter-actions" }, [completionButton, bookmarkButton, deepenButton, assessmentLink]),
-      element("aside", { className: "personal-note" }, [
-        element("span", { className: "callout-label", text: "Appunti personali · solo su questo dispositivo" }), note
-      ]),
       element("div", { className: "chapter-controls" }, [
         indexNumber > 0 ? element("a", { href: chapterHref(lessonId, model.chapters[indexNumber - 1].id), text: "← Capitolo precedente" }) : null,
         indexNumber < model.chapters.length - 1 ? element("a", { href: chapterHref(lessonId, model.chapters[indexNumber + 1].id), text: "Capitolo successivo →" }) : null

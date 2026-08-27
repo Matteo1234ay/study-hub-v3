@@ -1,6 +1,6 @@
-import { PATHS } from "../config/paths.js?v=20260827-1";
-import { buildSearchIndex, searchStudyIndex } from "../study/search-index.js?v=20260827-1";
-import { element, pageHeader } from "../ui/components.js?v=20260827-1";
+import { PATHS } from "../config/paths.js?v=20260827-2";
+import { buildSearchIndex, searchStudyIndex } from "../study/search-index.js?v=20260827-2";
+import { element, pageHeader } from "../ui/components.js?v=20260827-2";
 
 export async function renderSearchView(query = "") {
   const view = element("section", { className: "content-page" }, [pageHeader("Ricerca locale", "Trova un concetto", "La ricerca usa soltanto le lezioni pubbliche già disponibili in Study Hub.")]);

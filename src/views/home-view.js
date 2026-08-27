@@ -1,7 +1,7 @@
-import { PATHS } from "../config/paths.js?v=20260827-1";
-import { element } from "../ui/components.js?v=20260827-1";
-import { createStudyStore } from "../study/study-store.js?v=20260827-1";
-import { findLesson } from "../config/paths.js?v=20260827-1";
+import { PATHS } from "../config/paths.js?v=20260827-2";
+import { element } from "../ui/components.js?v=20260827-2";
+import { createStudyStore } from "../study/study-store.js?v=20260827-2";
+import { findLesson } from "../config/paths.js?v=20260827-2";
 
 export function renderHomeView() {
   const last = createStudyStore().getState().lastPosition;

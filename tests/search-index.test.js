@@ -19,3 +19,21 @@ test("returns no results for short or missing queries", () => {
   assert.deepEqual(searchStudyIndex(index, ""), []);
   assert.deepEqual(searchStudyIndex(index, "inesistente"), []);
 });
+
+test("indexes macro chapter sections and returns their context", () => {
+  const macroDocuments = new Map([["SMM-01", { chapters: [{
+    id: "leggere-dati-piattaforme",
+    title: "Leggere i dati delle piattaforme",
+    sections: [{
+      id: "ctr-denominatori",
+      title: "CTR e denominatori",
+      blocks: [{ type: "paragraph", text: "Il denominatore cambia il significato del tasso." }]
+    }]
+  }] }]]);
+
+  const results = searchStudyIndex(buildSearchIndex(catalog, macroDocuments), "denominatore");
+
+  assert.equal(results.length, 1);
+  assert.equal(results[0].chapterId, "leggere-dati-piattaforme");
+  assert.equal(results[0].sectionId, "ctr-denominatori");
+});

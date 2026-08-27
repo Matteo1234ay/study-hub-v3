@@ -1,16 +1,19 @@
-import { renderLesson } from "../lessons/render-lesson.js?v=20260827-1";
-import { createLessonCache } from "../lessons/lesson-cache.js?v=20260827-1";
-import { element } from "../ui/components.js?v=20260827-1";
-import { calculateLessonProgress, createProgressStore } from "../progress/local-progress.js?v=20260827-1";
-import { createStudyStore } from "../study/study-store.js?v=20260827-1";
-import { createNotesStore } from "../study/notes-store.js?v=20260827-1";
-import { buildPublicChapterContext } from "../assistant/study-assistant.js?v=20260827-1";
-import { createChatGptAdapter } from "../assistant/chatgpt-adapter.js?v=20260827-1";
-import { createStudyDialog } from "../ui/study-dialog.js?v=20260827-1";
-import { normalizeLessonExperience } from "../lessons/lesson-model.js?v=20260827-1";
-import { createReviewConceptsStore } from "../study/review-concepts-store.js?v=20260827-1";
+import { renderLesson } from "../lessons/render-lesson.js?v=20260827-2";
+import { createLessonCache } from "../lessons/lesson-cache.js?v=20260827-2";
+import { element } from "../ui/components.js?v=20260827-2";
+import { calculateLessonProgress, createProgressStore } from "../progress/local-progress.js?v=20260827-2";
+import { createStudyStore } from "../study/study-store.js?v=20260827-2";
+import { createNotesStore } from "../study/notes-store.js?v=20260827-2";
+import { buildPublicChapterContext } from "../assistant/study-assistant.js?v=20260827-2";
+import { createChatGptAdapter } from "../assistant/chatgpt-adapter.js?v=20260827-2";
+import { createStudyDialog } from "../ui/study-dialog.js?v=20260827-2";
+import { normalizeLessonExperience } from "../lessons/lesson-model.js?v=20260827-2";
+import { createReviewConceptsStore } from "../study/review-concepts-store.js?v=20260827-2";
+import { resolveRequestedChapter } from "../lessons/lesson-compatibility.js?v=20260827-2";
+import { createLessonNotesPanel } from "../ui/lesson-notes-panel.js?v=20260827-2";
+import { exportNotes } from "../study/notes-export.js?v=20260827-2";
 
-export async function renderLessonView({ lesson, activeChapterId = null, viewMode = "chapter" }) {
+export async function renderLessonView({ lesson, activeChapterId = null, activeSectionId = null, viewMode = "chapter" }) {
   if (!lesson) {
     return element("section", { className: "content-page" }, [
       element("p", { className: "eyebrow", text: "Errore 404" }),
@@ -68,23 +71,65 @@ export async function renderLessonView({ lesson, activeChapterId = null, viewMod
     }
   }
   model = normalizeLessonExperience(model);
-  const requestedChapterMissing = Boolean(activeChapterId && !model.chapters.some(chapter => chapter.id === activeChapterId));
-  const effectiveChapterId = activeChapterId ?? model.chapters[0]?.id ?? null;
-  if (requestedChapterMissing) {
-    activeChapterId = null;
+  const chapterRequest = resolveRequestedChapter(model.chapters, activeChapterId);
+  const requestedChapterMissing = chapterRequest.missing;
+  const resolvedChapterId = chapterRequest.chapterId;
+  if (chapterRequest.redirected && resolvedChapterId) {
+    const suffix = viewMode === "full" ? "?view=full" : "";
+    history.replaceState(null, "", `#/lessons/${lesson.id}/${resolvedChapterId}${suffix}`);
   }
-  const resolvedChapterId = requestedChapterMissing ? (model.chapters[0]?.id ?? null) : effectiveChapterId;
   view.querySelector(".lesson-source-state").textContent = fromCache ? `${model.chapters.length} capitoli · copia salvata` : `${model.chapters.length} capitoli · sincronizzato`;
   const store = createProgressStore();
   const studyStore = createStudyStore();
   const notesStore = createNotesStore();
   const reviewConceptsStore = createReviewConceptsStore();
+  const initialChapter = model.chapters.find(chapter => chapter.id === resolvedChapterId) ?? model.chapters[0];
+  const initialSection = initialChapter?.sections?.[0] ?? null;
+  const notesPanel = createLessonNotesPanel({
+    lessonId: lesson.id,
+    store: notesStore,
+    initialContext: {
+      chapterId: initialChapter?.id ?? null,
+      chapterTitle: initialChapter?.title ?? lesson.title,
+      sectionId: activeSectionId ?? initialSection?.id ?? null,
+      sectionTitle: initialChapter?.sections?.find(section => section.id === activeSectionId)?.title ?? initialSection?.title ?? null
+    },
+    async onExport(notes) {
+      if (!notes.length) {
+        alert("Non ci sono ancora note da esportare.");
+        return;
+      }
+      const result = await exportNotes({
+        lesson: { ...model, id: lesson.id },
+        notes,
+        async saveFile(blob, filename) {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = filename;
+          link.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        },
+        async copyText(text) {
+          try {
+            await navigator.clipboard.writeText(text);
+          } catch {
+            prompt("Copia le note e incollale in Google Docs:", text);
+          }
+        }
+      });
+      alert(result.method === "docx"
+        ? "Documento creato sul dispositivo. Puoi aprirlo o importarlo in Google Docs."
+        : "Il file non è stato creato: le note sono state copiate come testo.");
+    }
+  });
   const assistant = createChatGptAdapter();
   const assistantDialog = createStudyDialog();
   view.append(assistantDialog.node);
   const studyState = studyStore.getState();
   studyStore.recordVisit({ type: "lesson", lessonId: lesson.id, title: lesson.title });
   studyStore.setLastPosition(lesson.id, resolvedChapterId);
+  if (resolvedChapterId) store.visit(lesson.id, resolvedChapterId);
   const favorite = element("button", {
     className: `button quiet favorite-button${studyState.favorites.includes(lesson.id) ? " is-active" : ""}`,
     text: studyState.favorites.includes(lesson.id) ? "★ Nei preferiti" : "☆ Aggiungi ai preferiti",
@@ -114,6 +159,30 @@ export async function renderLessonView({ lesson, activeChapterId = null, viewMod
       element("span", { text: " Ti mostro il primo capitolo disponibile." })
     ])
     : null;
+  let sectionObserver = null;
+
+  function observeSections() {
+    sectionObserver?.disconnect();
+    if (!("IntersectionObserver" in window)) return;
+    sectionObserver = new IntersectionObserver(entries => {
+      const visible = entries.filter(entry => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (!visible) return;
+      const sectionId = visible.target.dataset.sectionId;
+      const chapterNode = visible.target.closest("[data-chapter-id]");
+      const chapter = model.chapters.find(item => item.id === chapterNode?.dataset.chapterId);
+      const section = chapter?.sections?.find(item => item.id === sectionId);
+      notesPanel.setContext({
+        chapterId: chapter?.id,
+        chapterTitle: chapter?.title,
+        sectionId,
+        sectionTitle: section?.title
+      });
+      body.querySelectorAll(".section-index a").forEach(link => {
+        link.classList.toggle("active", link.getAttribute("href")?.includes(`section=${sectionId}`));
+      });
+    }, { rootMargin: "-20% 0px -60%", threshold: [0.1, 0.5] });
+    body.querySelectorAll("[data-section-id]").forEach(section => sectionObserver.observe(section));
+  }
   function paintLesson() {
     const saved = store.get(lesson.id);
     const completed = new Set(saved.completed);
@@ -151,16 +220,18 @@ export async function renderLessonView({ lesson, activeChapterId = null, viewMod
         reviewConceptsStore.clear(lessonId, question.id);
       }
     });
+    lessonNode.append(notesPanel.node);
     body.replaceChildren(...[missingNotice, lessonNode].filter(Boolean));
+    observeSections();
   }
   paintLesson();
   if (resolvedChapterId) {
     const active = model.chapters.find(chapter => chapter.id === resolvedChapterId);
     studyStore.recordVisit({ type: "chapter", lessonId: lesson.id, chapterId: resolvedChapterId, title: active?.title ?? resolvedChapterId });
     requestAnimationFrame(() => {
-      const chapter = document.getElementById(resolvedChapterId);
-      chapter?.scrollIntoView({ block: "start" });
-      chapter?.querySelector("h2")?.focus({ preventScroll: true });
+      const target = activeSectionId ? document.getElementById(activeSectionId) : document.getElementById(resolvedChapterId);
+      target?.scrollIntoView({ block: "start" });
+      target?.querySelector(activeSectionId ? "h3" : "h2")?.focus({ preventScroll: true });
     });
   }
   return view;

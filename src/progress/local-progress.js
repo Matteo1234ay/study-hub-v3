@@ -1,7 +1,7 @@
 const PREFIX = "study-hub-v3:progress:";
 
 function emptyProgress() {
-  return { completed: [], updatedAt: null };
+  return { completed: [], visited: [], activities: {}, legacyCompleted: [], updatedAt: null };
 }
 
 export function calculateLessonProgress(chapters, completedChapterIds) {
@@ -11,6 +11,10 @@ export function calculateLessonProgress(chapters, completedChapterIds) {
   return Math.round((completed / chapters.length) * 100);
 }
 
+export function calculateMacroProgress(chapters, progressState = {}) {
+  return calculateLessonProgress(chapters, new Set(progressState.completed ?? []));
+}
+
 export function createProgressStore(storage = localStorage, now = Date.now) {
   function get(lessonId) {
     try {
@@ -18,6 +22,9 @@ export function createProgressStore(storage = localStorage, now = Date.now) {
       if (!value || !Array.isArray(value.completed)) return emptyProgress();
       return {
         completed: [...new Set(value.completed.filter((id) => typeof id === "string"))],
+        visited: Array.isArray(value.visited) ? [...new Set(value.visited.filter(id => typeof id === "string"))] : [],
+        activities: value.activities && typeof value.activities === "object" ? value.activities : {},
+        legacyCompleted: Array.isArray(value.legacyCompleted) ? [...new Set(value.legacyCompleted.filter(id => typeof id === "string"))] : [],
         updatedAt: typeof value.updatedAt === "number" ? value.updatedAt : null
       };
     } catch {
@@ -26,7 +33,19 @@ export function createProgressStore(storage = localStorage, now = Date.now) {
   }
 
   function set(lessonId, completed) {
-    const value = { completed: [...new Set(completed)], updatedAt: now() };
+    const current = get(lessonId);
+    const value = { ...current, completed: [...new Set(completed)], updatedAt: now() };
+    storage.setItem(`${PREFIX}${lessonId}`, JSON.stringify(value));
+    return value;
+  }
+
+  function visit(lessonId, chapterId) {
+    const current = get(lessonId);
+    const value = {
+      ...current,
+      visited: [...new Set([...current.visited, chapterId])],
+      updatedAt: now()
+    };
     storage.setItem(`${PREFIX}${lessonId}`, JSON.stringify(value));
     return value;
   }
@@ -38,5 +57,5 @@ export function createProgressStore(storage = localStorage, now = Date.now) {
     return set(lessonId, completed);
   }
 
-  return { get, set, toggle };
+  return { get, set, toggle, visit };
 }

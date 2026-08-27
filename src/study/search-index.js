@@ -12,12 +12,20 @@ export function buildSearchIndex(catalog, lessonDocuments) {
     for (const lesson of path.lessons) {
       const document = lessonDocuments.get(lesson.id);
       for (const chapter of document?.chapters ?? []) {
-        const text = chapter.blocks.map(blockText).join(" ").replace(/\s+/g, " ").trim();
-        index.push({
-          pathId: path.id, pathTitle: path.title, lessonId: lesson.id, lessonTitle: lesson.title,
-          chapterId: chapter.id, chapterTitle: chapter.title, excerpt: text.slice(0, 180),
-          normalizedTitle: normalize(`${lesson.title} ${chapter.title}`), normalizedText: normalize(text)
-        });
+        const sections = Array.isArray(chapter.sections)
+          ? chapter.sections
+          : [{ id: null, title: chapter.title, blocks: chapter.blocks ?? [] }];
+        for (const section of sections) {
+          const text = (section.blocks ?? []).map(blockText).join(" ").replace(/\s+/g, " ").trim();
+          index.push({
+            pathId: path.id, pathTitle: path.title, lessonId: lesson.id, lessonTitle: lesson.title,
+            chapterId: chapter.id, chapterTitle: chapter.title,
+            ...(section.id ? { sectionId: section.id, sectionTitle: section.title } : {}),
+            excerpt: text.slice(0, 180),
+            normalizedTitle: normalize(`${lesson.title} ${chapter.title} ${section.title ?? ""}`),
+            normalizedText: normalize(text)
+          });
+        }
       }
     }
   }

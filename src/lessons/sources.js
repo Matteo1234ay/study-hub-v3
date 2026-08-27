@@ -1,4 +1,4 @@
-import { element } from "../ui/components.js?v=20260827-1";
+import { element } from "../ui/components.js?v=20260827-2";
 
 export function resolveSourceRefs(block = {}, sources = []) {
   const registry = new Map((Array.isArray(sources) ? sources : []).map(source => [source.id, source]));
