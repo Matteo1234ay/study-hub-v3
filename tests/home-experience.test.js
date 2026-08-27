@@ -9,19 +9,25 @@ const css = fs.readFileSync(new URL("../styles/home-immersive.css", import.meta.
 test("home is a long cinematic tour through a recognizable study hub", () => {
   assert.match(home, /study-hub-canvas/);
   assert.match(home, /hub-station/);
-  assert.match(home, /data-center/);
-  assert.match(css, /900vh/);
+  assert.match(home, /data-hold/);
+  assert.match(css, /1100vh/);
   assert.doesNotMatch(home, /CAPISCI\./);
 });
 
-test("WebGL renderer models a room and choreographs the camera", () => {
-  assert.match(webgl, /webgl2/);
-  assert.match(webgl, /sdRoundBox/);
-  assert.match(webgl, /lookAt/);
+test("stations have readable dwell instead of flashing at a single center", () => {
+  assert.match(home, /focusWithHold/);
+  assert.match(home, /hold=/);
+  assert.match(css, /transition:opacity \.32s ease,filter \.32s ease,transform \.32s ease/);
+});
+
+test("WebGL renderer models designed furniture instead of only box primitives", () => {
+  assert.match(webgl, /sdCylinder/);
+  assert.match(webgl, /sdTorus/);
+  assert.match(webgl, /sdCapsule/);
+  assert.match(webgl, /chair/i);
+  assert.match(webgl, /lamp/i);
+  assert.match(webgl, /keyboard/i);
   assert.match(webgl, /cameraJourney/);
-  assert.match(webgl, /desk/i);
-  assert.match(webgl, /screen/i);
-  assert.match(webgl, /journey/);
 });
 
 test("home motion respects reduced-motion preferences", () => {
