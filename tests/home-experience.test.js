@@ -30,6 +30,17 @@ test("WebGL renderer models designed furniture instead of only box primitives", 
   assert.match(webgl, /cameraJourney/);
 });
 
+test("study hub uses realistic materials and environmental lighting", () => {
+  assert.match(webgl, /woodMaterial/);
+  assert.match(webgl, /metalMaterial/);
+  assert.match(webgl, /glassMaterial/);
+  assert.match(webgl, /softShadow/);
+  assert.match(webgl, /ambientOcclusion/);
+  assert.match(webgl, /warmLamp/);
+  assert.match(webgl, /book/i);
+  assert.match(webgl, /mug/i);
+});
+
 test("home motion respects reduced-motion preferences", () => {
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
 });
