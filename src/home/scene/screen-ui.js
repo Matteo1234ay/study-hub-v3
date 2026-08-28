@@ -1,4 +1,11 @@
-const SCREEN_SIZE = Object.freeze({ width: 512, height: 320 });
+const SCREEN_SIZES = Object.freeze({
+  default: Object.freeze({ width: 512, height: 320 }),
+  social: Object.freeze({ width: 640, height: 896 })
+});
+
+function screenSize(screenKind) {
+  return SCREEN_SIZES[screenKind] ?? SCREEN_SIZES.default;
+}
 
 function normalizeData(data = {}) {
   return {
@@ -59,14 +66,20 @@ function drawMemory(context, data) {
 }
 
 function drawSocial(context, data) {
-  label(context, "SOCIAL MEDIA MANAGER", 24, 32, 13, "#7ab8ff", 700);
-  label(context, data.pathTitle, 24, 65, 25, "#f3f6fa", 740);
-  panel(context, 24, 88, 460, 74, "#152331");
-  label(context, `${data.lessonCount} lezione disponibile`, 42, 120, 18, "#e7f2fb", 700);
-  label(context, "Reach · Impression · Watch time · Retention", 42, 146, 13, "#91a9be", 600);
-  label(context, "Gli indicatori vengono studiati nel loro contesto", 24, 205, 15, "#c5d5e3", 600);
-  label(context, "Nessun dato dimostrativo viene presentato come reale.", 24, 235, 13, "#91a9be", 500);
-  label(context, "Apri il percorso →", 336, 292, 15, "#7ab8ff", 700);
+  label(context, "PERCORSO ATTIVO", 52, 82, 24, "#7ab8ff", 760);
+  label(context, data.pathTitle, 52, 154, 46, "#f7f9fc", 780);
+
+  panel(context, 52, 208, 536, 202, "#152331");
+  label(context, `${data.lessonCount} lezione disponibile`, 82, 278, 32, "#f4f8fc", 760);
+  label(context, "Reach · Impression", 82, 338, 25, "#c1d2e1", 650);
+  label(context, "Watch time · Retention", 82, 380, 25, "#c1d2e1", 650);
+
+  label(context, "LETTURA STRATEGICA", 52, 504, 23, "#7ab8ff", 740);
+  label(context, "Metriche nel loro contesto.", 52, 558, 31, "#eef4f9", 700);
+  label(context, "Dati reali, senza metriche inventate.", 52, 610, 23, "#b9c9d7", 560);
+
+  panel(context, 52, 706, 536, 112, "#101b26");
+  label(context, "Apri il percorso →", 82, 777, 29, "#8bc4ff", 780);
 }
 
 function drawAssessment(context, data) {
@@ -114,8 +127,9 @@ export function createStationScreen({
   canvasFactory = () => document.createElement("canvas")
 }) {
   const canvas = canvasFactory();
-  canvas.width = SCREEN_SIZE.width;
-  canvas.height = SCREEN_SIZE.height;
+  const size = screenSize(station?.screenKind);
+  canvas.width = size.width;
+  canvas.height = size.height;
   const context = canvas.getContext("2d");
   let current = normalizeData(data);
   let disposed = false;
