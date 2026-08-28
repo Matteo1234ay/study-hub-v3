@@ -3,7 +3,7 @@ export const HOME_SHOTS = Object.freeze([
   Object.freeze({ stationId: "memory", enter: .12, settleStart: .25, settleEnd: .29, exit: .47, position: [-3.05, 2.65, 3.85], target: [-3.35, 2.15, -2.68], fov: 37 }),
   Object.freeze({ stationId: "social", enter: .29, settleStart: .47, settleEnd: .51, exit: .64, position: [2.15, 2.65, 3.75], target: [3.35, 2.1, -2.75], fov: 35 }),
   Object.freeze({ stationId: "assessment", enter: .51, settleStart: .64, settleEnd: .68, exit: .81, position: [4.1, 1.95, 3.1], target: [2.55, .95, -.58], fov: 34 }),
-  Object.freeze({ stationId: "progress", enter: .68, settleStart: .81, settleEnd: .85, exit: .96, position: [-3.6, 1.9, 2.9], target: [-.95, 1.08, -2.75], fov: 34 }),
+  Object.freeze({ stationId: "progress", enter: .68, settleStart: .81, settleEnd: .85, exit: .96, position: [-3.1, 1.9, 2.9], target: [-.95, 1.08, -2.75], fov: 34 }),
   Object.freeze({ stationId: "future-paths", enter: .85, settleStart: .96, settleEnd: 1, exit: 1, position: [1.35, 3.45, 2.55], target: [.75, 3.26, -2.36], fov: 34 })
 ]);
 
@@ -12,7 +12,7 @@ export const MOBILE_HOME_SHOTS = Object.freeze([
   Object.freeze({ stationId: "memory", enter: .12, settleStart: .25, settleEnd: .29, exit: .47, position: [-2.3, 2.55, 2.8], target: [-3.35, 2.18, -2.68], fov: 33, chairClearance: 1.05 }),
   Object.freeze({ stationId: "social", enter: .29, settleStart: .47, settleEnd: .51, exit: .64, position: [2.55, 2.62, 3.0], target: [3.35, 2.12, -2.75], fov: 32, chairClearance: 1.05 }),
   Object.freeze({ stationId: "assessment", enter: .51, settleStart: .64, settleEnd: .68, exit: .81, position: [4.15, 2.05, 3.15], target: [2.55, .95, -.58], fov: 32, chairClearance: 1.05 }),
-  Object.freeze({ stationId: "progress", enter: .68, settleStart: .81, settleEnd: .85, exit: .96, position: [-3.7, 2.05, 3.15], target: [-.95, 1.08, -2.75], fov: 32, chairClearance: 1.05 }),
+  Object.freeze({ stationId: "progress", enter: .68, settleStart: .81, settleEnd: .85, exit: .96, position: [-3.1, 2.05, 3.15], target: [-.95, 1.08, -2.75], fov: 32, chairClearance: 1.05 }),
   Object.freeze({ stationId: "future-paths", enter: .85, settleStart: .96, settleEnd: 1, exit: 1, position: [1.55, 3.5, 2.75], target: [.75, 3.26, -2.36], fov: 32, chairClearance: 1.05 })
 ]);
 
@@ -23,23 +23,13 @@ function clamp01(value) {
   return Math.min(1, Math.max(0, Number.isFinite(Number(value)) ? Number(value) : 0));
 }
 
-function smoothstep(value) {
-  const x = clamp01(value);
-  return x * x * (3 - 2 * x);
-}
-
-function gentleEase(value) {
-  const x = clamp01(value);
-  return x * .75 + smoothstep(x) * .25;
-}
-
 function interpolateVector(from, to, value) {
-  const t = gentleEase(value);
+  const t = clamp01(value);
   return from.map((item, index) => item + (to[index] - item) * t);
 }
 
 function interpolateNumber(from, to, value) {
-  const t = gentleEase(value);
+  const t = clamp01(value);
   return from + (to - from) * t;
 }
 
