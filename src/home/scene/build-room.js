@@ -99,11 +99,11 @@ function buildErgonomicChair(THREE, materials) {
 function buildArticulatedLamp(THREE, materials) {
   const group = new THREE.Group();
   group.name = "articulated-desk-lamp";
-  const base = [-1.62, 1.2, -.58];
-  const lowerStart = [-1.62, 1.25, -.58];
-  const elbow = [-1.8, 1.88, -.64];
-  const upperEnd = [-1.28, 2.27, -.76];
-  const shadePosition = [-1.08, 2.3, -.82];
+  const base = [-1.55, 1.2, -.58];
+  const lowerStart = [-1.55, 1.25, -.58];
+  const elbow = [-1.82, 1.82, -.64];
+  const upperEnd = [-2.18, 2.16, -.74];
+  const shadePosition = [-2.32, 2.16, -.8];
   const elbowJoint = mesh(
     THREE,
     new THREE.SphereGeometry(.095, 16, 12),
@@ -116,7 +116,7 @@ function buildArticulatedLamp(THREE, materials) {
     cylinderBetween(THREE, .045, lowerStart, elbow, materials.metal, "lamp-lower-arm"),
     elbowJoint,
     cylinderBetween(THREE, .04, elbow, upperEnd, materials.metal, "lamp-upper-arm"),
-    box(THREE, [.46, .23, .36], materials.metal, "lamp-shade", shadePosition, [0, -.1, -.24])
+    box(THREE, [.46, .23, .36], materials.metal, "lamp-shade", shadePosition, [0, -.1, -.18])
   );
   return group;
 }
