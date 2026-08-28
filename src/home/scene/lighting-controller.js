@@ -8,7 +8,7 @@ function ramp(progress, start, end) {
 }
 
 const ACTIVATION = Object.freeze({
-  desk: [0, .07],
+  desk: [.02, .09],
   memory: [.14, .22],
   social: [.35, .43],
   assessment: [.51, .59],
@@ -29,7 +29,7 @@ export function createLightingController(lightRig = null) {
     const value = clamp01(progress);
     const focus = normalizeFocus(focusStation);
     return {
-      ambient: .38,
+      ambient: .5,
       desk: ramp(value, ...ACTIVATION.desk),
       memory: ramp(value, ...ACTIVATION.memory),
       social: ramp(value, ...ACTIVATION.social),
@@ -38,7 +38,7 @@ export function createLightingController(lightRig = null) {
       future: ramp(value, ...ACTIVATION.future),
       room: ramp(value, ...ACTIVATION.room),
       focusStation: focus,
-      focusBoost: focus ? 2.15 : 1
+      focusBoost: focus ? 2.8 : 1
     };
   }
 
@@ -46,14 +46,16 @@ export function createLightingController(lightRig = null) {
     const state = sample(progress, context.focusStation);
     if (!lightRig) return state;
     if (lightRig.ambient) lightRig.ambient.intensity = state.ambient;
-    if (lightRig.room) lightRig.room.intensity = state.room * 2.2;
+    if (lightRig.room) lightRig.room.intensity = state.room * 2.55;
 
     for (const key of ZONE_KEYS) {
       const zone = lightRig[key];
       const focused = state.focusStation === key;
-      if (zone?.light) zone.light.intensity = state[key] * 1.45 + (focused ? state.focusBoost : 0);
+      const screenPower = state[key];
+      if (zone?.light) zone.light.intensity = state[key] * 1.35 + (focused ? state.focusBoost : 0);
       if (zone?.screen?.material) {
-        zone.screen.material.emissiveIntensity = state[key] * .9 + (focused ? .48 : 0);
+        zone.screen.material.color?.setScalar?.(.035 + screenPower * .965);
+        zone.screen.material.emissiveIntensity = screenPower * (focused ? 1.45 : .88);
       }
     }
 
@@ -61,7 +63,7 @@ export function createLightingController(lightRig = null) {
     const cameraPosition = Array.isArray(context.cameraPosition) ? context.cameraPosition : null;
     if (lightRig.guide?.light && target) {
       const light = lightRig.guide.light;
-      light.intensity = state.focusStation ? 2.6 : 1.25;
+      light.intensity = state.focusStation ? 3.35 : 1.45;
       lightRig.guide.target?.position?.set?.(...target);
       lightRig.guide.target?.updateMatrixWorld?.();
       if (cameraPosition && light.position?.set) {
