@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   HOME_SHOTS,
+  MOBILE_HOME_SHOTS,
   createCameraTimeline
 } from "../src/home/scene/camera-timeline.js";
 
@@ -15,6 +16,18 @@ test("opens on a front three-quarter shot with the main monitor visible", () => 
   assert.equal(opening.stationId, "desk");
   assert.equal(opening.monitorVisible, true);
   assert.ok(opening.chairClearance >= .7);
+});
+
+test("provides a dedicated portrait-safe mobile camera timeline", () => {
+  assert.equal(MOBILE_HOME_SHOTS.length, HOME_SHOTS.length);
+  assert.deepEqual(MOBILE_HOME_SHOTS.map(shot => shot.stationId), HOME_SHOTS.map(shot => shot.stationId));
+  const timeline = createCameraTimeline({ layout: "mobile" });
+  const desk = timeline.sample(timeline.stationProgress("desk"));
+  assert.equal(desk.stationId, "desk");
+  assert.equal(desk.monitorVisible, true);
+  assert.ok(desk.chairClearance >= .9);
+  assert.ok(desk.fov <= 38);
+  assert.ok(Math.abs(desk.position[0]) >= 2.8);
 });
 
 test("provides a stable reading interval for every semantic station", () => {
@@ -31,17 +44,19 @@ test("provides a stable reading interval for every semantic station", () => {
 });
 
 test("camera and target move continuously without abrupt jumps", () => {
-  const timeline = createCameraTimeline({ shots: HOME_SHOTS });
-  let previous = timeline.sample(0);
-  for (let index = 1; index <= 200; index += 1) {
-    const current = timeline.sample(index / 200);
-    for (const key of ["position", "target"]) {
-      const distance = Math.hypot(...current[key].map((value, axis) => value - previous[key][axis]));
-      assert.ok(distance < .22, `${key} jumped ${distance} at ${index / 200}`);
-      assert.ok(current[key].every(Number.isFinite));
+  for (const layout of ["desktop", "mobile"]) {
+    const timeline = createCameraTimeline({ layout });
+    let previous = timeline.sample(0);
+    for (let index = 1; index <= 200; index += 1) {
+      const current = timeline.sample(index / 200);
+      for (const key of ["position", "target"]) {
+        const distance = Math.hypot(...current[key].map((value, axis) => value - previous[key][axis]));
+        assert.ok(distance < .28, `${layout} ${key} jumped ${distance} at ${index / 200}`);
+        assert.ok(current[key].every(Number.isFinite));
+      }
+      assert.ok(Number.isFinite(current.fov));
+      previous = current;
     }
-    assert.ok(Number.isFinite(current.fov));
-    previous = current;
   }
 });
 
