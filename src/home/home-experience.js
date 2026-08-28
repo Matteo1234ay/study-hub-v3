@@ -36,12 +36,12 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     if (!root.isConnected) cleanup();
   });
   removalObserver.observe(document.documentElement, { childList: true, subtree: true });
-  const { createStudyRoomRenderer } = await import("./scene/study-room-renderer.js?v=20260828-17");
+  const { createStudyRoomRenderer } = await import("./scene/study-room-renderer.js?v=20260828-18");
   if (disposed || !root.isConnected) {
     cleanup();
     return cleanup;
   }
-  const { createHomeTransitionManager } = await import("./home-transition-manager.js?v=20260828-17");
+  const { createHomeTransitionManager } = await import("./home-transition-manager.js?v=20260828-18");
   if (disposed || !root.isConnected) {
     cleanup();
     return cleanup;

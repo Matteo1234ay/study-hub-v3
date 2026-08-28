@@ -1,4 +1,4 @@
-import { createStationScreen } from "./screen-ui.js?v=20260828-17";
+import { createStationScreen } from "./screen-ui.js?v=20260828-18";
 
 const OPENING_CAMERA = Object.freeze({
   position: [-5.6, 3.05, 5.75],
