@@ -19,7 +19,7 @@ export const HOME_SHOTS = Object.freeze([
     exit: .47,
     position: [-3.05, 2.65, 3.85],
     target: [-3.35, 2.15, -2.68],
-    fov: 38
+    fov: 37
   }),
   Object.freeze({
     stationId: "social",
@@ -27,9 +27,9 @@ export const HOME_SHOTS = Object.freeze([
     settleStart: .47,
     settleEnd: .51,
     exit: .64,
-    position: [1.5, 2.7, 4.55],
+    position: [2.15, 2.65, 3.75],
     target: [3.35, 2.1, -2.75],
-    fov: 37
+    fov: 35
   }),
   Object.freeze({
     stationId: "assessment",
@@ -37,9 +37,9 @@ export const HOME_SHOTS = Object.freeze([
     settleStart: .64,
     settleEnd: .68,
     exit: .81,
-    position: [2.8, 2.05, 3.2],
-    target: [2.55, .92, -.58],
-    fov: 36
+    position: [4.1, 1.95, 3.1],
+    target: [2.55, .95, -.58],
+    fov: 34
   }),
   Object.freeze({
     stationId: "progress",
@@ -47,9 +47,9 @@ export const HOME_SHOTS = Object.freeze([
     settleStart: .81,
     settleEnd: .85,
     exit: .96,
-    position: [-1.4, 2.05, 3.4],
+    position: [-3.6, 1.9, 2.9],
     target: [-.95, 1.08, -2.75],
-    fov: 37
+    fov: 34
   }),
   Object.freeze({
     stationId: "future-paths",
@@ -57,9 +57,9 @@ export const HOME_SHOTS = Object.freeze([
     settleStart: .96,
     settleEnd: 1,
     exit: 1,
-    position: [1.35, 3.45, 3.65],
-    target: [.75, 3.25, -2.6],
-    fov: 40
+    position: [1.35, 3.45, 2.55],
+    target: [.75, 3.26, -2.36],
+    fov: 34
   })
 ]);
 
@@ -70,9 +70,9 @@ export const MOBILE_HOME_SHOTS = Object.freeze([
     settleStart: 0,
     settleEnd: .12,
     exit: .25,
-    position: [-5.35, 2.75, 4.55],
+    position: [-5.1, 2.9, 4.9],
     target: [-.08, 1.94, -1.02],
-    fov: 34,
+    fov: 33,
     monitorVisible: true,
     chairClearance: 1.08
   }),
@@ -82,9 +82,9 @@ export const MOBILE_HOME_SHOTS = Object.freeze([
     settleStart: .25,
     settleEnd: .29,
     exit: .47,
-    position: [-2.15, 2.55, 2.55],
+    position: [-2.3, 2.55, 2.8],
     target: [-3.35, 2.18, -2.68],
-    fov: 35,
+    fov: 33,
     chairClearance: 1.05
   }),
   Object.freeze({
@@ -93,9 +93,9 @@ export const MOBILE_HOME_SHOTS = Object.freeze([
     settleStart: .47,
     settleEnd: .51,
     exit: .64,
-    position: [2.15, 2.6, 2.75],
+    position: [2.55, 2.62, 3.0],
     target: [3.35, 2.12, -2.75],
-    fov: 34,
+    fov: 32,
     chairClearance: 1.05
   }),
   Object.freeze({
@@ -104,9 +104,9 @@ export const MOBILE_HOME_SHOTS = Object.freeze([
     settleStart: .64,
     settleEnd: .68,
     exit: .81,
-    position: [3.3, 1.9, 2.8],
-    target: [2.55, .92, -.58],
-    fov: 34,
+    position: [4.15, 2.05, 3.15],
+    target: [2.55, .95, -.58],
+    fov: 32,
     chairClearance: 1.05
   }),
   Object.freeze({
@@ -115,9 +115,9 @@ export const MOBILE_HOME_SHOTS = Object.freeze([
     settleStart: .81,
     settleEnd: .85,
     exit: .96,
-    position: [-1.4, 1.95, 2.8],
+    position: [-3.7, 2.05, 3.15],
     target: [-.95, 1.08, -2.75],
-    fov: 35,
+    fov: 32,
     chairClearance: 1.05
   }),
   Object.freeze({
@@ -126,9 +126,9 @@ export const MOBILE_HOME_SHOTS = Object.freeze([
     settleStart: .96,
     settleEnd: 1,
     exit: 1,
-    position: [2.05, 3.35, 2.7],
-    target: [.75, 3.25, -2.6],
-    fov: 36,
+    position: [1.55, 3.5, 2.75],
+    target: [.75, 3.26, -2.36],
+    fov: 32,
     chairClearance: 1.05
   })
 ]);
@@ -203,9 +203,9 @@ export function createCameraTimeline({ shots = null, layout = "desktop" } = {}) 
           position: interpolateVector(current.position, next.position, amount),
           target: interpolateVector(current.target, next.target, amount),
           fov: interpolateNumber(current.fov, next.fov, amount),
-          stationId: amount < .5 ? current.stationId : next.stationId,
+          stationId: amount < .72 ? current.stationId : next.stationId,
           settled: false,
-          monitorVisible: amount < .5 && current.stationId === "desk",
+          monitorVisible: amount < .72 && current.stationId === "desk",
           chairClearance: interpolateNumber(current.chairClearance ?? 1, next.chairClearance ?? 1, amount)
         };
       }
