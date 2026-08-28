@@ -162,13 +162,18 @@ function smoothstep(value) {
   return x * x * (3 - 2 * x);
 }
 
+function gentleEase(value) {
+  const x = clamp01(value);
+  return x * .65 + smoothstep(x) * .35;
+}
+
 function interpolateVector(from, to, value) {
-  const t = smoothstep(value);
+  const t = gentleEase(value);
   return from.map((item, index) => item + (to[index] - item) * t);
 }
 
 function interpolateNumber(from, to, value) {
-  const t = smoothstep(value);
+  const t = gentleEase(value);
   return from + (to - from) * t;
 }
 
