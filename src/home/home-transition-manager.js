@@ -28,10 +28,22 @@ export function createHomeTransitionManager({
   let active = null;
   let disposed = false;
 
-  function navigateOnce(record) {
+  function navigateOnce(record, { viewTransition = false } = {}) {
     if (record.navigated) return;
-    record.navigated = true;
-    navigate(record.station.href);
+    const performNavigation = () => {
+      if (record.navigated) return;
+      record.navigated = true;
+      navigate(record.station.href);
+    };
+    if (viewTransition && !reducedMotion && typeof root.ownerDocument.startViewTransition === "function") {
+      try {
+        root.ownerDocument.startViewTransition(performNavigation);
+        return;
+      } catch {
+        // Fall through to immediate internal navigation.
+      }
+    }
+    performNavigation();
   }
 
   function showOverlay(record) {
@@ -50,8 +62,11 @@ export function createHomeTransitionManager({
     record.overlay = overlay;
   }
 
-  async function activate(station) {
+  async function activate(station, options = {}) {
     if (disposed || active || !station?.href?.startsWith("#/")) return false;
+    const focus = options.focus !== false;
+    const overlay = options.overlay !== false;
+    const viewTransition = Boolean(options.viewTransition);
     const record = {
       station,
       controller: new AbortController(),
@@ -66,19 +81,24 @@ export function createHomeTransitionManager({
         await Promise.resolve();
         return true;
       }
-      try {
-        await Promise.race([
-          Promise.resolve(renderer?.focusStation?.(station.id, { duration: transitionDuration })),
-          abortSignal(record.controller.signal),
-          wait(900, record.controller.signal)
-        ]);
-      } catch {
-        // Rendering failure must never trap navigation.
+      if (focus) {
+        try {
+          await Promise.race([
+            Promise.resolve(renderer?.focusStation?.(station.id, { duration: transitionDuration })),
+            abortSignal(record.controller.signal),
+            wait(900, record.controller.signal)
+          ]);
+        } catch {
+          // Rendering failure must never trap navigation.
+        }
       }
       if (record.controller.signal.aborted) return true;
-      showOverlay(record);
-      await wait(120, record.controller.signal);
-      navigateOnce(record);
+      if (overlay) {
+        showOverlay(record);
+        await wait(120, record.controller.signal);
+      }
+      if (record.controller.signal.aborted) return true;
+      navigateOnce(record, { viewTransition });
       return true;
     } finally {
       record.overlay?.remove?.();
