@@ -8,7 +8,7 @@ import {
   createHomeQuickActions,
   createHomeStations
 } from "../home/home-stations.js?v=20260828-15";
-import { mountHomeExperience } from "../home/home-experience.js?v=20260828-15";
+import { mountHomeExperience } from "../home/home-experience.js?v=20260828-16";
 
 function stationCaption(station, index) {
   return element("a", {
