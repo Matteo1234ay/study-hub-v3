@@ -272,7 +272,7 @@ export function buildStudyRoom({ THREE, materials }) {
       const chairMove = smoothRange(clamp01(value), .34, .47);
       chair.position.x = chairMove * -3.0;
       chair.position.z = chairMove * .4;
-      chair.rotation.y = chairMove * -.18;
+      chair.rotation.y = chairMove * .12;
       group.updateMatrixWorld(true);
       return chairMove;
     },
