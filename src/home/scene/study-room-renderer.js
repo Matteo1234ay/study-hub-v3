@@ -114,6 +114,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
   let timeline = createCameraTimeline({ layout: cameraLayout });
   const lighting = createLightingController(lightRig);
   let journey = 0;
+  let exitProgress = 0;
   let disposed = false;
   let frameId = 0;
   let focusFrameId = 0;
@@ -142,14 +143,14 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     if (disposed) return;
     if (!reducedMotion) frameId = requestAnimationFrame(draw);
     if (!quality.isVisible) return;
-    const shot = timeline.sample(journey);
+    const shot = exitProgress > 0 ? timeline.exit(exitProgress) : timeline.sample(journey);
     const sceneProgress = journey;
     room.setJourney(sceneProgress);
     camera.position.set(...shot.position);
     camera.fov = shot.fov;
     camera.updateProjectionMatrix();
     camera.lookAt(new THREE.Vector3(...shot.target));
-    const parallax = reducedMotion || cameraLayout === "mobile" ? { x: 0, y: 0 } : interaction.update();
+    const parallax = reducedMotion || cameraLayout === "mobile" || exitProgress > 0 ? { x: 0, y: 0 } : interaction.update();
     camera.rotation.y += parallax.x;
     camera.rotation.x += parallax.y;
     lighting.apply(sceneProgress, {
@@ -193,6 +194,10 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       journey = Math.min(1, Math.max(0, Number(value) || 0));
       if (reducedMotion) draw(performance.now());
     },
+    setExitProgress(value) {
+      exitProgress = Math.min(1, Math.max(0, Number(value) || 0));
+      if (reducedMotion) draw(performance.now());
+    },
     getActiveStation(value) {
       return timeline.activeStation(value);
     },
@@ -202,6 +207,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       if (index < 0 || disposed) return Promise.resolve(false);
       if (focusFrameId) cancelAnimationFrame(focusFrameId);
       finishFocus?.(false);
+      exitProgress = 0;
       const startValue = journey;
       const destination = timeline.stationProgress(stationId);
       const startTime = performance.now();
