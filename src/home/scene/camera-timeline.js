@@ -18,9 +18,16 @@ export const MOBILE_HOME_SHOTS = Object.freeze([
 
 const HOME_OVERVIEW = Object.freeze({ position: [-4.65, 3.45, 7.8], target: [0, 1.65, -1.75], fov: 48, stationId: "overview", settled: true, monitorVisible: true, chairClearance: 1 });
 const MOBILE_OVERVIEW = Object.freeze({ position: [-5.1, 3.15, 6.1], target: [0, 1.75, -1.7], fov: 52, stationId: "overview", settled: true, monitorVisible: true, chairClearance: 1.08 });
+const HOME_EXIT = Object.freeze({ position: [.84, 3.3, -.05], target: [.75, 3.26, -2.36], fov: 27, stationId: "future-paths", settled: false, monitorVisible: false, chairClearance: 1 });
+const MOBILE_EXIT = Object.freeze({ position: [.72, 3.28, .38], target: [.75, 3.26, -2.36], fov: 42, stationId: "future-paths", settled: false, monitorVisible: false, chairClearance: 1.05 });
 
 function clamp01(value) {
   return Math.min(1, Math.max(0, Number.isFinite(Number(value)) ? Number(value) : 0));
+}
+
+function smooth(value) {
+  const t = clamp01(value);
+  return t * t * (3 - 2 * t);
 }
 
 function interpolateVector(from, to, value) {
@@ -48,6 +55,7 @@ function snapshot(shot, settled = true) {
 export function createCameraTimeline({ shots = null, layout = "desktop" } = {}) {
   const selectedShots = shots ?? (layout === "mobile" ? MOBILE_HOME_SHOTS : HOME_SHOTS);
   const selectedOverview = layout === "mobile" ? MOBILE_OVERVIEW : HOME_OVERVIEW;
+  const selectedExit = layout === "mobile" ? MOBILE_EXIT : HOME_EXIT;
   if (!Array.isArray(selectedShots) || selectedShots.length === 0) throw new Error("La timeline richiede almeno un'inquadratura");
 
   function sample(progress) {
@@ -74,6 +82,20 @@ export function createCameraTimeline({ shots = null, layout = "desktop" } = {}) 
     return value <= selectedShots[0].settleStart ? snapshot(selectedShots[0]) : snapshot(selectedShots.at(-1));
   }
 
+  function exit(progress) {
+    const start = snapshot(selectedShots.at(-1), false);
+    const amount = smooth(progress);
+    return {
+      position: interpolateVector(start.position, selectedExit.position, amount),
+      target: interpolateVector(start.target, selectedExit.target, amount),
+      fov: interpolateNumber(start.fov, selectedExit.fov, amount),
+      stationId: "future-paths",
+      settled: false,
+      monitorVisible: false,
+      chairClearance: interpolateNumber(start.chairClearance ?? 1, selectedExit.chairClearance ?? 1, amount)
+    };
+  }
+
   function activeStation(progress) { return sample(progress).stationId; }
   function stationProgress(stationId) {
     const shot = selectedShots.find(item => item.stationId === stationId);
@@ -81,5 +103,5 @@ export function createCameraTimeline({ shots = null, layout = "desktop" } = {}) 
   }
   function overview() { return { ...selectedOverview, position: [...selectedOverview.position], target: [...selectedOverview.target] }; }
 
-  return { sample, activeStation, stationProgress, overview, layout };
+  return { sample, exit, activeStation, stationProgress, overview, layout };
 }
