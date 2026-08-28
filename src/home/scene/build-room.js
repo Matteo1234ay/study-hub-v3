@@ -1,9 +1,9 @@
-import { createStationScreen } from "./screen-ui.js?v=20260828-15";
+import { createStationScreen } from "./screen-ui.js?v=20260828-16";
 
 const OPENING_CAMERA = Object.freeze({
-  position: [-4.8, 3.15, 7.4],
-  target: [0, 1.55, -1.45],
-  fov: 42
+  position: [-5.6, 3.05, 5.75],
+  target: [-.05, 1.92, -1.02],
+  fov: 39
 });
 
 function mesh(THREE, geometry, material, name, position, rotation = [0, 0, 0]) {
@@ -60,10 +60,10 @@ function buildErgonomicChair(THREE, materials) {
   const group = new THREE.Group();
   group.name = "ergonomic-chair";
   group.add(
-    box(THREE, [.92, .22, .85], materials.fabric, "chair-seat", [1.75, .7, 1.05], [-.08, -.08, 0]),
-    box(THREE, [.88, 1.28, .2], materials.fabric, "chair-back", [1.9, 1.48, 1.35], [-.1, -.08, 0]),
-    cylinder(THREE, .1, .72, materials.metal, "chair-column", [1.75, .25, 1.05]),
-    cylinder(THREE, .08, 1.15, materials.metal, "chair-base", [1.75, -.08, 1.05], [0, 0, Math.PI / 2])
+    box(THREE, [.92, .22, .85], materials.fabric, "chair-seat", [2.35, .7, 1.28], [-.08, -.12, 0]),
+    box(THREE, [.88, 1.28, .2], materials.fabric, "chair-back", [2.52, 1.48, 1.55], [-.1, -.12, 0]),
+    cylinder(THREE, .1, .72, materials.metal, "chair-column", [2.35, .25, 1.28]),
+    cylinder(THREE, .08, 1.15, materials.metal, "chair-base", [2.35, -.08, 1.28], [0, 0, Math.PI / 2])
   );
   return group;
 }
