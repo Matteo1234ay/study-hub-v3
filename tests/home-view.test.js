@@ -55,6 +55,13 @@ test("home stylesheet prevents local horizontal overflow and supports reduced mo
   assert.match(css, /data-home-state="ready"[^}]*\.home-fallback[^{]*\{[^}]*visibility:\s*hidden/s);
 });
 
+test("mobile cinematic mode keeps captions readable and touch-safe", async () => {
+  const css = await readProjectFile("styles/home-immersive.css");
+  assert.match(css, /@media\s*\(max-width:\s*760px\)[\s\S]*data-home-state="ready"[^}]*\.home-captions/s);
+  assert.match(css, /@media\s*\(max-width:\s*760px\)[\s\S]*data-home-state="ready"[^}]*\.home-station-caption/s);
+  assert.match(css, /touch-action:\s*pan-y/);
+});
+
 test("index loads the immersive home stylesheet", async () => {
   const html = await readProjectFile("index.html");
   assert.match(html, /styles\/home-immersive\.css\?v=/);
