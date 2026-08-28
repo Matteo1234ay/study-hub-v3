@@ -1,6 +1,6 @@
 import { createRoomMaterials } from "./materials.js?v=20260828-15";
 import { buildStudyRoom } from "./build-room.js?v=20260828-15";
-import { createCameraTimeline } from "./camera-timeline.js?v=20260828-15";
+import { createCameraTimeline } from "./camera-timeline.js?v=20260828-16";
 import { createLightingController } from "./lighting-controller.js?v=20260828-15";
 import { createInteractionController } from "./interaction-controller.js?v=20260828-15";
 import { createQualityController } from "./quality-controller.js?v=20260828-15";
@@ -23,12 +23,22 @@ function createLightRig(THREE, room) {
   return rig;
 }
 
+function resolveCameraLayout(width, height) {
+  return width <= 760 || height > width * 1.12 ? "mobile" : "desktop";
+}
+
 function initializeRoom({ THREE, canvas, stations, reducedMotion, onActivate }) {
   let renderer = null;
   let room = null;
   let interaction = null;
   try {
-    const quality = createQualityController({ devicePixelRatio: globalThis.devicePixelRatio ?? 1, reducedMotion });
+    const initialRect = canvas.getBoundingClientRect();
+    const compact = resolveCameraLayout(initialRect.width || globalThis.innerWidth || 1440, initialRect.height || globalThis.innerHeight || 900) === "mobile";
+    const quality = createQualityController({
+      devicePixelRatio: globalThis.devicePixelRatio ?? 1,
+      reducedMotion,
+      initialProfile: compact ? "balanced" : undefined
+    });
     renderer = new THREE.WebGLRenderer({ canvas, antialias: quality.profile !== "low", alpha: false, powerPreference: "high-performance" });
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.shadowMap.enabled = quality.profile === "high";
@@ -69,7 +79,8 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     THREE, canvas, stations, reducedMotion, onActivate
   });
 
-  const timeline = createCameraTimeline();
+  let cameraLayout = "desktop";
+  let timeline = createCameraTimeline({ layout: cameraLayout });
   const lighting = createLightingController(lightRig);
   let journey = 0;
   let disposed = false;
@@ -84,6 +95,11 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     const rect = canvas.getBoundingClientRect();
     const width = Math.max(1, Math.round(rect.width));
     const height = Math.max(1, Math.round(rect.height));
+    const nextLayout = resolveCameraLayout(width, height);
+    if (nextLayout !== cameraLayout) {
+      cameraLayout = nextLayout;
+      timeline = createCameraTimeline({ layout: cameraLayout });
+    }
     renderer.setPixelRatio(quality.getDprCap());
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
@@ -100,7 +116,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     camera.fov = shot.fov;
     camera.updateProjectionMatrix();
     camera.lookAt(new THREE.Vector3(...shot.target));
-    const parallax = reducedMotion ? { x: 0, y: 0 } : interaction.update();
+    const parallax = reducedMotion || cameraLayout === "mobile" ? { x: 0, y: 0 } : interaction.update();
     camera.rotation.y += parallax.x;
     camera.rotation.x += parallax.y;
     lighting.apply(reducedMotion ? 1 : journey);
@@ -173,7 +189,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       });
     },
     getAudit() {
-      return { ...room.occlusionAudit, profile: quality.profile, dpr: quality.getDprCap() };
+      return { ...room.occlusionAudit, profile: quality.profile, dpr: quality.getDprCap(), cameraLayout };
     },
     dispose() {
       if (disposed) return;
