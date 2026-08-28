@@ -278,7 +278,7 @@ export function buildStudyRoom({ THREE, materials }) {
     occlusionAudit: auditOpeningComposition(THREE, monitor, chair),
     setJourney(value) {
       const journey = clamp01(value);
-      const chairMove = smoothRange(journey, .34, .47);
+      const chairMove = smoothRange(journey, .16, .30);
       chair.position.x = chairMove * -3.0;
       chair.position.z = chairMove * .4;
       chair.rotation.y = chairMove * .12;
