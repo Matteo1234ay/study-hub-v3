@@ -58,7 +58,7 @@ test("home stylesheet prevents local horizontal overflow and supports reduced mo
 test("cinematic shading keeps the 3D room visible instead of crushing it to black", async () => {
   const css = await readProjectFile("styles/home-immersive.css");
   assert.match(css, /--home-scene-shade:\s*\.44/);
-  assert.match(css, /--home-mobile-scene-shade:\s*\.64/);
+  assert.match(css, /--home-mobile-scene-shade:\s*\.48/);
   assert.match(css, /rgba\(4,\s*7,\s*11,\s*var\(--home-scene-shade\)\)/);
   assert.match(css, /rgba\(4,\s*7,\s*11,\s*var\(--home-mobile-scene-shade\)\)/);
 });
