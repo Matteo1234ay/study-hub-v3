@@ -18,6 +18,21 @@ function fakeRoot(events) {
   };
 }
 
+function fakeExitRoot(events) {
+  return {
+    ownerDocument: {
+      body: { append() {} },
+      startViewTransition(callback) {
+        events.push("view-transition");
+        callback();
+        return {};
+      }
+    },
+    querySelector() { return null; },
+    dataset: {}
+  };
+}
+
 test("focuses, presents a semantic overlay and then navigates", async () => {
   const events = [];
   const manager = createHomeTransitionManager({
@@ -28,6 +43,23 @@ test("focuses, presents a semantic overlay and then navigates", async () => {
   });
   await manager.activate({ id: "progress", href: "#/progress" });
   assert.deepEqual(events, ["focus:progress", "overlay:progress", "navigate:#/progress"]);
+});
+
+test("automatic scroll exit navigates through a view transition without refocusing or showing a card", async () => {
+  const events = [];
+  const manager = createHomeTransitionManager({
+    root: fakeExitRoot(events),
+    renderer: { async focusStation(id) { events.push(`focus:${id}`); } },
+    navigate(href) { events.push(`navigate:${href}`); },
+    wait: async () => {}
+  });
+
+  await manager.activate(
+    { id: "future-paths", href: "#/paths" },
+    { focus: false, overlay: false, viewTransition: true }
+  );
+
+  assert.deepEqual(events, ["view-transition", "navigate:#/paths"]);
 });
 
 test("clamps cinematic duration between 400 and 900 milliseconds", () => {
