@@ -12,7 +12,16 @@ test("station lighting activates cumulatively and never switches off", () => {
       assert.ok(samples[index][key] >= samples[index - 1][key], `${key} decreased`);
     }
   }
-  assert.ok(samples[0].ambient > 0);
+  assert.ok(samples[0].ambient >= .34);
+});
+
+test("next station begins illuminating before its reading hold", () => {
+  const controller = createLightingController();
+  assert.ok(controller.sample(.2).memory > 0);
+  assert.ok(controller.sample(.42).social > 0);
+  assert.ok(controller.sample(.58).assessment > 0);
+  assert.ok(controller.sample(.75).progress > 0);
+  assert.ok(controller.sample(.9).future > 0);
 });
 
 test("general room light stays off until the final reveal", () => {
@@ -23,12 +32,25 @@ test("general room light stays off until the final reveal", () => {
   assert.equal(controller.sample(1).room, 1);
 });
 
-test("apply updates supplied lights and screen emissions", () => {
-  const light = () => ({ intensity: 0 });
+test("active station gets a stronger focus while previous stations remain visibly on", () => {
+  const controller = createLightingController();
+  const state = controller.sample(.66, "assessment");
+  assert.equal(state.focusStation, "assessment");
+  assert.ok(state.desk > 0);
+  assert.ok(state.memory > 0);
+  assert.ok(state.social > 0);
+  assert.ok(state.assessment > 0);
+  assert.ok(state.focusBoost > 1);
+});
+
+test("apply updates persistent zones, screen emission and guided light target", () => {
+  const light = () => ({ intensity: 0, position: { set(...values) { this.values = values; } } });
   const screen = () => ({ material: { emissiveIntensity: 0 } });
+  const target = { position: { set(...values) { this.values = values; } }, updateMatrixWorld() {} };
   const rig = {
     ambient: light(),
     room: light(),
+    guide: { light: light(), target },
     desk: { light: light(), screen: screen() },
     memory: { light: light(), screen: screen() },
     social: { light: light(), screen: screen() },
@@ -37,10 +59,16 @@ test("apply updates supplied lights and screen emissions", () => {
     future: { light: light(), screen: screen() }
   };
   const controller = createLightingController(rig);
-  const state = controller.apply(.72);
+  const state = controller.apply(.66, {
+    focusStation: "assessment",
+    target: [2.55, .92, -.58],
+    cameraPosition: [4.1, 2.1, 3.1]
+  });
 
   assert.equal(rig.ambient.intensity, state.ambient);
-  assert.equal(rig.desk.light.intensity, state.desk);
-  assert.equal(rig.social.screen.material.emissiveIntensity, state.social * .75);
-  assert.equal(rig.progress.light.intensity, 0);
+  assert.ok(rig.desk.light.intensity > 0);
+  assert.ok(rig.assessment.light.intensity > rig.desk.light.intensity);
+  assert.ok(rig.social.screen.material.emissiveIntensity > 0);
+  assert.ok(rig.guide.light.intensity > 0);
+  assert.deepEqual(rig.guide.target.position.values, [2.55, .92, -.58]);
 });
