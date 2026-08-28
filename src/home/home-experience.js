@@ -41,7 +41,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     cleanup();
     return cleanup;
   }
-  const { createHomeTransitionManager } = await import("./home-transition-manager.js?v=20260828-15");
+  const { createHomeTransitionManager } = await import("./home-transition-manager.js?v=20260828-16");
   if (disposed || !root.isConnected) {
     cleanup();
     return cleanup;
