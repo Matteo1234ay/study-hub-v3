@@ -269,6 +269,11 @@ export function buildStudyRoom({ THREE, materials }) {
 
   const reviewCards = Array.from({ length: 6 }, (_, index) => group.getObjectByName(`review-card-${index + 1}`));
   const futureBinders = Array.from({ length: 3 }, (_, index) => group.getObjectByName(`future-binder-${index + 1}`));
+  const lampShade = group.getObjectByName("lamp-shade");
+  const lampShadeRest = lampShade.rotation.z;
+  const assessmentBaseY = assessment.position.y;
+  const progressBaseY = progress.position.y;
+  const socialBaseZ = social.position.z;
   const screenHandles = [];
 
   return {
@@ -283,15 +288,29 @@ export function buildStudyRoom({ THREE, materials }) {
       chair.position.z = chairMove * .4;
       chair.rotation.y = chairMove * .12;
 
+      const lampWork = smoothRange(journey, .02, .11);
+      lampShade.rotation.z = lampShadeRest - lampWork * .16;
+
       setRevealScale(stations.desk.screen, smoothRange(journey, 0, .05), "y");
       reviewCards.forEach((card, index) => {
         const reveal = smoothRange(journey, .15 + index * .012, .215 + index * .012);
         const scale = .72 + reveal * .28;
         card.scale.set(scale, scale, 1);
       });
-      setRevealScale(stations.social.screen, smoothRange(journey, .35, .43), "y");
+
+      const socialReveal = smoothRange(journey, .35, .43);
+      social.position.z = socialBaseZ + socialReveal * .07;
+      setRevealScale(stations.social.screen, socialReveal, "y");
+
+      const assessmentReveal = smoothRange(journey, .52, .62);
+      assessment.position.y = assessmentBaseY + assessmentReveal * .11;
+      assessment.rotation.x = -assessmentReveal * .025;
       setRevealScale(stations.assessment.screen, smoothRange(journey, .51, .59), "y");
+
+      const progressReveal = smoothRange(journey, .70, .80);
+      progress.position.y = progressBaseY + progressReveal * .09;
       setRevealScale(stations.progress.screen, smoothRange(journey, .68, .76), "x");
+
       setRevealScale(stations["future-paths"].screen, smoothRange(journey, .84, .91), "y");
       futureBinders.forEach((binder, index) => {
         const reveal = smoothRange(journey, .86 + index * .015, .92 + index * .015);
