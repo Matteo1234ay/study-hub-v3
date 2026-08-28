@@ -70,6 +70,15 @@ test("mobile cinematic mode keeps captions readable and touch-safe", async () =>
   assert.match(css, /touch-action:\s*pan-y/);
 });
 
+test("the final paths exit clears reading chrome and lets the 3D push become the focal point", async () => {
+  const css = await readProjectFile("styles/home-immersive.css");
+  const experience = await readProjectFile("src/home/home-experience.js");
+  assert.match(experience, /dataset\.homeExit/);
+  assert.match(css, /data-home-exit="true"[^}]*\.home-captions[^{]*\{[^}]*opacity:\s*0/s);
+  assert.match(css, /data-home-exit="true"[^}]*\.home-progress[^{]*\{[^}]*opacity:\s*0/s);
+  assert.match(css, /data-home-exit="true"[^}]*\.home-stage-shade/);
+});
+
 test("index loads the immersive home stylesheet", async () => {
   const html = await readProjectFile("index.html");
   assert.match(html, /styles\/home-immersive\.css\?v=/);
