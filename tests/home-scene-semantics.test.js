@@ -70,17 +70,20 @@ test("builds exactly the six semantic physical stations", () => {
   room.dispose();
 });
 
-test("chair rolls into a believable parking zone before social and stays there", () => {
+test("chair starts rolling after the desk shot and is parked before memory settles", () => {
   const room = buildStudyRoom({ THREE, materials: createRoomMaterials(THREE) });
   const chair = room.group.getObjectByName("ergonomic-chair");
   assert.equal(typeof room.setJourney, "function");
   const initialX = chair.position.x;
   const initialZ = chair.position.z;
-  room.setJourney(.2);
+  room.setJourney(.12);
   assert.ok(Math.abs(chair.position.x - initialX) < .001);
   assert.ok(Math.abs(chair.position.z - initialZ) < .001);
-  room.setJourney(.5);
-  assert.ok(chair.position.x <= initialX - 2.6, `chair x not parked: ${chair.position.x}`);
+  room.setJourney(.2);
+  assert.ok(chair.position.x < initialX - .1, `chair has not started moving: ${chair.position.x}`);
+  assert.ok(chair.position.z > initialZ, `chair has not rolled back: ${chair.position.z}`);
+  room.setJourney(.3);
+  assert.ok(chair.position.x <= initialX - 2.6, `chair x not parked before memory: ${chair.position.x}`);
   assert.ok(chair.position.z >= initialZ + .3 && chair.position.z <= initialZ + .8, `chair z left floor zone: ${chair.position.z}`);
   const parkedX = chair.position.x;
   const parkedZ = chair.position.z;
