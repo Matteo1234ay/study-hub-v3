@@ -1,9 +1,9 @@
-import { createRoomMaterials } from "./materials.js?v=20260828-18";
-import { buildStudyRoom } from "./build-room.js?v=20260828-18";
-import { createCameraTimeline } from "./camera-timeline.js?v=20260828-18";
-import { createLightingController } from "./lighting-controller.js?v=20260828-18";
-import { createInteractionController } from "./interaction-controller.js?v=20260828-18";
-import { createQualityController } from "./quality-controller.js?v=20260828-18";
+import { createRoomMaterials } from "./materials.js?v=20260828-19";
+import { buildStudyRoom } from "./build-room.js?v=20260828-19";
+import { createCameraTimeline } from "./camera-timeline.js?v=20260828-19";
+import { createLightingController } from "./lighting-controller.js?v=20260828-19";
+import { createInteractionController } from "./interaction-controller.js?v=20260828-19";
+import { createQualityController } from "./quality-controller.js?v=20260828-19";
 
 function createLightRig(THREE, room) {
   const ambient = new THREE.HemisphereLight(0xc7d6e6, 0x211a14, .5);
@@ -91,7 +91,7 @@ function initializeRoom({ THREE, canvas, stations, reducedMotion, onActivate }) 
 
 export async function createStudyRoomRenderer({ canvas, stations, reducedMotion = false, onActivate = () => {}, onFailure = () => {} }) {
   if (!canvas?.getContext) throw new Error("Canvas della stanza non disponibile");
-  const THREE = await import("../../../vendor/three/three.module.min.js?v=20260828-18");
+  const THREE = await import("../../../vendor/three/three.module.min.js?v=20260828-19");
   const { renderer, room, interaction, quality, scene, camera, lightRig } = initializeRoom({
     THREE, canvas, stations, reducedMotion, onActivate
   });
