@@ -73,28 +73,43 @@ test("each station screen communicates its real Study Hub function", () => {
   assert.match(record("memory").text, /Note|Ripasso|Da consolidare/);
   assert.match(record("social").text, /Reach|Impression|Watch time|Retention|1 lezione/);
   assert.match(record("assessment").text, /Disponibile|Domande|feedback|Apri/);
-  assert.match(record("progress").text, /Avanzamento reale|2 di 4|consolidare/);
+  assert.match(record("progress").text, /Avanzamento|2 di 4|consolidare/);
   assert.match(record("future").text, /In preparazione|Standby/);
 });
 
-test("social display uses a portrait high-density canvas and readable type", () => {
+test("all important station screens use high-density canvases and stronger primary type", () => {
+  const requirements = [
+    ["lesson", "SMM-01", 768, 34],
+    ["memory", "Note e Ripasso", 768, 34],
+    ["social", "Social Media Manager", 960, 48],
+    ["assessment", "Disponibile", 768, 34],
+    ["progress", "Avanzamento", 768, 34],
+    ["future", "In preparazione", 768, 34]
+  ];
+
+  for (const [kind, primaryText, minWidth, minType] of requirements) {
+    const { canvas, draws } = record(kind);
+    const primary = draws.find(draw => draw.text === primaryText || draw.text.startsWith(primaryText));
+    assert.ok(canvas.width >= minWidth, `${kind} canvas width too low: ${canvas.width}`);
+    assert.ok(fontSize(primary) >= minType, `${kind} primary type too small: ${primary?.font}`);
+  }
+});
+
+test("social display stays portrait and gives lesson count readable type", () => {
   const { canvas, draws } = record("social");
-  const title = draws.find(draw => draw.text === "Social Media Manager");
   const lessonCount = draws.find(draw => /1 lezione disponibile/.test(draw.text));
 
   assert.ok(canvas.height > canvas.width, `expected portrait canvas, got ${canvas.width}x${canvas.height}`);
-  assert.ok(canvas.width >= 640, `social canvas width too low: ${canvas.width}`);
-  assert.ok(canvas.height >= 800, `social canvas height too low: ${canvas.height}`);
-  assert.ok(fontSize(title) >= 40, `social title too small: ${title?.font}`);
-  assert.ok(fontSize(lessonCount) >= 26, `lesson count too small: ${lessonCount?.font}`);
+  assert.ok(canvas.height >= 1200, `social canvas height too low: ${canvas.height}`);
+  assert.ok(fontSize(lessonCount) >= 30, `lesson count too small: ${lessonCount?.font}`);
 });
 
-test("screen textures stay small and redraw only when data changes", () => {
+test("screen textures remain bounded and redraw only when data changes", () => {
   const { handle, canvas } = record("lesson");
   const initialOperations = canvas.operations.length;
 
-  assert.ok(canvas.width <= 512);
-  assert.ok(canvas.height <= 512);
+  assert.ok(canvas.width <= 1024);
+  assert.ok(canvas.height <= 1536);
   assert.equal(handle.update({
     lessonId: "SMM-01",
     chapter: "Misurare ciò che conta",
