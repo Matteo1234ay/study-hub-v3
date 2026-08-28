@@ -42,6 +42,19 @@ function resolveCameraLayout(width, height) {
   return width <= 760 || height > width * 1.12 ? "mobile" : "desktop";
 }
 
+function sharpenScreenTextures(THREE, renderer, room) {
+  const maxAnisotropy = Math.max(1, Math.min(8, renderer.capabilities.getMaxAnisotropy()));
+  for (const station of Object.values(room.stations)) {
+    const texture = station.screen?.material?.map;
+    if (!texture) continue;
+    texture.anisotropy = maxAnisotropy;
+    texture.minFilter = THREE.LinearMipmapLinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.generateMipmaps = true;
+    texture.needsUpdate = true;
+  }
+}
+
 function initializeRoom({ THREE, canvas, stations, reducedMotion, onActivate }) {
   let renderer = null;
   let room = null;
@@ -68,6 +81,7 @@ function initializeRoom({ THREE, canvas, stations, reducedMotion, onActivate }) 
       stationDefinitions: stations,
       dataByStation: Object.fromEntries(stations.map(station => [station.id, station.screenData ?? {}]))
     });
+    sharpenScreenTextures(THREE, renderer, room);
     scene.add(room.group);
     const lightRig = createLightRig(THREE, room);
     scene.add(lightRig.ambient, lightRig.room, lightRig.guide.light, lightRig.guide.target);
