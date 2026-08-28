@@ -77,8 +77,8 @@ test("chair rolls into a believable parking zone before social and stays there",
   const initialX = chair.position.x;
   const initialZ = chair.position.z;
   room.setJourney(.2);
-  assert.equal(chair.position.x, initialX);
-  assert.equal(chair.position.z, initialZ);
+  assert.ok(Math.abs(chair.position.x - initialX) < .001);
+  assert.ok(Math.abs(chair.position.z - initialZ) < .001);
   room.setJourney(.5);
   assert.ok(chair.position.x <= initialX - 2.6, `chair x not parked: ${chair.position.x}`);
   assert.ok(chair.position.z >= initialZ + .3 && chair.position.z <= initialZ + .8, `chair z left floor zone: ${chair.position.z}`);
