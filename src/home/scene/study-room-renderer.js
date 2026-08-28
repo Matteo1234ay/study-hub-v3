@@ -6,7 +6,7 @@ import { createInteractionController } from "./interaction-controller.js?v=20260
 import { createQualityController } from "./quality-controller.js?v=20260828-18";
 
 function createLightRig(THREE, room) {
-  const ambient = new THREE.HemisphereLight(0xc7d6e6, 0x211a14, .38);
+  const ambient = new THREE.HemisphereLight(0xc7d6e6, 0x211a14, .5);
   const roomLight = new THREE.PointLight(0xffe6c7, 0, 20, 1.35);
   roomLight.position.set(0, 4.8, 1.2);
   const positions = {
@@ -72,10 +72,10 @@ function initializeRoom({ THREE, canvas, stations, reducedMotion, onActivate }) 
     const lightRig = createLightRig(THREE, room);
     scene.add(lightRig.ambient, lightRig.room, lightRig.guide.light, lightRig.guide.target);
     for (const key of ["desk", "memory", "social", "assessment", "progress", "future"]) scene.add(lightRig[key].light);
-    const keyLight = new THREE.DirectionalLight(0xe4edf7, .74);
+    const keyLight = new THREE.DirectionalLight(0xe4edf7, .88);
     keyLight.position.set(-4, 6, 5);
     keyLight.castShadow = quality.profile === "high";
-    const fillLight = new THREE.DirectionalLight(0x8fa8bf, .2);
+    const fillLight = new THREE.DirectionalLight(0x8fa8bf, .28);
     fillLight.position.set(4, 3.5, 4.5);
     scene.add(keyLight, fillLight);
     interaction = createInteractionController({ THREE, canvas, camera, stations: room.stations, onActivate });
