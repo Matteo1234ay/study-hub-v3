@@ -5,11 +5,11 @@ export const HOME_SHOTS = Object.freeze([
     settleStart: 0,
     settleEnd: .12,
     exit: .25,
-    position: [-4.8, 3.15, 7.4],
-    target: [0, 1.55, -1.45],
-    fov: 42,
+    position: [-5.6, 3.05, 5.75],
+    target: [-.05, 1.92, -1.02],
+    fov: 39,
     monitorVisible: true,
-    chairClearance: .78
+    chairClearance: 1
   }),
   Object.freeze({
     stationId: "memory",
@@ -17,9 +17,9 @@ export const HOME_SHOTS = Object.freeze([
     settleStart: .25,
     settleEnd: .29,
     exit: .47,
-    position: [-3.4, 2.7, 4.5],
-    target: [-2, 1.9, -2],
-    fov: 40
+    position: [-3.05, 2.65, 3.85],
+    target: [-3.35, 2.15, -2.68],
+    fov: 38
   }),
   Object.freeze({
     stationId: "social",
@@ -27,9 +27,9 @@ export const HOME_SHOTS = Object.freeze([
     settleStart: .47,
     settleEnd: .51,
     exit: .64,
-    position: [1.4, 2.7, 4.8],
-    target: [2, 1.9, -2],
-    fov: 39
+    position: [1.5, 2.7, 4.55],
+    target: [3.35, 2.1, -2.75],
+    fov: 37
   }),
   Object.freeze({
     stationId: "assessment",
@@ -37,9 +37,9 @@ export const HOME_SHOTS = Object.freeze([
     settleStart: .64,
     settleEnd: .68,
     exit: .81,
-    position: [2.5, 2, 3.7],
-    target: [1.6, 1.2, -.8],
-    fov: 38
+    position: [3.55, 2.05, 3.15],
+    target: [2.55, .92, -.58],
+    fov: 36
   }),
   Object.freeze({
     stationId: "progress",
@@ -47,9 +47,9 @@ export const HOME_SHOTS = Object.freeze([
     settleStart: .81,
     settleEnd: .85,
     exit: .96,
-    position: [-.8, 2.1, 4],
-    target: [-1.2, 1.2, -2.1],
-    fov: 39
+    position: [-2.2, 2.05, 3.45],
+    target: [-.95, 1.08, -2.75],
+    fov: 37
   }),
   Object.freeze({
     stationId: "future-paths",
@@ -57,9 +57,79 @@ export const HOME_SHOTS = Object.freeze([
     settleStart: .96,
     settleEnd: 1,
     exit: 1,
-    position: [.8, 3.2, 4],
-    target: [.5, 2.6, -2.3],
-    fov: 43
+    position: [1.35, 3.45, 3.65],
+    target: [.75, 3.25, -2.6],
+    fov: 40
+  })
+]);
+
+export const MOBILE_HOME_SHOTS = Object.freeze([
+  Object.freeze({
+    stationId: "desk",
+    enter: 0,
+    settleStart: 0,
+    settleEnd: .12,
+    exit: .25,
+    position: [-5.35, 2.75, 4.55],
+    target: [-.08, 1.94, -1.02],
+    fov: 34,
+    monitorVisible: true,
+    chairClearance: 1.08
+  }),
+  Object.freeze({
+    stationId: "memory",
+    enter: .12,
+    settleStart: .25,
+    settleEnd: .29,
+    exit: .47,
+    position: [-2.15, 2.55, 2.55],
+    target: [-3.35, 2.18, -2.68],
+    fov: 35,
+    chairClearance: 1.05
+  }),
+  Object.freeze({
+    stationId: "social",
+    enter: .29,
+    settleStart: .47,
+    settleEnd: .51,
+    exit: .64,
+    position: [2.15, 2.6, 2.75],
+    target: [3.35, 2.12, -2.75],
+    fov: 34,
+    chairClearance: 1.05
+  }),
+  Object.freeze({
+    stationId: "assessment",
+    enter: .51,
+    settleStart: .64,
+    settleEnd: .68,
+    exit: .81,
+    position: [4.15, 1.9, 2.35],
+    target: [2.55, .92, -.58],
+    fov: 34,
+    chairClearance: 1.05
+  }),
+  Object.freeze({
+    stationId: "progress",
+    enter: .68,
+    settleStart: .81,
+    settleEnd: .85,
+    exit: .96,
+    position: [-2.8, 1.95, 2.45],
+    target: [-.95, 1.08, -2.75],
+    fov: 35,
+    chairClearance: 1.05
+  }),
+  Object.freeze({
+    stationId: "future-paths",
+    enter: .85,
+    settleStart: .96,
+    settleEnd: 1,
+    exit: 1,
+    position: [2.05, 3.35, 2.7],
+    target: [.75, 3.25, -2.6],
+    fov: 36,
+    chairClearance: 1.05
   })
 ]);
 
@@ -70,7 +140,17 @@ const HOME_OVERVIEW = Object.freeze({
   stationId: "overview",
   settled: true,
   monitorVisible: true,
-  chairClearance: .78
+  chairClearance: 1
+});
+
+const MOBILE_OVERVIEW = Object.freeze({
+  position: [-5.1, 3.15, 6.1],
+  target: [0, 1.75, -1.7],
+  fov: 38,
+  stationId: "overview",
+  settled: true,
+  monitorVisible: true,
+  chairClearance: 1.08
 });
 
 function clamp01(value) {
@@ -104,17 +184,19 @@ function snapshot(shot, settled = true) {
   };
 }
 
-export function createCameraTimeline({ shots = HOME_SHOTS } = {}) {
-  if (!Array.isArray(shots) || shots.length === 0) throw new Error("La timeline richiede almeno un'inquadratura");
+export function createCameraTimeline({ shots = null, layout = "desktop" } = {}) {
+  const selectedShots = shots ?? (layout === "mobile" ? MOBILE_HOME_SHOTS : HOME_SHOTS);
+  const selectedOverview = layout === "mobile" ? MOBILE_OVERVIEW : HOME_OVERVIEW;
+  if (!Array.isArray(selectedShots) || selectedShots.length === 0) throw new Error("La timeline richiede almeno un'inquadratura");
 
   function sample(progress) {
     const value = clamp01(progress);
-    const settledShot = shots.find(shot => value >= shot.settleStart && value <= shot.settleEnd);
+    const settledShot = selectedShots.find(shot => value >= shot.settleStart && value <= shot.settleEnd);
     if (settledShot) return snapshot(settledShot, true);
 
-    for (let index = 0; index < shots.length - 1; index += 1) {
-      const current = shots[index];
-      const next = shots[index + 1];
+    for (let index = 0; index < selectedShots.length - 1; index += 1) {
+      const current = selectedShots[index];
+      const next = selectedShots[index + 1];
       if (value > current.settleEnd && value < next.settleStart) {
         const amount = (value - current.settleEnd) / Math.max(.0001, next.settleStart - current.settleEnd);
         return {
@@ -128,7 +210,7 @@ export function createCameraTimeline({ shots = HOME_SHOTS } = {}) {
         };
       }
     }
-    return value <= shots[0].settleStart ? snapshot(shots[0]) : snapshot(shots.at(-1));
+    return value <= selectedShots[0].settleStart ? snapshot(selectedShots[0]) : snapshot(selectedShots.at(-1));
   }
 
   function activeStation(progress) {
@@ -136,13 +218,13 @@ export function createCameraTimeline({ shots = HOME_SHOTS } = {}) {
   }
 
   function stationProgress(stationId) {
-    const shot = shots.find(item => item.stationId === stationId);
+    const shot = selectedShots.find(item => item.stationId === stationId);
     return shot ? (shot.settleStart + shot.settleEnd) / 2 : 0;
   }
 
   function overview() {
-    return { ...HOME_OVERVIEW, position: [...HOME_OVERVIEW.position], target: [...HOME_OVERVIEW.target] };
+    return { ...selectedOverview, position: [...selectedOverview.position], target: [...selectedOverview.target] };
   }
 
-  return { sample, activeStation, stationProgress, overview };
+  return { sample, activeStation, stationProgress, overview, layout };
 }
