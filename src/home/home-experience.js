@@ -2,6 +2,19 @@ function clamp01(value) {
   return Math.min(1, Math.max(0, Number(value) || 0));
 }
 
+const JOURNEY_CONTENT_END = .92;
+const JOURNEY_EXIT_TRIGGER = .995;
+
+export function resolveJourneyPhases(progress) {
+  const rawProgress = clamp01(progress);
+  return {
+    rawProgress,
+    sceneProgress: clamp01(rawProgress / JOURNEY_CONTENT_END),
+    exitProgress: clamp01((rawProgress - JOURNEY_CONTENT_END) / (1 - JOURNEY_CONTENT_END)),
+    shouldExit: rawProgress >= JOURNEY_EXIT_TRIGGER
+  };
+}
+
 export function resolveHomeMotionMode({ preference, mediaReduced, width, webgl }) {
   if (!webgl) return "dom";
   return "cinematic";
@@ -14,6 +27,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
 
   root.dataset.homeState = "fallback";
   root.dataset.journeyStarted = "false";
+  root.dataset.homeExit = "false";
   const canvas = root.querySelector(".study-room-canvas");
   const mediaReduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const motionPreference = document.documentElement.dataset.motion ?? "system";
@@ -42,6 +56,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
   let frameId = 0;
   let transitionManager = null;
   let renderer = null;
+  let exitTriggered = false;
   const removalObserver = new MutationObserver(() => {
     if (!root.isConnected) cleanup();
   });
@@ -119,12 +134,28 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     if (event.key === "Escape") transitionManager.cancel();
   }
 
-  function setActive(progress) {
-    const activeId = renderer.getActiveStation(progress);
-    if (progressMeter) progressMeter.value = Math.round(clamp01(progress) * 100);
+  function setActive(sceneProgress, rawProgress) {
+    const activeId = renderer.getActiveStation(sceneProgress);
+    if (progressMeter) progressMeter.value = Math.round(clamp01(rawProgress) * 100);
     root.dataset.activeStation = activeId;
-    root.dataset.journeyStarted = progress > .025 ? "true" : "false";
+    root.dataset.journeyStarted = rawProgress > .025 ? "true" : "false";
     captions.forEach(caption => caption.classList.toggle("is-active", caption.dataset.stationId === activeId));
+  }
+
+  function beginAutomaticExit() {
+    if (exitTriggered || disposed) return;
+    const pathsStation = stations.find(item => item.id === "future-paths") ?? {
+      id: "future-paths",
+      href: "#/paths"
+    };
+    exitTriggered = true;
+    Promise.resolve(transitionManager.activate(pathsStation, {
+      focus: false,
+      overlay: false,
+      viewTransition: true
+    })).then(started => {
+      if (!started && !disposed) exitTriggered = false;
+    });
   }
 
   function updateJourney() {
@@ -132,9 +163,12 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     if (disposed || !root.isConnected) return;
     const rect = root.getBoundingClientRect();
     const distance = Math.max(1, root.offsetHeight - innerHeight);
-    const progress = clamp01(-rect.top / distance);
-    setActive(progress);
-    renderer.setJourney(progress);
+    const phases = resolveJourneyPhases(-rect.top / distance);
+    setActive(phases.sceneProgress, phases.rawProgress);
+    renderer.setJourney(phases.sceneProgress);
+    renderer.setExitProgress?.(phases.exitProgress);
+    root.dataset.homeExit = phases.exitProgress > .01 ? "true" : "false";
+    if (phases.shouldExit) beginAutomaticExit();
   }
 
   function onScroll() {
