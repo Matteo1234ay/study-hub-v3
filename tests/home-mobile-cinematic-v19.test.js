@@ -10,14 +10,51 @@ function distance(a, b) {
   return Math.hypot(...a.map((value, index) => value - b[index]));
 }
 
-test("mobile cinematic camera actually enters the room instead of watching it from outside", () => {
+function projectedSize(object, shot, aspect) {
+  const camera = new THREE.PerspectiveCamera(shot.fov, aspect, .1, 100);
+  camera.position.set(...shot.position);
+  camera.lookAt(new THREE.Vector3(...shot.target));
+  camera.updateMatrixWorld(true);
+  camera.updateProjectionMatrix();
+  object.updateWorldMatrix(true, true);
+  const bounds = new THREE.Box3().setFromObject(object);
+  const points = [];
+  for (const x of [bounds.min.x, bounds.max.x]) {
+    for (const y of [bounds.min.y, bounds.max.y]) {
+      for (const z of [bounds.min.z, bounds.max.z]) points.push(new THREE.Vector3(x, y, z).project(camera));
+    }
+  }
+  return {
+    width: Math.max(...points.map(point => point.x)) - Math.min(...points.map(point => point.x)),
+    height: Math.max(...points.map(point => point.y)) - Math.min(...points.map(point => point.y))
+  };
+}
+
+test("mobile cinematic camera enters the room while preserving spatial context", () => {
   const timeline = createCameraTimeline({ layout: "mobile" });
   const opening = timeline.sample(0);
   assert.ok(distance(opening.position, opening.target) > 6, "opening should establish the whole room");
   for (const stationId of ["memory", "social", "assessment", "progress", "future-paths"]) {
     const shot = timeline.sample(timeline.stationProgress(stationId));
-    assert.ok(distance(shot.position, shot.target) < 4.8, `${stationId} is not a real mobile push-in`);
+    const shotDistance = distance(shot.position, shot.target);
+    assert.ok(shotDistance > 3.8, `${stationId} is so close that the room context disappears: ${shotDistance}`);
+    assert.ok(shotDistance < 6.5, `${stationId} no longer feels like a mobile push-in: ${shotDistance}`);
   }
+});
+
+test("mobile station screens never dominate the portrait viewport", () => {
+  const room = buildStudyRoom({ THREE, materials: createRoomMaterials(THREE) });
+  const timeline = createCameraTimeline({ layout: "mobile" });
+  const aspect = 390 / 844;
+  for (const [stationId, station] of Object.entries(room.stations)) {
+    const progress = timeline.stationProgress(stationId);
+    room.setJourney(progress);
+    room.group.updateMatrixWorld(true);
+    const size = projectedSize(station.screen, timeline.sample(progress), aspect);
+    assert.ok(size.height <= 1.02, `${stationId} screen fills too much portrait height: ${size.height}`);
+    assert.ok(size.width <= 1.62, `${stationId} screen fills too much portrait width: ${size.width}`);
+  }
+  room.dispose();
 });
 
 test("semantic room objects visibly react to the scroll journey", () => {
