@@ -30,6 +30,16 @@ test("provides a dedicated portrait-safe mobile camera timeline", () => {
   assert.ok(Math.abs(desk.position[0]) >= 2.8);
 });
 
+test("mobile shots move close enough to create obvious cinematic depth", () => {
+  const distances = MOBILE_HOME_SHOTS.map(shot => Math.hypot(
+    shot.position[0] - shot.target[0],
+    shot.position[1] - shot.target[1],
+    shot.position[2] - shot.target[2]
+  ));
+  assert.ok(Math.max(...distances) < 7.2, `mobile camera remains too distant: ${Math.max(...distances)}`);
+  assert.ok(Math.min(...distances) < 4, `mobile camera never creates a real close-up: ${Math.min(...distances)}`);
+});
+
 test("provides a stable reading interval for every semantic station", () => {
   const timeline = createCameraTimeline({ shots: HOME_SHOTS });
   const ids = ["desk", "memory", "social", "assessment", "progress", "future-paths"];
