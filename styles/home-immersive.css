@@ -226,6 +226,25 @@
   background: var(--home-blue);
 }
 
+.home-journey[data-home-exit="true"] .home-captions {
+  opacity: 0;
+  transform: translateY(.75rem);
+  pointer-events: none;
+  transition: opacity 220ms ease, transform 320ms ease;
+}
+
+.home-journey[data-home-exit="true"] .home-progress {
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.home-journey[data-home-exit="true"] .home-stage-shade {
+  background:
+    radial-gradient(circle at 55% 50%, rgba(122, 184, 255, .08), transparent 34%),
+    linear-gradient(180deg, rgba(4, 7, 11, .02), rgba(4, 7, 11, .22));
+  transition: background 320ms ease;
+}
+
 .study-room-canvas.is-station-hovered {
   cursor: pointer;
 }
