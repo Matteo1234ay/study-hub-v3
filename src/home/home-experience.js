@@ -14,6 +14,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
   }
 
   root.dataset.homeState = "fallback";
+  root.dataset.journeyStarted = "false";
   const canvas = root.querySelector(".study-room-canvas");
   const mediaReduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const webgl = typeof WebGL2RenderingContext !== "undefined";
@@ -23,10 +24,19 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     width: innerWidth,
     webgl
   });
+
+  function syncImmersiveChrome() {
+    if (mode === "cinematic" && innerWidth <= 760) document.body.dataset.homeImmersive = "true";
+    else delete document.body.dataset.homeImmersive;
+  }
+
   if (mode === "dom") {
     root.dataset.homeState = "dom";
+    delete document.body.dataset.homeImmersive;
     return () => {};
   }
+  syncImmersiveChrome();
+
   const reducedMotion = mode === "static-3d";
   let disposed = false;
   let frameId = 0;
@@ -55,6 +65,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
   function useDomFallback(error) {
     if (disposed) return;
     root.dataset.homeState = "dom";
+    delete document.body.dataset.homeImmersive;
     renderer?.dispose();
     if (!warned) {
       warned = true;
@@ -112,6 +123,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     const activeId = reducedMotion ? "desk" : renderer.getActiveStation(progress);
     if (progressMeter) progressMeter.value = Math.round(clamp01(progress) * 100);
     root.dataset.activeStation = activeId;
+    root.dataset.journeyStarted = progress > .025 ? "true" : "false";
     captions.forEach(caption => caption.classList.toggle("is-active", caption.dataset.stationId === activeId));
   }
 
@@ -129,8 +141,13 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     if (!frameId) frameId = requestAnimationFrame(updateJourney);
   }
 
+  function onResize() {
+    syncImmersiveChrome();
+    onScroll();
+  }
+
   addEventListener("scroll", onScroll, { passive: true });
-  addEventListener("resize", onScroll, { passive: true });
+  addEventListener("resize", onResize, { passive: true });
   root.addEventListener("click", onStationClick);
   addEventListener("keydown", onKeyDown);
   root.dataset.homeState = mode === "static-3d" ? "static-3d" : "ready";
@@ -141,12 +158,13 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     disposed = true;
     if (frameId) cancelAnimationFrame(frameId);
     removeEventListener("scroll", onScroll);
-    removeEventListener("resize", onScroll);
+    removeEventListener("resize", onResize);
     root.removeEventListener("click", onStationClick);
     removeEventListener("keydown", onKeyDown);
     removalObserver.disconnect();
     transitionManager?.dispose();
     renderer?.dispose();
+    delete document.body.dataset.homeImmersive;
   }
 
   return cleanup;
