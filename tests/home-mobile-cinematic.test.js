@@ -10,10 +10,9 @@ const readProjectFile = path => readFile(new URL(`../${path}`, import.meta.url),
 test("mobile ready mode is a full-screen cinematic journey without duplicate navigation chrome", async () => {
   const css = await readProjectFile("styles/home-immersive.css");
 
-  assert.match(css, /@media\s*\(max-width:\s*760px\)[\s\S]*\.home-journey\[data-home-state="ready"\]\s*\{[^}]*min-height:\s*9\d\dsvh/s);
-  assert.match(css, /body:has\(\.home-journey\[data-home-state="ready"\]\)[\s\S]*\.site-header[\s\S]*\.main-nav\s*\{[^}]*display:\s*none/s);
+  assert.match(css, /@media\s*\(max-width:\s*760px\)[\s\S]*\.home-journey\[data-home-state="ready"\]\s*\{[^}]*min-height:\s*1100svh/s);
+  assert.match(css, /body\[data-home-immersive="true"\]\s+\.site-header,[\s\S]*body\[data-home-immersive="true"\]\s+\.site-footer\s*\{[^}]*display:\s*none/s);
   assert.match(css, /\.home-journey\[data-home-state="ready"\][\s\S]*\.home-quick-actions\s*\{[^}]*display:\s*none/s);
-  assert.match(css, /body:has\(\.home-journey\[data-home-state="ready"\]\)[\s\S]*\.site-footer\s*\{[^}]*display:\s*none/s);
 });
 
 test("scroll progress visibly animates study objects instead of moving only the camera", () => {
