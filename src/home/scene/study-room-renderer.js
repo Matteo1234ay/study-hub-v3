@@ -6,16 +6,31 @@ import { createInteractionController } from "./interaction-controller.js?v=20260
 import { createQualityController } from "./quality-controller.js?v=20260828-17";
 
 function createLightRig(THREE, room) {
-  const ambient = new THREE.HemisphereLight(0xb7c8dc, 0x17130f, .24);
-  const roomLight = new THREE.PointLight(0xffe5c0, 0, 18, 1.5);
+  const ambient = new THREE.HemisphereLight(0xc7d6e6, 0x211a14, .38);
+  const roomLight = new THREE.PointLight(0xffe6c7, 0, 20, 1.35);
   roomLight.position.set(0, 4.8, 1.2);
   const positions = {
-    desk: [-.8, 2.7, -.2], memory: [-3.2, 3.4, -1.7], social: [3.2, 3.4, -1.8],
-    assessment: [2.5, 2.1, .1], progress: [-.8, 2.4, -1.9], future: [.8, 4.5, -1.8]
+    desk: [-.7, 2.75, -.1],
+    memory: [-3.15, 3.3, -1.55],
+    social: [3.2, 3.4, -1.65],
+    assessment: [2.55, 2.15, .15],
+    progress: [-.9, 2.45, -1.75],
+    future: [.8, 4.45, -1.75]
   };
-  const rig = { ambient, room: roomLight };
+  const colors = {
+    desk: 0xffcf9a,
+    memory: 0xefc98d,
+    social: 0x8fc8ff,
+    assessment: 0xa5cbff,
+    progress: 0x9de1b7,
+    future: 0xcbd3dc
+  };
+  const guideTarget = new THREE.Object3D();
+  const guideLight = new THREE.SpotLight(0xffdfba, 0, 13, Math.PI / 5, .58, 1.45);
+  guideLight.target = guideTarget;
+  const rig = { ambient, room: roomLight, guide: { light: guideLight, target: guideTarget } };
   for (const [key, position] of Object.entries(positions)) {
-    const light = new THREE.PointLight(key === "progress" ? 0x9de1b7 : 0x9acbff, 0, 5.5, 1.7);
+    const light = new THREE.PointLight(colors[key], 0, 7.5, 1.5);
     light.position.set(...position);
     const station = room.stations[key === "future" ? "future-paths" : key];
     rig[key] = { light, screen: station?.screen };
@@ -44,8 +59,8 @@ function initializeRoom({ THREE, canvas, stations, reducedMotion, onActivate }) 
     renderer.shadowMap.enabled = quality.profile === "high";
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x080b10);
-    scene.fog = new THREE.Fog(0x080b10, 11, 24);
+    scene.background = new THREE.Color(0x0b1016);
+    scene.fog = new THREE.Fog(0x0b1016, 12, 25);
     const camera = new THREE.PerspectiveCamera(42, 1, .1, 50);
     const materials = createRoomMaterials(THREE);
     room = buildStudyRoom({ THREE, materials });
@@ -55,12 +70,14 @@ function initializeRoom({ THREE, canvas, stations, reducedMotion, onActivate }) 
     });
     scene.add(room.group);
     const lightRig = createLightRig(THREE, room);
-    scene.add(lightRig.ambient, lightRig.room);
+    scene.add(lightRig.ambient, lightRig.room, lightRig.guide.light, lightRig.guide.target);
     for (const key of ["desk", "memory", "social", "assessment", "progress", "future"]) scene.add(lightRig[key].light);
-    const keyLight = new THREE.DirectionalLight(0xdde8f5, .48);
+    const keyLight = new THREE.DirectionalLight(0xe4edf7, .74);
     keyLight.position.set(-4, 6, 5);
     keyLight.castShadow = quality.profile === "high";
-    scene.add(keyLight);
+    const fillLight = new THREE.DirectionalLight(0x8fa8bf, .2);
+    fillLight.position.set(4, 3.5, 4.5);
+    scene.add(keyLight, fillLight);
     interaction = createInteractionController({ THREE, canvas, camera, stations: room.stations, onActivate });
     return { renderer, room, interaction, quality, scene, camera, lightRig };
   } catch (error) {
@@ -112,6 +129,8 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     if (!reducedMotion) frameId = requestAnimationFrame(draw);
     if (!quality.isVisible) return;
     const shot = reducedMotion ? timeline.overview() : timeline.sample(journey);
+    const sceneProgress = reducedMotion ? 1 : journey;
+    room.setJourney(sceneProgress);
     camera.position.set(...shot.position);
     camera.fov = shot.fov;
     camera.updateProjectionMatrix();
@@ -119,7 +138,11 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     const parallax = reducedMotion || cameraLayout === "mobile" ? { x: 0, y: 0 } : interaction.update();
     camera.rotation.y += parallax.x;
     camera.rotation.x += parallax.y;
-    lighting.apply(reducedMotion ? 1 : journey);
+    lighting.apply(sceneProgress, {
+      focusStation: reducedMotion ? null : shot.stationId,
+      target: shot.target,
+      cameraPosition: shot.position
+    });
     renderer.render(scene, camera);
     if (quality.recordFrame(now - lastFrame) && quality.profile !== lastProfile) {
       lastProfile = quality.profile;
@@ -146,6 +169,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
   document.addEventListener("visibilitychange", onVisibilityChange);
   canvas.addEventListener("webglcontextlost", onContextLost, { once: true });
   resize();
+  room.setJourney(reducedMotion ? 1 : 0);
   lighting.apply(reducedMotion ? 1 : 0);
   if (reducedMotion) draw(performance.now());
   else frameId = requestAnimationFrame(draw);
