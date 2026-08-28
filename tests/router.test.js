@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseRoute } from "../src/router.js";
+import { navigateToHash, parseRoute } from "../src/router.js";
 
 test("parses home and paths routes", () => {
   assert.deepEqual(parseRoute("#/home"), { name: "home", params: {} });
@@ -60,4 +60,17 @@ test("parses a section target inside a macro chapter", () => {
 test("parses search and review routes", () => {
   assert.deepEqual(parseRoute("#/search?q=retention"), { name: "search", params: { query: "retention" } });
   assert.deepEqual(parseRoute("#/review"), { name: "review", params: {} });
+});
+
+test("programmatic navigation accepts only internal Study Hub hashes", () => {
+  const previous = globalThis.location;
+  globalThis.location = { hash: "#/home" };
+  try {
+    assert.equal(navigateToHash("#/progress"), true);
+    assert.equal(globalThis.location.hash, "/progress");
+    assert.equal(navigateToHash("https://example.com"), false);
+    assert.equal(globalThis.location.hash, "/progress");
+  } finally {
+    globalThis.location = previous;
+  }
 });

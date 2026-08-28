@@ -1,13 +1,13 @@
-import { validateAssessment } from "../assessment/assessment-schema.js?v=20260827-2";
-import { scoreAttempt } from "../assessment/assessment-engine.js?v=20260827-2";
-import { buildAssessmentReviewPackage } from "../assessment/review-package.js?v=20260827-2";
-import { includeConfiguredLessons, validatePathAssessment } from "../path-assessment/path-schema.js?v=20260827-2";
-import { buildQuestionPool } from "../path-assessment/question-pool.js?v=20260827-2";
-import { selectPathQuestions } from "../path-assessment/selector.js?v=20260827-2";
-import { progressiveLevel, scoreFinalGate } from "../path-assessment/path-score.js?v=20260827-2";
-import { createPathAssessmentStore } from "../path-assessment/path-store.js?v=20260827-2";
-import { element, pageHeader } from "../ui/components.js?v=20260827-2";
-import { createStudyDialog } from "../ui/study-dialog.js?v=20260827-2";
+import { validateAssessment } from "../assessment/assessment-schema.js?v=20260828-15";
+import { scoreAttempt } from "../assessment/assessment-engine.js?v=20260828-15";
+import { buildAssessmentReviewPackage } from "../assessment/review-package.js?v=20260828-15";
+import { includeConfiguredLessons, validatePathAssessment } from "../path-assessment/path-schema.js?v=20260828-15";
+import { buildQuestionPool } from "../path-assessment/question-pool.js?v=20260828-15";
+import { selectPathQuestions } from "../path-assessment/selector.js?v=20260828-15";
+import { progressiveLevel, scoreFinalGate } from "../path-assessment/path-score.js?v=20260828-15";
+import { createPathAssessmentStore } from "../path-assessment/path-store.js?v=20260828-15";
+import { element, pageHeader } from "../ui/components.js?v=20260828-15";
+import { createStudyDialog } from "../ui/study-dialog.js?v=20260828-15";
 
 function message(path, title, description) {
   return element("section", { className: "content-page" }, [

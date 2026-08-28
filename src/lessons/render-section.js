@@ -1,7 +1,7 @@
-import { element } from "../ui/components.js?v=20260827-2";
-import { renderSourceRefs } from "./sources.js?v=20260827-2";
-import { renderMicroQuestion } from "./micro-question.js?v=20260827-2";
-import { renderVisualization } from "../visualizations/visualization-registry.js?v=20260827-2";
+import { element } from "../ui/components.js?v=20260828-15";
+import { renderSourceRefs } from "./sources.js?v=20260828-15";
+import { renderMicroQuestion } from "./micro-question.js?v=20260828-15";
+import { renderVisualization } from "../visualizations/visualization-registry.js?v=20260828-15";
 
 const CALLOUT_TYPES = new Set([
   "example", "warning", "error", "key-concept", "note",

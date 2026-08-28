@@ -1,7 +1,7 @@
-import { element } from "../ui/components.js?v=20260827-2";
-import { blockPresentation, renderSection, sectionHref } from "./render-section.js?v=20260827-2";
+import { element } from "../ui/components.js?v=20260828-15";
+import { blockPresentation, renderSection, sectionHref } from "./render-section.js?v=20260828-15";
 
-export { blockPresentation } from "./render-section.js?v=20260827-2";
+export { blockPresentation } from "./render-section.js?v=20260828-15";
 
 export function chapterHref(lessonId, chapterId) {
   return `#/lessons/${lessonId}/${chapterId}`;

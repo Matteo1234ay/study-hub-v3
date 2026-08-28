@@ -1,7 +1,7 @@
-import { PATHS } from "../config/paths.js?v=20260827-2";
-import { createStudyStore } from "../study/study-store.js?v=20260827-2";
-import { createProgressStore } from "../progress/local-progress.js?v=20260827-2";
-import { element, pageHeader } from "../ui/components.js?v=20260827-2";
+import { PATHS } from "../config/paths.js?v=20260828-15";
+import { createStudyStore } from "../study/study-store.js?v=20260828-15";
+import { createProgressStore } from "../progress/local-progress.js?v=20260828-15";
+import { element, pageHeader } from "../ui/components.js?v=20260828-15";
 
 export async function renderReviewView() {
   const view = element("section", { className: "content-page" }, [pageHeader("Ripasso", "Torna ai concetti importanti", "Capitoli salvati e non ancora completati, senza contenuti generati automaticamente.")]);

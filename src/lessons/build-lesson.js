@@ -1,5 +1,5 @@
-import { classifyBlock } from "./classify-block.js?v=20260827-2";
-import { normalizeDocument } from "./normalize-doc.js?v=20260827-2";
+import { classifyBlock } from "./classify-block.js?v=20260828-15";
+import { normalizeDocument } from "./normalize-doc.js?v=20260828-15";
 
 function slugify(value) {
   return value

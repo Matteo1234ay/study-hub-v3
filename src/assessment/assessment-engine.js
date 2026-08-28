@@ -1,4 +1,4 @@
-import { scoreOpenAnswer } from "./open-answer.js?v=20260827-2";
+import { scoreOpenAnswer } from "./open-answer.js?v=20260828-15";
 
 export function scoreQuestion(question, answer) {
   if (question.type === "open" || question.type === "scenario") return scoreOpenAnswer(question, answer);

@@ -1,4 +1,4 @@
-import { isStudentVisibleLesson } from "../lessons/lesson-model.js?v=20260827-2";
+import { isStudentVisibleLesson } from "../lessons/lesson-model.js?v=20260828-15";
 
 export function studentVisibleLessons(lessons = []) {
   return lessons.filter(isStudentVisibleLesson);
@@ -19,6 +19,7 @@ export const PATHS = Object.freeze([
       description: "Leggere le performance organiche e trasformarle in decisioni motivate.",
       level: "Fondamenta",
       estimated: "5 ore",
+      chapterCount: 4,
       dataUrl: "data/lessons/SMM-01.json",
       assessmentUrl: "data/assessments/SMM-01.json",
       publishedUrl: "https://docs.google.com/document/d/e/2PACX-1vRTVVkxYkCN8QwPRqR4Szdmr0mi4zJRCtasHz1Xw8bvF80nop9Y10VuSXhaNwl_UOUBizJUhAIgRo9F/pub"

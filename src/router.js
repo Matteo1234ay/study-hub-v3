@@ -53,3 +53,9 @@ export function startRouter(onRoute) {
   dispatch();
   return () => removeEventListener("hashchange", dispatch);
 }
+
+export function navigateToHash(href) {
+  if (typeof href !== "string" || !href.startsWith("#/")) return false;
+  location.hash = href.slice(1);
+  return true;
+}

@@ -1,7 +1,113 @@
-import { PATHS, findLesson } from "../config/paths.js?v=20260827-2";
-import { element } from "../ui/components.js?v=20260827-2";
-import { createStudyStore } from "../study/study-store.js?v=20260827-2";
-import { mountStudyHubWebGL } from "../home/study-hub-webgl.js?v=20260828-14";
-function station({className="",eyebrow,title,detail,href,center,span=.10,hold=.055}){const children=[element("span",{className:"station-eyebrow",text:eyebrow}),element("strong",{text:title}),detail?element("small",{text:detail}):null,href?element("b",{text:"OPEN ↗"}):null].filter(Boolean);return element(href?"a":"div",{className:`hub-station ${className}`.trim(),href,attrs:{"data-center":String(center),"data-span":String(span),"data-hold":String(hold)}},children)}
-function focusWithHold(journey,center,span,hold){const distance=Math.abs(journey-center);if(distance<=hold)return 1;const feather=Math.max(.001,span-hold);return Math.max(0,1-(distance-hold)/feather)}
-export function renderHomeView(){const state=createStudyStore().getState(),last=state.lastPosition,recent=last?findLesson(last.lessonId):null;const continueHref=recent?`#/lessons/${recent.id}${last.chapterId?`/${last.chapterId}`:""}`:"#/lessons/SMM-01";const social=PATHS.find(path=>path.id==="social-media-marketing")??PATHS[0],futureCount=PATHS.filter(path=>!path.lessons.length).length;const root=element("section",{className:"home-journey webgl-journey",attrs:{"data-motion":"cinematic-room"}}),canvas=element("canvas",{className:"study-hub-canvas",attrs:{"aria-label":"Study Hub tridimensionale interattivo esplorato durante lo scorrimento"}});const stations=[station({className:"station-establish",eyebrow:"STUDY HUB / V3",title:"IL TUO SPAZIO DI STUDIO",detail:"La stanza è già leggibile: scorri e la luce guiderà lo sguardo sugli strumenti di studio.",center:.06,span:.115,hold:.065}),station({className:"station-desk",eyebrow:"01 / ACTIVE DESK",title:recent?recent.title:"SMM-01",detail:recent?"Il monitor della scrivania si accende sulla lezione e sul punto in cui eri rimasto.":"Il monitor della scrivania mostra la prima lezione, i capitoli e l'avanzamento.",href:continueHref,center:.29,span:.105,hold:.055}),station({className:"station-notes",eyebrow:"02 / NOTES + REVIEW",title:"MEMORIA DI STUDIO",detail:"La camera passa al pannello note e alle mensole: appunti, ripasso e materiali hanno finalmente un posto preciso.",href:"#/review",center:.42,span:.105,hold:.055}),station({className:"station-social",eyebrow:"03 / ACTIVE PATH",title:social.title,detail:`Il display Social Media visualizza feed, contenuti e andamento del percorso attivo (${social.lessons.length} lezione).`,href:`#/paths/${social.id}`,center:.55,span:.105,hold:.055}),station({className:"station-assessment",eyebrow:"04 / ASSESSMENT",title:"VERIFICA PROGRESSIVA",detail:"La console di verifica mostra domanda, opzioni e avanzamento del test.",href:`#/paths/${social.id}/assessment`,center:.68,span:.095,hold:.05}),station({className:"station-progress",eyebrow:"05 / PROGRESS",title:"COMPETENZE E PROGRESSI",detail:"Il display progressi trasforma lo studio in barre e livelli leggibili: cosa cresce e cosa consolidare.",href:"#/progress",center:.79,span:.09,hold:.045}),station({className:"station-paths",eyebrow:"06 / FUTURE MODULES",title:`${futureCount} NUCLEI IN COSTRUZIONE`,detail:"I moduli dormienti sono pannelli spenti e riconoscibili: non decorazioni casuali, ma percorsi pronti ad attivarsi.",href:"#/paths",center:.89,span:.085,hold:.04}),station({className:"station-final",eyebrow:"STUDY HUB / SYSTEM VIEW",title:"ENTRA NELL'HUB",detail:"Solo qui si accende l'illuminazione generale e l'intero sistema diventa visibile insieme.",href:"#/paths",center:.975,span:.06,hold:.025})];root.append(element("div",{className:"home-stage"},[canvas,element("div",{className:"stage-noise",attrs:{"aria-hidden":"true"}}),element("div",{className:"stage-vignette",attrs:{"aria-hidden":"true"}}),element("div",{className:"stage-meta meta-top",text:"STUDY HUB / CINEMATIC KNOWLEDGE SPACE"}),element("div",{className:"stage-meta meta-side",text:"SCROLL / SEMANTIC CAMERA TOUR / 00—08"}),element("div",{className:"hub-stations"},stations),element("div",{className:"journey-progress",attrs:{"aria-hidden":"true"}},[element("i"),element("span",{className:"journey-label",text:"APPROACH"})]) ]));queueMicrotask(()=>{if(typeof matchMedia!=="undefined"&&matchMedia("(prefers-reduced-motion: reduce)").matches)return;let journey=0,raf=0;const stationNodes=[...root.querySelectorAll(".hub-station")],label=root.querySelector(".journey-label"),phases=[[0,.15,"APPROACH"],[.15,.24,"ENTER"],[.24,.36,"DESK MONITOR"],[.36,.49,"NOTES WALL"],[.49,.62,"SOCIAL DISPLAY"],[.62,.74,"QUIZ CONSOLE"],[.74,.84,"PROGRESS DISPLAY"],[.84,.94,"DORMANT MODULES"],[.94,1.01,"FULL LIGHT"]];const update=()=>{raf=0;const rect=root.getBoundingClientRect(),travel=Math.max(1,root.offsetHeight-innerHeight);journey=Math.min(1,Math.max(0,-rect.top/travel));root.style.setProperty("--journey",journey.toFixed(4));stationNodes.forEach(node=>{const center=Number(node.dataset.center),span=Number(node.dataset.span)||.10,hold=Number(node.dataset.hold)||.05,focus=focusWithHold(journey,center,span,hold);node.style.setProperty("--focus",focus.toFixed(3));node.classList.toggle("is-active",focus>.5)});const phase=phases.find(([start,end])=>journey>=start&&journey<end);if(label&&phase)label.textContent=phase[2]};const onScroll=()=>{if(!raf)raf=requestAnimationFrame(update)};addEventListener("scroll",onScroll,{passive:true});update();const destroyGL=mountStudyHubWebGL(canvas,{getJourney:()=>journey});const cleanup=()=>{if(root.isConnected){requestAnimationFrame(cleanup);return}removeEventListener("scroll",onScroll);destroyGL()};requestAnimationFrame(cleanup)});return root}
+import { PATHS, findLesson } from "../config/paths.js?v=20260828-15";
+import { element } from "../ui/components.js?v=20260828-15";
+import { createStudyStore } from "../study/study-store.js?v=20260828-15";
+import { createProgressStore } from "../progress/local-progress.js?v=20260828-15";
+import { createNotesStore } from "../study/notes-store.js?v=20260828-15";
+import { createReviewConceptsStore } from "../study/review-concepts-store.js?v=20260828-15";
+import {
+  createHomeQuickActions,
+  createHomeStations
+} from "../home/home-stations.js?v=20260828-15";
+import { mountHomeExperience } from "../home/home-experience.js?v=20260828-15";
+
+function stationCaption(station, index) {
+  return element("a", {
+    className: "home-station-caption",
+    href: station.href,
+    attrs: {
+      "data-station-id": station.id,
+      "data-station-index": String(index),
+      "data-station-status": station.status
+    }
+  }, [
+    element("span", { className: "home-station-label", text: station.label }),
+    element("strong", { text: station.title }),
+    element("small", { text: station.description }),
+    station.meta ? element("span", { className: "home-station-meta", text: station.meta }) : null,
+    element("b", { text: station.status === "standby" ? "Esplora la struttura →" : "Apri →" })
+  ]);
+}
+
+function quickNavigation(actions) {
+  return element("nav", {
+    className: "home-quick-actions",
+    attrs: { "aria-label": "Accesso rapido" }
+  }, actions.map(action => element("a", {
+    className: action.id === "lesson" ? "is-primary" : "",
+    href: action.href,
+    text: action.label,
+    attrs: { "data-quick-action": action.id }
+  })));
+}
+
+export function renderHomeView({ mountExperience = mountHomeExperience, navigate } = {}) {
+  const state = createStudyStore().getState();
+  const activeLesson = findLesson(state.lastPosition?.lessonId) ?? PATHS.flatMap(path => path.lessons)[0];
+  const progress = createProgressStore().get(activeLesson?.id);
+  const totalChapters = activeLesson?.chapterCount ?? 0;
+  const completedChapters = progress.completed.length;
+  const stations = createHomeStations({
+    paths: PATHS,
+    lastPosition: state.lastPosition,
+    findLessonById: findLesson,
+    screenState: {
+      chapter: state.lastPosition?.chapterId ?? activeLesson?.title,
+      completedChapters,
+      completion: totalChapters ? Math.round(completedChapters / totalChapters * 100) : 0,
+      noteCount: createNotesStore().list({ lessonId: activeLesson?.id }).length,
+      reviewCount: createReviewConceptsStore().list().filter(item => item.lessonId === activeLesson?.id).length
+    }
+  });
+  const actions = createHomeQuickActions(stations);
+  const root = element("section", {
+    className: "home-journey",
+    attrs: {
+      "data-home-state": "loading",
+      "data-motion": "semantic-room"
+    }
+  });
+  const canvas = element("canvas", {
+    className: "study-room-canvas",
+    attrs: { "aria-hidden": "true" }
+  });
+  const fallback = element("div", { className: "home-fallback" }, [
+    element("p", { className: "home-kicker", text: "Study Hub V3 · Il tuo spazio di studio" }),
+    element("h1", { text: "Riprendi da ciò che stai costruendo." }),
+    element("p", {
+      text: "Lezioni, note, verifiche e progressi organizzati come strumenti di un unico ambiente di studio."
+    }),
+    element("a", {
+      className: "button primary",
+      href: stations[0].href,
+      text: "Continua a studiare"
+    })
+  ]);
+  const captions = element(
+    "div",
+    { className: "home-captions" },
+    stations.map(stationCaption)
+  );
+  const stage = element("div", { className: "home-stage" }, [
+    canvas,
+    element("div", { className: "home-stage-shade", attrs: { "aria-hidden": "true" } }),
+    fallback,
+    quickNavigation(actions),
+    captions,
+    element("div", { className: "home-progress", attrs: { "aria-hidden": "true" } }, [
+      element("progress", { attrs: { max: "100", value: "0" } }),
+      element("span", { text: "Studio" })
+    ])
+  ]);
+
+  root.append(stage);
+  queueMicrotask(async () => {
+    if (!root.isConnected) return;
+    try {
+      await mountExperience(root, { stations, navigate });
+    } catch (error) {
+      root.dataset.homeState = "fallback";
+      console.warn("La scena 3D non è disponibile; uso la homepage accessibile.", error);
+    }
+  });
+  return root;
+}

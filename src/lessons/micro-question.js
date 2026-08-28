@@ -1,4 +1,4 @@
-import { element } from "../ui/components.js?v=20260827-2";
+import { element } from "../ui/components.js?v=20260828-15";
 
 function validOptions(options) {
   return Array.isArray(options) && options.length >= 2 && options.some(option => option?.correct === true)

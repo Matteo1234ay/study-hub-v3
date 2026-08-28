@@ -1,17 +1,17 @@
-import { renderLesson } from "../lessons/render-lesson.js?v=20260827-2";
-import { createLessonCache } from "../lessons/lesson-cache.js?v=20260827-2";
-import { element } from "../ui/components.js?v=20260827-2";
-import { calculateLessonProgress, createProgressStore } from "../progress/local-progress.js?v=20260827-2";
-import { createStudyStore } from "../study/study-store.js?v=20260827-2";
-import { createNotesStore } from "../study/notes-store.js?v=20260827-2";
-import { buildPublicChapterContext } from "../assistant/study-assistant.js?v=20260827-2";
-import { createChatGptAdapter } from "../assistant/chatgpt-adapter.js?v=20260827-2";
-import { createStudyDialog } from "../ui/study-dialog.js?v=20260827-2";
-import { normalizeLessonExperience } from "../lessons/lesson-model.js?v=20260827-2";
-import { createReviewConceptsStore } from "../study/review-concepts-store.js?v=20260827-2";
-import { resolveRequestedChapter } from "../lessons/lesson-compatibility.js?v=20260827-2";
-import { createLessonNotesPanel } from "../ui/lesson-notes-panel.js?v=20260827-2";
-import { exportNotes } from "../study/notes-export.js?v=20260827-2";
+import { renderLesson } from "../lessons/render-lesson.js?v=20260828-15";
+import { createLessonCache } from "../lessons/lesson-cache.js?v=20260828-15";
+import { element } from "../ui/components.js?v=20260828-15";
+import { calculateLessonProgress, createProgressStore } from "../progress/local-progress.js?v=20260828-15";
+import { createStudyStore } from "../study/study-store.js?v=20260828-15";
+import { createNotesStore } from "../study/notes-store.js?v=20260828-15";
+import { buildPublicChapterContext } from "../assistant/study-assistant.js?v=20260828-15";
+import { createChatGptAdapter } from "../assistant/chatgpt-adapter.js?v=20260828-15";
+import { createStudyDialog } from "../ui/study-dialog.js?v=20260828-15";
+import { normalizeLessonExperience } from "../lessons/lesson-model.js?v=20260828-15";
+import { createReviewConceptsStore } from "../study/review-concepts-store.js?v=20260828-15";
+import { resolveRequestedChapter } from "../lessons/lesson-compatibility.js?v=20260828-15";
+import { createLessonNotesPanel } from "../ui/lesson-notes-panel.js?v=20260828-15";
+import { exportNotes } from "../study/notes-export.js?v=20260828-15";
 
 export async function renderLessonView({ lesson, activeChapterId = null, activeSectionId = null, viewMode = "chapter" }) {
   if (!lesson) {
