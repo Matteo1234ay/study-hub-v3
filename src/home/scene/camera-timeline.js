@@ -23,18 +23,13 @@ function clamp01(value) {
   return Math.min(1, Math.max(0, Number.isFinite(Number(value)) ? Number(value) : 0));
 }
 
-function cinematicEase(value) {
-  const t = clamp01(value);
-  return t * t * (3 - 2 * t);
-}
-
 function interpolateVector(from, to, value) {
-  const t = cinematicEase(value);
+  const t = clamp01(value);
   return from.map((item, index) => item + (to[index] - item) * t);
 }
 
 function interpolateNumber(from, to, value) {
-  const t = cinematicEase(value);
+  const t = clamp01(value);
   return from + (to - from) * t;
 }
 
@@ -65,14 +60,13 @@ export function createCameraTimeline({ shots = null, layout = "desktop" } = {}) 
       const next = selectedShots[index + 1];
       if (value > current.settleEnd && value < next.settleStart) {
         const amount = (value - current.settleEnd) / Math.max(.0001, next.settleStart - current.settleEnd);
-        const easedAmount = cinematicEase(amount);
         return {
           position: interpolateVector(current.position, next.position, amount),
           target: interpolateVector(current.target, next.target, amount),
           fov: interpolateNumber(current.fov, next.fov, amount),
-          stationId: easedAmount < .72 ? current.stationId : next.stationId,
+          stationId: amount < .72 ? current.stationId : next.stationId,
           settled: false,
-          monitorVisible: easedAmount < .72 && current.stationId === "desk",
+          monitorVisible: amount < .72 && current.stationId === "desk",
           chairClearance: interpolateNumber(current.chairClearance ?? 1, next.chairClearance ?? 1, amount)
         };
       }
