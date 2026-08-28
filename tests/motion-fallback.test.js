@@ -13,8 +13,13 @@ test("resolves cinematic, static 3D and DOM modes from real capabilities", () =>
   assert.equal(resolveHomeMotionMode({ preference: "normal", mediaReduced: false, width: 1440, webgl: true }), "cinematic");
 });
 
-test("small screens keep the room but remove the long scroll journey", () => {
-  assert.equal(resolveHomeMotionMode({ preference: "normal", mediaReduced: false, width: 420, webgl: true }), "static-3d");
+test("small screens keep the cinematic journey when WebGL is available", () => {
+  assert.equal(resolveHomeMotionMode({ preference: "normal", mediaReduced: false, width: 420, webgl: true }), "cinematic");
+});
+
+test("reduced motion still wins over viewport size", () => {
+  assert.equal(resolveHomeMotionMode({ preference: "reduced", mediaReduced: false, width: 420, webgl: true }), "static-3d");
+  assert.equal(resolveHomeMotionMode({ preference: "normal", mediaReduced: true, width: 420, webgl: true }), "static-3d");
 });
 
 test("reduced motion starts visualizations at the complete explanatory state", () => {
