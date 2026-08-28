@@ -128,8 +128,8 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     if (disposed) return;
     if (!reducedMotion) frameId = requestAnimationFrame(draw);
     if (!quality.isVisible) return;
-    const shot = reducedMotion ? timeline.overview() : timeline.sample(journey);
-    const sceneProgress = reducedMotion ? 1 : journey;
+    const shot = timeline.sample(journey);
+    const sceneProgress = journey;
     room.setJourney(sceneProgress);
     camera.position.set(...shot.position);
     camera.fov = shot.fov;
@@ -139,7 +139,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     camera.rotation.y += parallax.x;
     camera.rotation.x += parallax.y;
     lighting.apply(sceneProgress, {
-      focusStation: reducedMotion ? null : shot.stationId,
+      focusStation: shot.stationId,
       target: shot.target,
       cameraPosition: shot.position
     });
@@ -169,14 +169,15 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
   document.addEventListener("visibilitychange", onVisibilityChange);
   canvas.addEventListener("webglcontextlost", onContextLost, { once: true });
   resize();
-  room.setJourney(reducedMotion ? 1 : 0);
-  lighting.apply(reducedMotion ? 1 : 0);
+  room.setJourney(0);
+  lighting.apply(0);
   if (reducedMotion) draw(performance.now());
   else frameId = requestAnimationFrame(draw);
 
   return {
     setJourney(value) {
       journey = Math.min(1, Math.max(0, Number(value) || 0));
+      if (reducedMotion) draw(performance.now());
     },
     getActiveStation(value) {
       return timeline.activeStation(value);
@@ -202,6 +203,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
           const linear = Math.min(1, Math.max(0, (now - startTime) / milliseconds));
           const eased = linear * linear * (3 - 2 * linear);
           journey = startValue + (destination - startValue) * eased;
+          if (reducedMotion) draw(now);
           if (linear < 1) focusFrameId = requestAnimationFrame(step);
           else {
             focusFrameId = 0;
