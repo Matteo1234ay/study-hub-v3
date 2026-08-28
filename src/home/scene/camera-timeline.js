@@ -8,12 +8,12 @@ export const HOME_SHOTS = Object.freeze([
 ]);
 
 export const MOBILE_HOME_SHOTS = Object.freeze([
-  Object.freeze({ stationId: "desk", enter: 0, settleStart: 0, settleEnd: .12, exit: .25, position: [-5.1, 2.9, 4.9], target: [-.08, 1.94, -1.02], fov: 33, monitorVisible: true, chairClearance: 1.08 }),
-  Object.freeze({ stationId: "memory", enter: .12, settleStart: .25, settleEnd: .29, exit: .47, position: [-2.3, 2.55, 2.8], target: [-3.35, 2.18, -2.68], fov: 33, chairClearance: 1.05 }),
-  Object.freeze({ stationId: "social", enter: .29, settleStart: .47, settleEnd: .51, exit: .64, position: [2.55, 2.62, 3.0], target: [3.35, 2.12, -2.75], fov: 32, chairClearance: 1.05 }),
-  Object.freeze({ stationId: "assessment", enter: .51, settleStart: .64, settleEnd: .68, exit: .81, position: [4.15, 2.05, 3.15], target: [2.55, .95, -.58], fov: 32, chairClearance: 1.05 }),
-  Object.freeze({ stationId: "progress", enter: .68, settleStart: .81, settleEnd: .85, exit: .96, position: [-3.1, 2.05, 3.15], target: [-.95, 1.08, -2.75], fov: 32, chairClearance: 1.05 }),
-  Object.freeze({ stationId: "future-paths", enter: .85, settleStart: .96, settleEnd: 1, exit: 1, position: [1.55, 3.5, 2.75], target: [.75, 3.26, -2.36], fov: 32, chairClearance: 1.05 })
+  Object.freeze({ stationId: "desk", enter: 0, settleStart: 0, settleEnd: .12, exit: .25, position: [-4.45, 2.7, 3.85], target: [-.08, 1.94, -1.02], fov: 31, monitorVisible: true, chairClearance: 1.08 }),
+  Object.freeze({ stationId: "memory", enter: .12, settleStart: .25, settleEnd: .29, exit: .47, position: [-2.55, 2.45, 1.75], target: [-3.35, 2.18, -2.68], fov: 30, chairClearance: 1.05 }),
+  Object.freeze({ stationId: "social", enter: .29, settleStart: .47, settleEnd: .51, exit: .64, position: [2.7, 2.48, 1.85], target: [3.35, 2.12, -2.75], fov: 30, chairClearance: 1.05 }),
+  Object.freeze({ stationId: "assessment", enter: .51, settleStart: .64, settleEnd: .68, exit: .81, position: [3.45, 1.72, 1.45], target: [2.55, .95, -.58], fov: 29, chairClearance: 1.05 }),
+  Object.freeze({ stationId: "progress", enter: .68, settleStart: .81, settleEnd: .85, exit: .96, position: [-2.55, 1.65, 1.55], target: [-.95, 1.08, -2.75], fov: 30, chairClearance: 1.05 }),
+  Object.freeze({ stationId: "future-paths", enter: .85, settleStart: .96, settleEnd: 1, exit: 1, position: [1.25, 3.38, 1.5], target: [.75, 3.26, -2.36], fov: 30, chairClearance: 1.05 })
 ]);
 
 const HOME_OVERVIEW = Object.freeze({ position: [-4.65, 3.45, 7.8], target: [0, 1.65, -1.75], fov: 48, stationId: "overview", settled: true, monitorVisible: true, chairClearance: 1 });
