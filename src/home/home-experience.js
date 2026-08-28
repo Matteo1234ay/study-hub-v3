@@ -4,7 +4,7 @@ function clamp01(value) {
 
 export function resolveHomeMotionMode({ preference, mediaReduced, width, webgl }) {
   if (!webgl) return "dom";
-  if (preference === "reduced" || mediaReduced || Number(width) <= 760) return "static-3d";
+  if (preference === "reduced" || mediaReduced) return "static-3d";
   return "cinematic";
 }
 
