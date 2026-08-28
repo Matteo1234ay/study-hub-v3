@@ -6,6 +6,15 @@ const OPENING_CAMERA = Object.freeze({
   fov: 39
 });
 
+function clamp01(value) {
+  return Math.min(1, Math.max(0, Number(value) || 0));
+}
+
+function smoothRange(value, start, end) {
+  const x = clamp01((value - start) / Math.max(.0001, end - start));
+  return x * x * (3 - 2 * x);
+}
+
 function mesh(THREE, geometry, material, name, position, rotation = [0, 0, 0]) {
   const value = new THREE.Mesh(geometry, material);
   value.name = name;
@@ -29,6 +38,25 @@ function cylinder(THREE, radius, height, material, name, position, rotation = [0
     position,
     rotation
   );
+}
+
+function cylinderBetween(THREE, radius, start, end, material, name, segments = 20) {
+  const from = new THREE.Vector3(...start);
+  const to = new THREE.Vector3(...end);
+  const direction = to.clone().sub(from);
+  const length = Math.max(.001, direction.length());
+  const value = mesh(
+    THREE,
+    new THREE.CylinderGeometry(radius, radius, length, segments),
+    material,
+    name,
+    [0, 0, 0]
+  );
+  value.position.copy(from).add(to).multiplyScalar(.5);
+  value.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
+  value.userData.start = [...start];
+  value.userData.end = [...end];
+  return value;
 }
 
 function createHitArea(THREE, size, position, name) {
@@ -71,11 +99,24 @@ function buildErgonomicChair(THREE, materials) {
 function buildArticulatedLamp(THREE, materials) {
   const group = new THREE.Group();
   group.name = "articulated-desk-lamp";
+  const base = [-1.62, 1.2, -.58];
+  const lowerStart = [-1.62, 1.25, -.58];
+  const elbow = [-1.8, 1.88, -.64];
+  const upperEnd = [-1.28, 2.27, -.76];
+  const shadePosition = [-1.08, 2.3, -.82];
+  const elbowJoint = mesh(
+    THREE,
+    new THREE.SphereGeometry(.095, 16, 12),
+    materials.metal,
+    "lamp-elbow-joint",
+    elbow
+  );
   group.add(
-    cylinder(THREE, .25, .07, materials.metal, "lamp-base", [-1.25, 1.2, -.45]),
-    cylinder(THREE, .045, .85, materials.metal, "lamp-lower-arm", [-1.25, 1.6, -.45], [0, 0, -.22]),
-    cylinder(THREE, .04, .72, materials.metal, "lamp-upper-arm", [-1.08, 2.15, -.55], [0, 0, .75]),
-    box(THREE, [.42, .22, .34], materials.metal, "lamp-shade", [-.78, 2.38, -.65], [0, 0, -.35])
+    cylinder(THREE, .25, .07, materials.metal, "lamp-base", base),
+    cylinderBetween(THREE, .045, lowerStart, elbow, materials.metal, "lamp-lower-arm"),
+    elbowJoint,
+    cylinderBetween(THREE, .04, elbow, upperEnd, materials.metal, "lamp-upper-arm"),
+    box(THREE, [.46, .23, .36], materials.metal, "lamp-shade", shadePosition, [0, -.1, -.24])
   );
   return group;
 }
@@ -169,14 +210,24 @@ function buildProgressDisplay(THREE, materials) {
 function buildFutureArchive(THREE, materials) {
   const group = new THREE.Group();
   group.name = "future-archive";
-  group.add(box(THREE, [2.7, 1.55, .5], materials.wood, "archive-cabinet", [.75, 3.25, -2.62]));
+  group.add(
+    box(THREE, [3.0, 1.8, .48], materials.wood, "archive-cabinet", [.75, 3.18, -2.72]),
+    box(THREE, [2.32, 1.28, .11], materials.metal, "future-directory-frame", [.75, 3.26, -2.43])
+  );
+  const screen = box(
+    THREE,
+    [2.14, 1.1, .035],
+    materials.glassOff.clone(),
+    "future-directory-screen",
+    [.75, 3.26, -2.362]
+  );
+  group.add(screen);
   for (let index = 0; index < 3; index += 1) {
     group.add(
-      box(THREE, [.72, .92, .38], materials.fabric, `future-binder-${index + 1}`, [-.05 + index * .8, 3.25, -2.28]),
-      box(THREE, [.42, .1, .02], materials.metal, `future-label-${index + 1}`, [-.05 + index * .8, 3.25, -2.07])
+      box(THREE, [.48, .32, .32], materials.fabric, `future-binder-${index + 1}`, [-.05 + index * .8, 2.38, -2.48])
     );
   }
-  group.userData.screen = group.getObjectByName("future-label-2");
+  group.userData.screen = screen;
   return group;
 }
 
@@ -246,17 +297,17 @@ export function buildStudyRoom({ THREE, materials }) {
     social: createHitArea(THREE, [2.0, 2.6, .35], [3.35, 2.1, -2.6], "hit-social"),
     assessment: createHitArea(THREE, [2.0, 1.4, .7], [2.55, .9, -.4], "hit-assessment"),
     progress: createHitArea(THREE, [2.3, 1.6, .35], [-.95, 1.05, -2.6], "hit-progress"),
-    "future-paths": createHitArea(THREE, [3.1, 1.9, .7], [.75, 3.25, -2.4], "hit-future-paths")
+    "future-paths": createHitArea(THREE, [3.1, 2.0, .7], [.75, 3.15, -2.35], "hit-future-paths")
   };
   Object.values(hitAreas).forEach(hitArea => group.add(hitArea));
 
   const stations = {
-    desk: { anchor: monitor, target: new THREE.Vector3(0, 1.85, -1), hitArea: hitAreas.desk, screen: monitor.userData.screen, lights: [] },
-    memory: { anchor: memory, target: new THREE.Vector3(-3.35, 2, -2.7), hitArea: hitAreas.memory, screen: memory.userData.screen, lights: [] },
+    desk: { anchor: monitor, target: new THREE.Vector3(0, 1.9, -1), hitArea: hitAreas.desk, screen: monitor.userData.screen, lights: [] },
+    memory: { anchor: memory, target: new THREE.Vector3(-3.35, 2.2, -2.7), hitArea: hitAreas.memory, screen: memory.userData.screen, lights: [] },
     social: { anchor: social, target: new THREE.Vector3(3.35, 2.1, -2.75), hitArea: hitAreas.social, screen: social.userData.screen, lights: [] },
-    assessment: { anchor: assessment, target: new THREE.Vector3(2.55, .9, -.55), hitArea: hitAreas.assessment, screen: assessment.userData.screen, lights: [] },
-    progress: { anchor: progress, target: new THREE.Vector3(-.95, 1.05, -2.75), hitArea: hitAreas.progress, screen: progress.userData.screen, lights: [] },
-    "future-paths": { anchor: future, target: new THREE.Vector3(.75, 3.25, -2.6), hitArea: hitAreas["future-paths"], screen: future.userData.screen, lights: [] }
+    assessment: { anchor: assessment, target: new THREE.Vector3(2.55, .95, -.58), hitArea: hitAreas.assessment, screen: assessment.userData.screen, lights: [] },
+    progress: { anchor: progress, target: new THREE.Vector3(-.95, 1.08, -2.75), hitArea: hitAreas.progress, screen: progress.userData.screen, lights: [] },
+    "future-paths": { anchor: future, target: new THREE.Vector3(.75, 3.26, -2.36), hitArea: hitAreas["future-paths"], screen: future.userData.screen, lights: [] }
   };
 
   const screenHandles = [];
@@ -266,6 +317,14 @@ export function buildStudyRoom({ THREE, materials }) {
     stations,
     openingCamera: OPENING_CAMERA,
     occlusionAudit: auditOpeningComposition(THREE, monitor, chair),
+    setJourney(value) {
+      const chairMove = smoothRange(clamp01(value), .43, .58);
+      chair.position.x = chairMove * 1.72;
+      chair.position.z = chairMove * .2;
+      chair.rotation.y = chairMove * .16;
+      group.updateMatrixWorld(true);
+      return chairMove;
+    },
     attachScreens({ stationDefinitions = [], dataByStation = {}, canvasFactory } = {}) {
       for (const definition of stationDefinitions) {
         const physical = stations[definition.id];
