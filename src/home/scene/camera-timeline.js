@@ -11,7 +11,7 @@ export const MOBILE_HOME_SHOTS = Object.freeze([
   Object.freeze({ stationId: "desk", enter: 0, settleStart: 0, settleEnd: .12, exit: .25, position: [-5.0, 2.95, 5.0], target: [-.08, 1.94, -1.02], fov: 48, monitorVisible: true, chairClearance: 1.08 }),
   Object.freeze({ stationId: "memory", enter: .12, settleStart: .25, settleEnd: .29, exit: .47, position: [-4.5, 2.55, 2.6], target: [-3.35, 2.18, -2.68], fov: 56, chairClearance: 1.05 }),
   Object.freeze({ stationId: "social", enter: .29, settleStart: .47, settleEnd: .51, exit: .64, position: [4.4, 2.55, 2.5], target: [3.35, 2.12, -2.75], fov: 52, chairClearance: 1.05 }),
-  Object.freeze({ stationId: "assessment", enter: .51, settleStart: .64, settleEnd: .68, exit: .81, position: [3.8, 2.05, 2.9], target: [2.55, .95, -.58], fov: 50, chairClearance: 1.05 }),
+  Object.freeze({ stationId: "assessment", enter: .51, settleStart: .64, settleEnd: .68, exit: .81, position: [3.8, 2.05, 3.6], target: [2.55, .95, -.58], fov: 56, chairClearance: 1.05 }),
   Object.freeze({ stationId: "progress", enter: .68, settleStart: .81, settleEnd: .85, exit: .96, position: [-2.8, 1.9, 2.8], target: [-.95, 1.08, -2.75], fov: 52, chairClearance: 1.05 }),
   Object.freeze({ stationId: "future-paths", enter: .85, settleStart: .96, settleEnd: 1, exit: 1, position: [-1.2, 3.35, 3.0], target: [.75, 3.26, -2.36], fov: 54, chairClearance: 1.05 })
 ]);
