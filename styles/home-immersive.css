@@ -2,6 +2,8 @@
   --home-ink: #f4f2eb;
   --home-muted: #b8bdc8;
   --home-blue: #7ab8ff;
+  --home-scene-shade: .44;
+  --home-mobile-scene-shade: .64;
   position: relative;
   width: 100%;
   max-width: 100%;
@@ -37,7 +39,7 @@
 .home-stage-shade {
   pointer-events: none;
   z-index: 1;
-  background: linear-gradient(90deg, rgba(4, 7, 11, .68), transparent 56%);
+  background: linear-gradient(90deg, rgba(4, 7, 11, var(--home-scene-shade)), transparent 52%);
 }
 
 .home-fallback {
@@ -118,7 +120,7 @@
   border: 1px solid rgba(255, 255, 255, .1);
   border-radius: 1rem;
   color: inherit;
-  background: rgba(13, 17, 24, .78);
+  background: rgba(13, 17, 24, .76);
   text-decoration: none;
 }
 
@@ -308,7 +310,7 @@
 
   .home-journey[data-home-state="ready"] .home-stage-shade {
     background:
-      linear-gradient(180deg, rgba(4, 7, 11, .2) 0%, transparent 42%, rgba(4, 7, 11, .78) 77%, rgba(4, 7, 11, .94) 100%);
+      linear-gradient(180deg, rgba(4, 7, 11, .1) 0%, transparent 50%, rgba(4, 7, 11, .38) 80%, rgba(4, 7, 11, var(--home-mobile-scene-shade)) 100%);
   }
 
   .home-journey[data-home-state="ready"] .home-quick-actions,
@@ -339,7 +341,7 @@
     overflow-y: auto;
     padding: .9rem 1rem;
     border-radius: .85rem;
-    background: rgba(8, 12, 18, .9);
+    background: rgba(8, 12, 18, .82);
     backdrop-filter: blur(14px);
   }
 
