@@ -14,21 +14,29 @@ function projectedRect(object, shot, aspect) {
   camera.updateProjectionMatrix();
   object.updateWorldMatrix(true, true);
   const bounds = new THREE.Box3().setFromObject(object);
-  const corners = [];
+  const projected = [];
+  let visible = false;
   for (const x of [bounds.min.x, bounds.max.x]) {
     for (const y of [bounds.min.y, bounds.max.y]) {
-      for (const z of [bounds.min.z, bounds.max.z]) corners.push(new THREE.Vector3(x, y, z).project(camera));
+      for (const z of [bounds.min.z, bounds.max.z]) {
+        const worldPoint = new THREE.Vector3(x, y, z);
+        const cameraPoint = worldPoint.clone().applyMatrix4(camera.matrixWorldInverse);
+        if (cameraPoint.z < -camera.near) visible = true;
+        projected.push(worldPoint.project(camera));
+      }
     }
   }
   return {
-    left: Math.min(...corners.map(point => point.x)),
-    right: Math.max(...corners.map(point => point.x)),
-    top: Math.max(...corners.map(point => point.y)),
-    bottom: Math.min(...corners.map(point => point.y))
+    visible,
+    left: Math.min(...projected.map(point => point.x)),
+    right: Math.max(...projected.map(point => point.x)),
+    top: Math.max(...projected.map(point => point.y)),
+    bottom: Math.min(...projected.map(point => point.y))
   };
 }
 
 function overlapRatio(subject, obstacle) {
+  if (!subject.visible || !obstacle.visible) return 0;
   const width = Math.max(0, Math.min(subject.right, obstacle.right) - Math.max(subject.left, obstacle.left));
   const height = Math.max(0, Math.min(subject.top, obstacle.top) - Math.max(subject.bottom, obstacle.bottom));
   const area = Math.max(.0001, (subject.right - subject.left) * (subject.top - subject.bottom));
@@ -71,9 +79,12 @@ test("chair moves out of the sightline before assessment and stays out", () => {
   assert.equal(chair.position.x, initialX);
   room.setJourney(.65);
   assert.ok(chair.position.x >= initialX + 1.2);
+  assert.ok(chair.position.z >= 2.4);
   const shiftedX = chair.position.x;
+  const shiftedZ = chair.position.z;
   room.setJourney(.9);
   assert.ok(chair.position.x >= shiftedX - .001);
+  assert.ok(chair.position.z >= shiftedZ - .001);
   room.dispose();
 });
 
@@ -103,6 +114,7 @@ test("settled desktop and mobile shots keep every real screen readable and clear
       room.group.updateMatrixWorld(true);
       const shot = timeline.sample(progress);
       const screen = projectedRect(station.screen, shot, aspect);
+      assert.equal(screen.visible, true, `${layout} ${stationId} screen behind camera`);
       const screenHeight = screen.top - screen.bottom;
       assert.ok(screenHeight >= .13, `${layout} ${stationId} screen too small: ${screenHeight}`);
       for (const obstacle of [chair, lamp]) {
