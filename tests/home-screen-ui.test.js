@@ -5,8 +5,12 @@ import { createStationScreen } from "../src/home/scene/screen-ui.js";
 
 function recordingCanvas() {
   const operations = [];
+  const draws = [];
   const context = new Proxy({
-    fillText(text) { operations.push(String(text)); },
+    fillText(text) {
+      operations.push(String(text));
+      draws.push({ text: String(text), font: String(this.font ?? "") });
+    },
     measureText(text) { return { width: String(text).length * 7 }; },
     beginPath() {},
     moveTo() {},
@@ -29,6 +33,7 @@ function recordingCanvas() {
     width: 0,
     height: 0,
     operations,
+    draws,
     getContext: () => context
   };
 }
@@ -56,7 +61,11 @@ function record(screenKind) {
     },
     canvasFactory: () => canvas
   });
-  return { text: canvas.operations.join(" "), handle, canvas };
+  return { text: canvas.operations.join(" "), draws: canvas.draws, handle, canvas };
+}
+
+function fontSize(draw) {
+  return Number(draw?.font.match(/(\d+(?:\.\d+)?)px/)?.[1] ?? 0);
 }
 
 test("each station screen communicates its real Study Hub function", () => {
@@ -66,6 +75,18 @@ test("each station screen communicates its real Study Hub function", () => {
   assert.match(record("assessment").text, /Disponibile|Domande|feedback|Apri/);
   assert.match(record("progress").text, /Avanzamento reale|2 di 4|consolidare/);
   assert.match(record("future").text, /In preparazione|Standby/);
+});
+
+test("social display uses a portrait high-density canvas and readable type", () => {
+  const { canvas, draws } = record("social");
+  const title = draws.find(draw => draw.text === "Social Media Manager");
+  const lessonCount = draws.find(draw => /1 lezione disponibile/.test(draw.text));
+
+  assert.ok(canvas.height > canvas.width, `expected portrait canvas, got ${canvas.width}x${canvas.height}`);
+  assert.ok(canvas.width >= 640, `social canvas width too low: ${canvas.width}`);
+  assert.ok(canvas.height >= 800, `social canvas height too low: ${canvas.height}`);
+  assert.ok(fontSize(title) >= 40, `social title too small: ${title?.font}`);
+  assert.ok(fontSize(lessonCount) >= 26, `lesson count too small: ${lessonCount?.font}`);
 });
 
 test("screen textures stay small and redraw only when data changes", () => {
@@ -88,6 +109,12 @@ test("screen textures stay small and redraw only when data changes", () => {
   assert.equal(canvas.operations.length, initialOperations);
   assert.equal(handle.update({ completion: 60 }), true);
   assert.ok(canvas.operations.length > initialOperations);
+});
+
+test("renderer sharpens station textures at oblique viewing angles", async () => {
+  const source = await readFile(new URL("../src/home/scene/study-room-renderer.js", import.meta.url), "utf8");
+  assert.match(source, /getMaxAnisotropy/);
+  assert.match(source, /anisotropy/);
 });
 
 test("dispose makes later updates inert", () => {
