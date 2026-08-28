@@ -37,7 +37,7 @@ export const HOME_SHOTS = Object.freeze([
     settleStart: .64,
     settleEnd: .68,
     exit: .81,
-    position: [3.55, 2.05, 3.15],
+    position: [2.8, 2.05, 3.2],
     target: [2.55, .92, -.58],
     fov: 36
   }),
@@ -47,7 +47,7 @@ export const HOME_SHOTS = Object.freeze([
     settleStart: .81,
     settleEnd: .85,
     exit: .96,
-    position: [-2.2, 2.05, 3.45],
+    position: [-1.4, 2.05, 3.4],
     target: [-.95, 1.08, -2.75],
     fov: 37
   }),
@@ -104,7 +104,7 @@ export const MOBILE_HOME_SHOTS = Object.freeze([
     settleStart: .64,
     settleEnd: .68,
     exit: .81,
-    position: [4.15, 1.9, 2.35],
+    position: [3.3, 1.9, 2.8],
     target: [2.55, .92, -.58],
     fov: 34,
     chairClearance: 1.05
@@ -115,7 +115,7 @@ export const MOBILE_HOME_SHOTS = Object.freeze([
     settleStart: .81,
     settleEnd: .85,
     exit: .96,
-    position: [-2.8, 1.95, 2.45],
+    position: [-1.4, 1.95, 2.8],
     target: [-.95, 1.08, -2.75],
     fov: 35,
     chairClearance: 1.05
