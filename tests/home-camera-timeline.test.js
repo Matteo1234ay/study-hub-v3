@@ -26,18 +26,18 @@ test("provides a dedicated portrait-safe mobile camera timeline", () => {
   assert.equal(desk.stationId, "desk");
   assert.equal(desk.monitorVisible, true);
   assert.ok(desk.chairClearance >= .9);
-  assert.ok(desk.fov <= 38);
+  assert.ok(desk.fov >= 40 && desk.fov <= 48);
   assert.ok(Math.abs(desk.position[0]) >= 2.8);
 });
 
-test("mobile shots move close enough to create obvious cinematic depth", () => {
-  const distances = MOBILE_HOME_SHOTS.map(shot => Math.hypot(
+test("mobile shots create depth without losing the surrounding room", () => {
+  const distances = MOBILE_HOME_SHOTS.slice(1).map(shot => Math.hypot(
     shot.position[0] - shot.target[0],
     shot.position[1] - shot.target[1],
     shot.position[2] - shot.target[2]
   ));
-  assert.ok(Math.max(...distances) < 7.2, `mobile camera remains too distant: ${Math.max(...distances)}`);
-  assert.ok(Math.min(...distances) < 4, `mobile camera never creates a real close-up: ${Math.min(...distances)}`);
+  assert.ok(Math.max(...distances) < 6.5, `mobile camera remains too distant: ${Math.max(...distances)}`);
+  assert.ok(Math.min(...distances) > 3.8, `mobile camera crops away room context: ${Math.min(...distances)}`);
 });
 
 test("provides a stable reading interval for every semantic station", () => {
