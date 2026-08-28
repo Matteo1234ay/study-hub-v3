@@ -15,6 +15,12 @@ function smoothRange(value, start, end) {
   return x * x * (3 - 2 * x);
 }
 
+function setRevealScale(object, amount, axis = "y") {
+  const scale = .04 + .96 * clamp01(amount);
+  if (axis === "x") object.scale.set(scale, 1, 1);
+  else object.scale.set(1, scale, 1);
+}
+
 function mesh(THREE, geometry, material, name, position, rotation = [0, 0, 0]) {
   const value = new THREE.Mesh(geometry, material);
   value.name = name;
@@ -261,6 +267,8 @@ export function buildStudyRoom({ THREE, materials }) {
     "future-paths": { anchor: future, target: new THREE.Vector3(.75, 3.26, -2.36), hitArea: hitAreas["future-paths"], screen: future.userData.screen, lights: [] }
   };
 
+  const reviewCards = Array.from({ length: 6 }, (_, index) => group.getObjectByName(`review-card-${index + 1}`));
+  const futureBinders = Array.from({ length: 3 }, (_, index) => group.getObjectByName(`future-binder-${index + 1}`));
   const screenHandles = [];
 
   return {
@@ -269,10 +277,28 @@ export function buildStudyRoom({ THREE, materials }) {
     openingCamera: OPENING_CAMERA,
     occlusionAudit: auditOpeningComposition(THREE, monitor, chair),
     setJourney(value) {
-      const chairMove = smoothRange(clamp01(value), .34, .47);
+      const journey = clamp01(value);
+      const chairMove = smoothRange(journey, .34, .47);
       chair.position.x = chairMove * -3.0;
       chair.position.z = chairMove * .4;
       chair.rotation.y = chairMove * .12;
+
+      setRevealScale(stations.desk.screen, smoothRange(journey, 0, .05), "y");
+      reviewCards.forEach((card, index) => {
+        const reveal = smoothRange(journey, .15 + index * .012, .215 + index * .012);
+        const scale = .72 + reveal * .28;
+        card.scale.set(scale, scale, 1);
+      });
+      setRevealScale(stations.social.screen, smoothRange(journey, .35, .43), "y");
+      setRevealScale(stations.assessment.screen, smoothRange(journey, .51, .59), "y");
+      setRevealScale(stations.progress.screen, smoothRange(journey, .68, .76), "x");
+      setRevealScale(stations["future-paths"].screen, smoothRange(journey, .84, .91), "y");
+      futureBinders.forEach((binder, index) => {
+        const reveal = smoothRange(journey, .86 + index * .015, .92 + index * .015);
+        const scale = .82 + reveal * .18;
+        binder.scale.set(scale, scale, scale);
+      });
+
       group.updateMatrixWorld(true);
       return chairMove;
     },
