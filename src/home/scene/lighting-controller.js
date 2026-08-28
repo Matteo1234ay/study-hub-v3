@@ -54,7 +54,9 @@ export function createLightingController(lightRig = null) {
       const screenPower = state[key];
       if (zone?.light) zone.light.intensity = state[key] * 1.35 + (focused ? state.focusBoost : 0);
       if (zone?.screen?.material) {
-        zone.screen.material.color?.setScalar?.(.035 + screenPower * .965);
+        if (zone.screen.material.color?.setScalar) {
+          zone.screen.material.color.setScalar(.035 + screenPower * .965);
+        }
         zone.screen.material.emissiveIntensity = screenPower * (focused ? 1.45 : .88);
       }
     }
