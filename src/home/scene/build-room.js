@@ -318,7 +318,7 @@ export function buildStudyRoom({ THREE, materials }) {
     openingCamera: OPENING_CAMERA,
     occlusionAudit: auditOpeningComposition(THREE, monitor, chair),
     setJourney(value) {
-      const chairMove = smoothRange(clamp01(value), .43, .58);
+      const chairMove = smoothRange(clamp01(value), .34, .47);
       chair.position.x = chairMove * 1.72;
       chair.position.z = chairMove * .2;
       chair.rotation.y = chairMove * .16;
