@@ -4,7 +4,7 @@ function clamp01(value) {
 
 export function resolveHomeMotionMode({ preference, mediaReduced, width, webgl }) {
   if (!webgl) return "dom";
-  if (preference === "reduced" || mediaReduced) return "static-3d";
+  if (preference === "reduced" || mediaReduced || Number(width) <= 760) return "static-3d";
   return "cinematic";
 }
 
@@ -36,12 +36,12 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     if (!root.isConnected) cleanup();
   });
   removalObserver.observe(document.documentElement, { childList: true, subtree: true });
-  const { createStudyRoomRenderer } = await import("./scene/study-room-renderer.js?v=20260828-16");
+  const { createStudyRoomRenderer } = await import("./scene/study-room-renderer.js?v=20260828-17");
   if (disposed || !root.isConnected) {
     cleanup();
     return cleanup;
   }
-  const { createHomeTransitionManager } = await import("./home-transition-manager.js?v=20260828-16");
+  const { createHomeTransitionManager } = await import("./home-transition-manager.js?v=20260828-17");
   if (disposed || !root.isConnected) {
     cleanup();
     return cleanup;

@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const RELEASE_TOKEN = "20260828-16";
+const RELEASE_TOKEN = "20260828-17";
 
 test("Three.js is pinned and vendored locally with its license", async () => {
   const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url)));
