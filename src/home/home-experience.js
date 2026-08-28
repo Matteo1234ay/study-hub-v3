@@ -4,7 +4,6 @@ function clamp01(value) {
 
 export function resolveHomeMotionMode({ preference, mediaReduced, width, webgl }) {
   if (!webgl) return "dom";
-  if (preference === "reduced" || mediaReduced) return "static-3d";
   return "cinematic";
 }
 
@@ -17,9 +16,11 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
   root.dataset.journeyStarted = "false";
   const canvas = root.querySelector(".study-room-canvas");
   const mediaReduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const motionPreference = document.documentElement.dataset.motion ?? "system";
+  const reducedMotion = motionPreference === "reduced" || mediaReduced;
   const webgl = typeof WebGL2RenderingContext !== "undefined";
   const mode = resolveHomeMotionMode({
-    preference: document.documentElement.dataset.motion ?? "system",
+    preference: motionPreference,
     mediaReduced,
     width: innerWidth,
     webgl
@@ -37,7 +38,6 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
   }
   syncImmersiveChrome();
 
-  const reducedMotion = mode === "static-3d";
   let disposed = false;
   let frameId = 0;
   let transitionManager = null;
@@ -120,7 +120,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
   }
 
   function setActive(progress) {
-    const activeId = reducedMotion ? "desk" : renderer.getActiveStation(progress);
+    const activeId = renderer.getActiveStation(progress);
     if (progressMeter) progressMeter.value = Math.round(clamp01(progress) * 100);
     root.dataset.activeStation = activeId;
     root.dataset.journeyStarted = progress > .025 ? "true" : "false";
@@ -132,7 +132,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     if (disposed || !root.isConnected) return;
     const rect = root.getBoundingClientRect();
     const distance = Math.max(1, root.offsetHeight - innerHeight);
-    const progress = reducedMotion ? 1 : clamp01(-rect.top / distance);
+    const progress = clamp01(-rect.top / distance);
     setActive(progress);
     renderer.setJourney(progress);
   }
@@ -150,7 +150,8 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
   addEventListener("resize", onResize, { passive: true });
   root.addEventListener("click", onStationClick);
   addEventListener("keydown", onKeyDown);
-  root.dataset.homeState = mode === "static-3d" ? "static-3d" : "ready";
+  root.dataset.homeState = "ready";
+  root.dataset.reducedMotion = reducedMotion ? "true" : "false";
   updateJourney();
 
   function cleanup() {
