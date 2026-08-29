@@ -3,6 +3,7 @@ import { buildStudyRoom } from "./build-room.js?v=20260829-23";
 import { createCameraTimeline } from "./camera-timeline.js?v=20260829-23";
 import { createLightingController } from "./lighting-controller.js?v=20260829-23";
 import { createInteractionController } from "./interaction-controller.js?v=20260829-23";
+import { createParallaxRig } from "./parallax-rig.js?v=20260829-23";
 import { createQualityController } from "./quality-controller.js?v=20260829-23";
 import { RoomEnvironment } from "../../../vendor/three/examples/jsm/environments/RoomEnvironment.js?v=20260829-23";
 
@@ -66,6 +67,27 @@ function sharpenScreenTextures(THREE, renderer, room) {
     texture.generateMipmaps = true;
     texture.needsUpdate = true;
   }
+}
+
+function createRoomParallaxLayers(room) {
+  const definitions = [
+    ["review-card-1", 1, 10, { x: .055, y: .035 }, { x: .018, y: .028 }],
+    ["review-card-3", .82, 9, { x: .048, y: .03 }, { x: .015, y: .023 }],
+    ["review-card-5", .68, 8, { x: .042, y: .027 }, { x: .013, y: .02 }],
+    ["ceramic-mug", .58, 7.5, { x: .037, y: .022 }, { x: .011, y: .016 }],
+    ["future-binder-1", .5, 7, { x: .032, y: .021 }, { x: .009, y: .014 }],
+    ["future-binder-2", .4, 6, { x: .027, y: .018 }, { x: .007, y: .011 }],
+    ["future-binder-3", .32, 5.5, { x: .023, y: .016 }, { x: .006, y: .009 }],
+    ["keyboard", .24, 5, { x: .018, y: .012 }, { x: .004, y: .007 }],
+    ["mouse", .18, 4.2, { x: .014, y: .01 }, { x: .003, y: .006 }]
+  ];
+  return definitions.map(([name, depth, damping, translation, rotation]) => ({
+    object: room.group.getObjectByName(name),
+    depth,
+    damping,
+    translation,
+    rotation
+  })).filter(layer => Boolean(layer.object));
 }
 
 function initializeRoom({ THREE, canvas, stations, reducedMotion, onActivate }) {
@@ -132,6 +154,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
   const { renderer, room, interaction, quality, scene, camera, lightRig, environmentTarget } = initializeRoom({
     THREE, canvas, stations, reducedMotion, onActivate
   });
+  const parallaxRig = createParallaxRig({ layers: createRoomParallaxLayers(room), maxLayers: 12 });
 
   let cameraLayout = "desktop";
   let timeline = createCameraTimeline({ layout: cameraLayout });
@@ -186,6 +209,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     if (disposed) return;
     if (!reducedMotion) frameId = requestAnimationFrame(draw);
     if (!quality.isVisible) return;
+    const frameSeconds = Math.min(.05, Math.max(0, (now - lastFrame) / 1000));
     const shot = exitProgress > 0 ? timeline.exit(exitProgress) : timeline.sample(journey);
     const sceneProgress = journey;
     room.setJourney(sceneProgress);
@@ -195,11 +219,17 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     camera.updateProjectionMatrix();
     camera.lookAt(new THREE.Vector3(...shot.target));
     const parallaxEnabled = !reducedMotion && cameraLayout !== "mobile" && exitProgress === 0;
-    if (!parallaxEnabled) interaction.reset();
-    const parallax = parallaxEnabled ? interaction.update() : ZERO_PARALLAX;
-    room.setParallax(parallax);
-    camera.rotation.y += parallax.x * .35;
-    camera.rotation.x += parallax.y * .35;
+    let cameraParallax = ZERO_PARALLAX;
+    if (parallaxEnabled) {
+      parallaxRig.setTarget(interaction.getParallaxTarget());
+      parallaxRig.update(frameSeconds);
+      cameraParallax = interaction.update();
+    } else {
+      interaction.reset();
+      parallaxRig.restoreImmediately();
+    }
+    camera.rotation.y += cameraParallax.x * .35;
+    camera.rotation.x += cameraParallax.y * .35;
     lighting.apply(sceneProgress, {
       focusStation: shot.stationId,
       target: shot.target,
@@ -298,7 +328,8 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
         dpr: quality.getDprCap(),
         cameraLayout,
         toneMappingExposure: renderer.toneMappingExposure,
-        environmentReady: Boolean(scene.environment)
+        environmentReady: Boolean(scene.environment),
+        parallax: parallaxRig.audit()
       };
     },
     dispose() {
@@ -312,6 +343,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       document.removeEventListener("visibilitychange", onVisibilityChange);
       canvas.removeEventListener("webglcontextlost", onContextLost);
       interaction.dispose();
+      parallaxRig.restoreImmediately();
       room.dispose();
       environmentTarget?.dispose?.();
       renderer.dispose();
