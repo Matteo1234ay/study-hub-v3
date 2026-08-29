@@ -4,6 +4,7 @@ import { createCameraTimeline } from "./camera-timeline.js?v=20260829-23";
 import { createLightingController } from "./lighting-controller.js?v=20260829-23";
 import { createInteractionController } from "./interaction-controller.js?v=20260829-23";
 import { createQualityController } from "./quality-controller.js?v=20260829-23";
+import { RoomEnvironment } from "../../../vendor/three/examples/jsm/environments/RoomEnvironment.js?v=20260829-23";
 
 const ZERO_PARALLAX = Object.freeze({ x: 0, y: 0 });
 
@@ -71,6 +72,7 @@ function initializeRoom({ THREE, canvas, stations, reducedMotion, onActivate }) 
   let renderer = null;
   let room = null;
   let interaction = null;
+  let environmentTarget = null;
   try {
     const initialRect = canvas.getBoundingClientRect();
     const compact = resolveCameraLayout(initialRect.width || globalThis.innerWidth || 1440, initialRect.height || globalThis.innerHeight || 900) === "mobile";
@@ -84,6 +86,13 @@ function initializeRoom({ THREE, canvas, stations, reducedMotion, onActivate }) 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0b1016);
     scene.fog = new THREE.Fog(0x0b1016, 12, 25);
+    const environmentScene = new RoomEnvironment();
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    environmentTarget = pmremGenerator.fromScene(environmentScene, .04);
+    scene.environment = environmentTarget.texture;
+    if ("environmentIntensity" in scene) scene.environmentIntensity = compact ? .48 : .58;
+    environmentScene.dispose();
+    pmremGenerator.dispose();
     const camera = new THREE.PerspectiveCamera(42, 1, .1, 50);
     const materials = createRoomMaterials(THREE);
     room = buildStudyRoom({ THREE, materials });
@@ -106,10 +115,11 @@ function initializeRoom({ THREE, canvas, stations, reducedMotion, onActivate }) 
     fillLight.position.set(4, 3.5, 4.5);
     scene.add(keyLight, fillLight);
     interaction = createInteractionController({ THREE, canvas, camera, stations: room.stations, onActivate });
-    return { renderer, room, interaction, quality, scene, camera, lightRig };
+    return { renderer, room, interaction, quality, scene, camera, lightRig, environmentTarget };
   } catch (error) {
     interaction?.dispose();
     room?.dispose();
+    environmentTarget?.dispose?.();
     renderer?.dispose();
     renderer?.forceContextLoss?.();
     throw error;
@@ -119,7 +129,7 @@ function initializeRoom({ THREE, canvas, stations, reducedMotion, onActivate }) 
 export async function createStudyRoomRenderer({ canvas, stations, reducedMotion = false, onActivate = () => {}, onFailure = () => {} }) {
   if (!canvas?.getContext) throw new Error("Canvas della stanza non disponibile");
   const THREE = await import("../../../vendor/three/three.module.min.js?v=20260829-23");
-  const { renderer, room, interaction, quality, scene, camera, lightRig } = initializeRoom({
+  const { renderer, room, interaction, quality, scene, camera, lightRig, environmentTarget } = initializeRoom({
     THREE, canvas, stations, reducedMotion, onActivate
   });
 
@@ -273,7 +283,8 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
         profile: quality.profile,
         dpr: quality.getDprCap(),
         cameraLayout,
-        toneMappingExposure: renderer.toneMappingExposure
+        toneMappingExposure: renderer.toneMappingExposure,
+        environmentReady: Boolean(scene.environment)
       };
     },
     dispose() {
@@ -288,6 +299,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       canvas.removeEventListener("webglcontextlost", onContextLost);
       interaction.dispose();
       room.dispose();
+      environmentTarget?.dispose?.();
       renderer.dispose();
       renderer.forceContextLoss?.();
       if (!readySettled) {
