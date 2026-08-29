@@ -41,7 +41,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     return () => {};
   }
 
-  root.dataset.homeState = "fallback";
+  root.dataset.homeState = "preparing";
   root.dataset.journeyStarted = "false";
   root.dataset.homeExit = "false";
   const routeState = createCinematicRouteState();
@@ -120,6 +120,13 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
         if (station) transitionManager?.activate(station);
       }
     });
+    if (disposed || !root.isConnected) {
+      renderer.dispose();
+      renderer = null;
+      cleanup();
+      return cleanup;
+    }
+    await renderer.ready;
     if (disposed || !root.isConnected) {
       renderer.dispose();
       renderer = null;
