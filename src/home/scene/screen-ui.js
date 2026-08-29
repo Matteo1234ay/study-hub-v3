@@ -1,10 +1,25 @@
 const SCREEN_SIZES = Object.freeze({
-  default: Object.freeze({ width: 768, height: 480, logicalWidth: 512, logicalHeight: 320 }),
-  social: Object.freeze({ width: 960, height: 1344, logicalWidth: 640, logicalHeight: 896 })
+  default: Object.freeze({
+    logicalWidth: 512,
+    logicalHeight: 320,
+    base: Object.freeze({ width: 768, height: 480 }),
+    active: Object.freeze({ width: 1024, height: 640 })
+  }),
+  social: Object.freeze({
+    logicalWidth: 640,
+    logicalHeight: 896,
+    base: Object.freeze({ width: 960, height: 1344 }),
+    active: Object.freeze({ width: 1280, height: 1792 })
+  })
 });
 
-function screenSize(screenKind) {
-  return SCREEN_SIZES[screenKind] ?? SCREEN_SIZES.default;
+function screenSize(screenKind, active = false) {
+  const policy = SCREEN_SIZES[screenKind] ?? SCREEN_SIZES.default;
+  return {
+    ...policy[active ? "active" : "base"],
+    logicalWidth: policy.logicalWidth,
+    logicalHeight: policy.logicalHeight
+  };
 }
 
 function normalizeData(data = {}) {
@@ -26,7 +41,7 @@ function sameData(left, right) {
   return JSON.stringify(left) === JSON.stringify(right);
 }
 
-function label(context, text, x, y, size = 18, color = "#d8e7f6", weight = 500) {
+function label(context, text, x, y, size = 18, color = "#e4edf5", weight = 620) {
   context.fillStyle = color;
   context.font = `${weight} ${size}px system-ui, sans-serif`;
   context.fillText(text, x, y);
@@ -37,78 +52,78 @@ function panel(context, x, y, width, height, color = "#17202b") {
   context.fillRect(x, y, width, height);
 }
 
-function progressBar(context, x, y, width, value, color = "#66aef4") {
-  panel(context, x, y, width, 10, "#28313c");
-  panel(context, x, y, width * value / 100, 10, color);
+function progressBar(context, x, y, width, value, color = "#76baff") {
+  panel(context, x, y, width, 12, "#2a3541");
+  panel(context, x, y, width * value / 100, 12, color);
 }
 
 function drawLesson(context, data) {
-  label(context, "LEZIONE ATTIVA", 28, 34, 15, "#7ab8ff", 760);
-  label(context, data.lessonId, 28, 78, 36, "#ffffff", 790);
-  label(context, `Capitolo · ${data.chapter}`, 28, 112, 17, "#c5d1dd", 620);
-  panel(context, 28, 136, 456, 86, "#151d27");
-  label(context, "Riprendi da qui", 48, 171, 21, "#f4f7fb", 720);
-  label(context, `${data.completion}% completato`, 48, 202, 16, "#aab9c8", 620);
-  progressBar(context, 28, 248, 456, data.completion);
-  label(context, "Continua →", 374, 292, 18, "#8bc4ff", 760);
+  label(context, "LEZIONE ATTIVA", 28, 36, 16, "#8bc4ff", 780);
+  label(context, data.lessonId, 28, 84, 40, "#ffffff", 820);
+  label(context, `Capitolo · ${data.chapter}`, 28, 120, 18, "#d6e0e9", 660);
+  panel(context, 28, 144, 456, 84, "#15202b");
+  label(context, `${data.completion}% completato`, 48, 185, 22, "#ffffff", 760);
+  progressBar(context, 28, 252, 456, data.completion);
+  label(context, "Continua →", 368, 296, 20, "#8bc4ff", 800);
 }
 
 function drawMemory(context, data) {
-  label(context, "MEMORIA DI STUDIO", 28, 34, 15, "#e4bd6f", 760);
-  label(context, "Note e Ripasso", 28, 78, 35, "#fffaf1", 790);
-  panel(context, 28, 108, 216, 102, "#3b3327");
-  panel(context, 264, 108, 220, 102, "#1b2a37");
-  label(context, `${data.noteCount} note`, 46, 148, 20, "#ffe2aa", 700);
-  label(context, "Appunti salvati", 46, 180, 15, "#d1c4a8", 600);
-  label(context, "Da consolidare", 282, 148, 19, "#b9def8", 700);
-  label(context, "Ripasso", 282, 180, 15, "#b4c4d1", 600);
-  label(context, "Apri il ripasso →", 306, 278, 18, "#f0c979", 760);
+  label(context, "MEMORIA DI STUDIO", 28, 36, 16, "#efcd85", 780);
+  label(context, "Note e Ripasso", 28, 84, 38, "#fffaf1", 820);
+  panel(context, 28, 116, 216, 100, "#3d3427");
+  panel(context, 264, 116, 220, 100, "#1a2b39");
+  label(context, `${data.noteCount} note`, 46, 158, 23, "#ffe4ad", 760);
+  label(context, "Appunti salvati", 46, 190, 16, "#e2d5bd", 650);
+  label(context, "Da consolidare", 282, 158, 21, "#c9e8ff", 760);
+  label(context, "Ripasso", 282, 190, 16, "#cfdae3", 650);
+  label(context, "Apri il ripasso →", 292, 286, 20, "#f2cf82", 800);
 }
 
 function drawSocial(context, data) {
-  label(context, "PERCORSO ATTIVO", 52, 82, 26, "#7ab8ff", 780);
-  label(context, data.pathTitle, 52, 158, 52, "#ffffff", 800);
+  label(context, "PERCORSO ATTIVO", 52, 84, 26, "#8bc4ff", 800);
+  label(context, data.pathTitle, 52, 166, 56, "#ffffff", 840);
 
-  panel(context, 52, 216, 536, 202, "#152331");
-  label(context, `${data.lessonCount} lezione disponibile`, 82, 288, 36, "#ffffff", 780);
-  label(context, "Reach · Impression", 82, 350, 28, "#cfe1f0", 680);
-  label(context, "Watch time · Retention", 82, 394, 28, "#cfe1f0", 680);
+  panel(context, 52, 226, 536, 210, "#142433");
+  label(context, `${data.lessonCount} lezione disponibile`, 82, 304, 38, "#ffffff", 800);
+  label(context, "Reach · Impression", 82, 370, 30, "#d9ebf8", 720);
+  label(context, "Watch time · Retention", 82, 418, 30, "#d9ebf8", 720);
 
-  label(context, "LETTURA STRATEGICA", 52, 516, 25, "#7ab8ff", 760);
-  label(context, "Metriche nel loro contesto", 52, 574, 34, "#f3f7fb", 740);
+  label(context, "LETTURA STRATEGICA", 52, 538, 26, "#8bc4ff", 780);
+  label(context, "Metriche nel contesto", 52, 600, 36, "#f7fafc", 780);
 
-  panel(context, 52, 706, 536, 112, "#101b26");
-  label(context, "Apri il percorso →", 82, 779, 32, "#8bc4ff", 800);
+  panel(context, 52, 710, 536, 120, "#0f1c28");
+  label(context, "Apri il percorso →", 82, 788, 34, "#91c9ff", 820);
 }
 
 function drawAssessment(context, data) {
-  label(context, "VERIFICA PROGRESSIVA", 26, 34, 15, "#a8c8ef", 760);
-  label(context, data.assessmentAvailable ? "Disponibile" : "In preparazione", 26, 82, 35, "#ffffff", 790);
-  panel(context, 26, 112, 460, 104, "#17202b");
-  label(context, "Domande e feedback", 46, 156, 22, "#edf3f8", 720);
-  label(context, "Secondo tentativo incluso", 46, 190, 16, "#b8c6d3", 600);
-  label(context, "Apri la verifica →", 310, 286, 18, "#8bc4ff", 760);
+  label(context, "VERIFICA PROGRESSIVA", 26, 36, 16, "#b4d3f7", 780);
+  label(context, data.assessmentAvailable ? "Disponibile" : "In preparazione", 26, 86, 39, "#ffffff", 820);
+  panel(context, 26, 118, 460, 104, "#17222d");
+  label(context, "Domande e feedback", 46, 162, 24, "#f4f8fb", 760);
+  label(context, "Secondo tentativo incluso", 46, 198, 17, "#d1dbe5", 650);
+  label(context, "Apri la verifica →", 294, 292, 20, "#8bc4ff", 800);
 }
 
 function drawProgress(context, data) {
-  label(context, "PROGRESSI", 28, 34, 15, "#79d09f", 760);
-  label(context, "Avanzamento", 28, 80, 35, "#f4fff7", 790);
-  label(context, `${data.completedChapters} di ${data.totalChapters} capitoli completati`, 28, 124, 19, "#dff4e7", 700);
-  progressBar(context, 28, 150, 456, data.completion, "#66c48f");
-  panel(context, 28, 190, 456, 62, "#17241d");
-  label(context, `${data.reviewCount} concetti da consolidare`, 48, 229, 18, "#f4c98d", 680);
-  label(context, "Apri progressi →", 318, 290, 17, "#79d09f", 760);
+  label(context, "PROGRESSI", 28, 36, 16, "#86d9aa", 780);
+  label(context, "Avanzamento", 28, 84, 38, "#f5fff8", 820);
+  label(context, `${data.completedChapters} di ${data.totalChapters} capitoli completati`, 28, 130, 20, "#e8f7ed", 740);
+  progressBar(context, 28, 158, 456, data.completion, "#73cf9b");
+  panel(context, 28, 198, 456, 64, "#17251e");
+  label(context, `${data.reviewCount} concetti da consolidare`, 48, 240, 19, "#ffd39a", 720);
+  label(context, "Apri progressi →", 304, 296, 19, "#86d9aa", 800);
 }
 
 function drawFuture(context) {
-  label(context, "ARCHIVIO PERCORSI", 28, 36, 15, "#b7c0cb", 760);
-  label(context, "In preparazione", 28, 82, 35, "#ffffff", 790);
+  label(context, "ARCHIVIO DIDATTICO", 28, 36, 16, "#c4ccd5", 780);
+  label(context, "Percorsi", 28, 84, 38, "#ffffff", 820);
+  label(context, "In preparazione", 286, 82, 34, "#d8dfe7", 780);
   ["Intelligenza Artificiale", "Design", "Video Making"].forEach((name, index) => {
-    panel(context, 28, 108 + index * 52, 456, 40, "#191f27");
-    label(context, name, 44, 135 + index * 52, 17, "#d0d7df", 650);
-    label(context, "Standby", 406, 135 + index * 52, 13, "#8a96a4", 700);
+    panel(context, 28, 112 + index * 52, 456, 40, "#191f27");
+    label(context, name, 44, 139 + index * 52, 17, "#e0e5eb", 680);
+    label(context, "Standby", 400, 139 + index * 52, 15, "#aab5c0", 740);
   });
-  label(context, "Vai ai percorsi →", 330, 294, 17, "#cbd4de", 760);
+  label(context, "Vai ai percorsi →", 300, 298, 20, "#d7e0e8", 800);
 }
 
 const DRAWERS = Object.freeze({
@@ -126,14 +141,24 @@ export function createStationScreen({
   canvasFactory = () => document.createElement("canvas")
 }) {
   const canvas = canvasFactory();
-  const size = screenSize(station?.screenKind);
-  canvas.width = size.width;
-  canvas.height = size.height;
   const context = canvas.getContext("2d");
   let current = normalizeData(data);
+  let active = false;
   let disposed = false;
 
+  function currentSize() {
+    return screenSize(station?.screenKind, active);
+  }
+
+  function applySize() {
+    const size = currentSize();
+    canvas.width = size.width;
+    canvas.height = size.height;
+    return size;
+  }
+
   function draw() {
+    const size = currentSize();
     context.clearRect(0, 0, canvas.width, canvas.height);
     context.fillStyle = "#090d12";
     context.fillRect(0, 0, canvas.width, canvas.height);
@@ -144,9 +169,19 @@ export function createStationScreen({
     context.restore();
   }
 
+  applySize();
   draw();
   return {
     canvas,
+    setActive(value) {
+      if (disposed) return false;
+      const next = Boolean(value);
+      if (next === active) return false;
+      active = next;
+      applySize();
+      draw();
+      return true;
+    },
     update(nextData = {}) {
       if (disposed) return false;
       const next = normalizeData({ ...current, ...nextData });
