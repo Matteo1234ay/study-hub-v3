@@ -134,6 +134,13 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
   let finishFocus = null;
   let lastFrame = performance.now();
   let lastProfile = quality.profile;
+  let readySettled = false;
+  let resolveReady;
+  let rejectReady;
+  const readyPromise = new Promise((resolve, reject) => {
+    resolveReady = resolve;
+    rejectReady = reject;
+  });
 
   function resize() {
     if (disposed) return;
@@ -175,6 +182,10 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       cameraPosition: shot.position
     });
     renderer.render(scene, camera);
+    if (!readySettled) {
+      readySettled = true;
+      resolveReady();
+    }
     if (quality.recordFrame(now - lastFrame) && quality.profile !== lastProfile) {
       lastProfile = quality.profile;
       renderer.shadowMap.enabled = quality.profile === "high";
@@ -195,7 +206,12 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
   function onContextLost(event) {
     event.preventDefault();
     quality.setVisible(false);
-    onFailure(new Error("Contesto WebGL interrotto"));
+    const error = new Error("Contesto WebGL interrotto");
+    if (!readySettled) {
+      readySettled = true;
+      rejectReady(error);
+    }
+    onFailure(error);
   }
   document.addEventListener("visibilitychange", onVisibilityChange);
   canvas.addEventListener("webglcontextlost", onContextLost, { once: true });
@@ -206,6 +222,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
   else frameId = requestAnimationFrame(draw);
 
   return {
+    ready: readyPromise,
     setJourney(value) {
       journey = Math.min(1, Math.max(0, Number(value) || 0));
       if (reducedMotion) draw(performance.now());
@@ -273,6 +290,10 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       room.dispose();
       renderer.dispose();
       renderer.forceContextLoss?.();
+      if (!readySettled) {
+        readySettled = true;
+        rejectReady(new Error("Renderer chiuso prima del primo frame"));
+      }
     }
   };
 }
