@@ -1,4 +1,5 @@
 import { createStationScreen } from "./screen-ui.js?v=20260829-23";
+import { RoundedBoxGeometry } from "../../../vendor/three/examples/jsm/geometries/RoundedBoxGeometry.js?v=20260829-23";
 
 const OPENING_CAMERA = Object.freeze({
   position: [-5.6, 3.05, 5.75],
@@ -35,11 +36,17 @@ function box(THREE, size, material, name, position, rotation) {
   return mesh(THREE, new THREE.BoxGeometry(...size), material, name, position, rotation);
 }
 
-function cylinder(THREE, radius, height, material, name, position, rotation = [0, 0, 0]) {
-  return mesh(THREE, new THREE.CylinderGeometry(radius, radius, height, 20), material, name, position, rotation);
+function roundedBox(THREE, size, material, name, position, rotation = [0, 0, 0], radius = .045, segments = 2) {
+  const value = mesh(THREE, new RoundedBoxGeometry(size[0], size[1], size[2], segments, radius), material, name, position, rotation);
+  value.userData.silhouetteRefined = true;
+  return value;
 }
 
-function cylinderBetween(THREE, radius, start, end, material, name, segments = 20) {
+function cylinder(THREE, radius, height, material, name, position, rotation = [0, 0, 0], segments = 28) {
+  return mesh(THREE, new THREE.CylinderGeometry(radius, radius, height, segments), material, name, position, rotation);
+}
+
+function cylinderBetween(THREE, radius, start, end, material, name, segments = 24) {
   const from = new THREE.Vector3(...start);
   const to = new THREE.Vector3(...end);
   const direction = to.clone().sub(from);
@@ -49,6 +56,7 @@ function cylinderBetween(THREE, radius, start, end, material, name, segments = 2
   value.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
   value.userData.start = [...start];
   value.userData.end = [...end];
+  value.userData.curvedSilhouette = true;
   return value;
 }
 
@@ -64,28 +72,47 @@ function createHitArea(THREE, size, position, name) {
 function buildDesk(THREE, materials) {
   const group = new THREE.Group();
   group.name = "main-desk";
+  const top = roundedBox(THREE, [3.5, .18, 1.55], materials.wood, "desk-top", [0, 1.05, -.35], [0, 0, 0], .07, 3);
+  const keyboard = roundedBox(THREE, [1.25, .08, .38], materials.paintedMetal, "keyboard", [-.15, 1.18, .12], [-.08, 0, 0], .035, 3);
+  const mouse = roundedBox(THREE, [.26, .1, .4], materials.paintedMetal, "mouse", [.9, 1.18, .14], [0, 0, 0], .07, 4);
   group.add(
-    box(THREE, [3.5, .18, 1.55], materials.wood, "desk-top", [0, 1.05, -.35]),
-    box(THREE, [.16, 1.75, 1.18], materials.metal, "desk-leg-left", [-1.45, .15, -.35]),
-    box(THREE, [.16, 1.75, 1.18], materials.metal, "desk-leg-right", [1.45, .15, -.35]),
-    box(THREE, [1.25, .08, .38], materials.metal, "keyboard", [-.15, 1.18, .12], [-.08, 0, 0]),
-    box(THREE, [.26, .1, .4], materials.metal, "mouse", [.9, 1.18, .14])
+    top,
+    roundedBox(THREE, [.16, 1.75, 1.18], materials.paintedMetal, "desk-leg-left", [-1.45, .15, -.35], [0, 0, 0], .035),
+    roundedBox(THREE, [.16, 1.75, 1.18], materials.paintedMetal, "desk-leg-right", [1.45, .15, -.35], [0, 0, 0], .035),
+    keyboard,
+    mouse
   );
-  const mug = cylinder(THREE, .18, .38, materials.wall, "ceramic-mug", [1.3, 1.34, -.55]);
+
+  const mug = mesh(THREE, new THREE.CylinderGeometry(.18, .165, .38, 36, 1, true), materials.ceramic, "ceramic-mug", [1.3, 1.34, -.55]);
   mug.userData.functionalProp = "study-break";
-  group.add(mug);
+  mug.userData.curvedSilhouette = true;
+  mug.userData.silhouetteRefined = true;
+  const mugBase = cylinder(THREE, .165, .025, materials.ceramic, "mug-base", [1.3, 1.16, -.55], [0, 0, 0], 36);
+  const handle = mesh(THREE, new THREE.TorusGeometry(.14, .035, 10, 28, Math.PI * 1.72), materials.ceramic, "mug-handle", [1.48, 1.34, -.55], [Math.PI / 2, 0, Math.PI / 2]);
+  handle.userData.curvedSilhouette = true;
+  group.add(mug, mugBase, handle);
   return group;
 }
 
 function buildErgonomicChair(THREE, materials) {
   const group = new THREE.Group();
   group.name = "ergonomic-chair";
-  group.add(
-    box(THREE, [.92, .22, .85], materials.fabric, "chair-seat", [2.35, .7, 1.28], [-.08, -.12, 0]),
-    box(THREE, [.88, 1.28, .2], materials.fabric, "chair-back", [2.52, 1.48, 1.55], [-.1, -.12, 0]),
-    cylinder(THREE, .1, .72, materials.metal, "chair-column", [2.35, .25, 1.28]),
-    cylinder(THREE, .08, 1.15, materials.metal, "chair-base", [2.35, -.08, 1.28], [0, 0, Math.PI / 2])
-  );
+  group.userData.silhouetteRefined = true;
+  const seat = roundedBox(THREE, [.92, .2, .85], materials.fabric, "chair-seat", [2.35, .7, 1.28], [-.08, -.12, 0], .11, 4);
+  const back = roundedBox(THREE, [.82, 1.22, .17], materials.fabric, "chair-back", [2.52, 1.48, 1.55], [-.1, -.12, 0], .12, 4);
+  seat.userData.curvedSilhouette = true;
+  back.userData.curvedSilhouette = true;
+  const lumbar = roundedBox(THREE, [.7, .07, .08], materials.paintedMetal, "chair-lumbar-frame", [2.48, 1.25, 1.42], [-.08, -.12, 0], .035, 3);
+  const column = cylinder(THREE, .085, .72, materials.metal, "chair-column", [2.35, .25, 1.28]);
+  const hub = cylinder(THREE, .16, .08, materials.metal, "chair-hub", [2.35, -.08, 1.28]);
+  group.add(seat, back, lumbar, column, hub);
+  for (let index = 0; index < 5; index += 1) {
+    const angle = index / 5 * Math.PI * 2;
+    const end = [2.35 + Math.cos(angle) * .54, -.11, 1.28 + Math.sin(angle) * .54];
+    group.add(cylinderBetween(THREE, .035, [2.35, -.08, 1.28], end, materials.metal, `chair-spoke-${index + 1}`, 14));
+    const wheel = mesh(THREE, new THREE.TorusGeometry(.07, .025, 8, 16), materials.paintedMetal, `chair-wheel-${index + 1}`, [end[0], -.17, end[2]], [Math.PI / 2, 0, 0]);
+    group.add(wheel);
+  }
   return group;
 }
 
@@ -97,13 +124,18 @@ function buildArticulatedLamp(THREE, materials) {
   const elbow = [1.68, 1.82, -.64];
   const upperEnd = [1.48, 2.16, -.74];
   const shadePosition = [1.4, 2.16, -.8];
-  const elbowJoint = mesh(THREE, new THREE.SphereGeometry(.095, 16, 12), materials.metal, "lamp-elbow-joint", elbow);
+  const elbowJoint = mesh(THREE, new THREE.SphereGeometry(.095, 20, 16), materials.metal, "lamp-elbow-joint", elbow);
+  const shade = mesh(THREE, new THREE.CylinderGeometry(.12, .25, .34, 32, 1, true), materials.paintedMetal, "lamp-shade", shadePosition, [0, .1, Math.PI / 2 + .18]);
+  shade.userData.silhouetteRefined = true;
+  shade.userData.curvedSilhouette = true;
+  const inner = mesh(THREE, new THREE.CircleGeometry(.115, 28), new THREE.MeshStandardMaterial({ color: 0xffe7c6, roughness: .75, emissive: 0x33200f, emissiveIntensity: .16 }), "lamp-diffuser", [1.29, 2.14, -.81], [0, Math.PI / 2, 0]);
   group.add(
-    cylinder(THREE, .25, .07, materials.metal, "lamp-base", base),
-    cylinderBetween(THREE, .045, lowerStart, elbow, materials.metal, "lamp-lower-arm"),
+    cylinder(THREE, .25, .07, materials.paintedMetal, "lamp-base", base),
+    cylinderBetween(THREE, .042, lowerStart, elbow, materials.metal, "lamp-lower-arm"),
     elbowJoint,
-    cylinderBetween(THREE, .04, elbow, upperEnd, materials.metal, "lamp-upper-arm"),
-    box(THREE, [.46, .23, .36], materials.metal, "lamp-shade", shadePosition, [0, .1, .18])
+    cylinderBetween(THREE, .038, elbow, upperEnd, materials.metal, "lamp-upper-arm"),
+    shade,
+    inner
   );
   return group;
 }
@@ -111,13 +143,15 @@ function buildArticulatedLamp(THREE, materials) {
 function buildMainMonitor(THREE, materials) {
   const group = new THREE.Group();
   group.name = "main-monitor";
-  const frame = box(THREE, [1.85, 1.12, .12], materials.metal, "main-monitor-frame", [0, 1.95, -1.02]);
-  const screen = box(THREE, [1.68, .94, .035], materials.glassOff.clone(), "main-monitor-screen", [0, 1.95, -.948]);
+  group.userData.silhouetteRefined = true;
+  const frame = roundedBox(THREE, [1.85, 1.12, .12], materials.paintedMetal, "main-monitor-frame", [0, 1.95, -1.02], [0, 0, 0], .07, 4);
+  const screen = roundedBox(THREE, [1.68, .94, .035], materials.glassOff.clone(), "main-monitor-screen", [0, 1.95, -.948], [0, 0, 0], .035, 3);
+  screen.userData.silhouetteRefined = true;
   group.add(
     frame,
     screen,
-    cylinder(THREE, .07, .58, materials.metal, "monitor-neck", [0, 1.35, -1.05]),
-    box(THREE, [.62, .08, .44], materials.metal, "monitor-foot", [0, 1.18, -.98])
+    cylinder(THREE, .065, .58, materials.metal, "monitor-neck", [0, 1.35, -1.05]),
+    roundedBox(THREE, [.62, .08, .44], materials.paintedMetal, "monitor-foot", [0, 1.18, -.98], [0, 0, 0], .04, 3)
   );
   group.userData.screen = screen;
   return group;
@@ -126,18 +160,20 @@ function buildMainMonitor(THREE, materials) {
 function buildMemoryWall(THREE, materials) {
   const group = new THREE.Group();
   group.name = "memory-board";
-  const board = box(THREE, [2.15, 1.35, .12], materials.wood, "note-board-frame", [-3.35, 2.35, -2.86]);
+  const board = roundedBox(THREE, [2.15, 1.35, .12], materials.wood, "note-board-frame", [-3.35, 2.35, -2.86], [0, 0, 0], .045, 2);
   group.add(board);
   group.userData.screen = board;
   const paperColors = [0xd3b566, 0xb7c8d8, 0xc7b9d8, 0xd7d0ba];
   for (let index = 0; index < 6; index += 1) {
-    const paper = new THREE.MeshStandardMaterial({ color: paperColors[index % paperColors.length], roughness: .9 });
-    group.add(box(THREE, [.5, .34, .018], paper, `review-card-${index + 1}`, [-3.72 + (index % 3) * .48, 2.68 - Math.floor(index / 3) * .48, -2.78], [0, 0, (index % 2 ? 1 : -1) * .045]));
+    const paper = new THREE.MeshStandardMaterial({ color: paperColors[index % paperColors.length], roughness: .92, metalness: 0 });
+    group.add(roundedBox(THREE, [.5, .34, .018], paper, `review-card-${index + 1}`, [-3.72 + (index % 3) * .48, 2.68 - Math.floor(index / 3) * .48, -2.78], [0, 0, (index % 2 ? 1 : -1) * .045], .012, 2));
   }
   for (let shelf = 0; shelf < 2; shelf += 1) {
-    group.add(box(THREE, [2.2, .12, .52], materials.wood, `memory-shelf-${shelf + 1}`, [-3.35, 1.22 - shelf * .72, -2.42]));
+    group.add(roundedBox(THREE, [2.2, .12, .52], materials.wood, `memory-shelf-${shelf + 1}`, [-3.35, 1.22 - shelf * .72, -2.42], [0, 0, 0], .035, 2));
     for (let book = 0; book < 5; book += 1) {
-      group.add(box(THREE, [.22 + (book % 2) * .05, .55, .4], book % 2 ? materials.fabric : materials.wall, `study-binder-${shelf + 1}-${book + 1}`, [-4.08 + book * .36, 1.55 - shelf * .72, -2.48], [0, 0, (book - 2) * .018]));
+      const width = .2 + (book % 3) * .025;
+      const height = .51 + (book % 2) * .055;
+      group.add(roundedBox(THREE, [width, height, .39], book % 2 ? materials.fabric : materials.wall, `study-binder-${shelf + 1}-${book + 1}`, [-4.08 + book * .36, 1.55 - shelf * .72 + (height - .51) / 2, -2.48], [0, 0, (book - 2) * .018], .018, 2));
     }
   }
   return group;
@@ -146,8 +182,8 @@ function buildMemoryWall(THREE, materials) {
 function buildSocialDisplay(THREE, materials) {
   const group = new THREE.Group();
   group.name = "social-display";
-  const screen = box(THREE, [1.5, 2.05, .06], materials.glassOff.clone(), "social-screen", [3.35, 2.1, -2.78]);
-  group.add(box(THREE, [1.7, 2.25, .14], materials.metal, "social-display-frame", [3.35, 2.1, -2.87]), screen);
+  const screen = roundedBox(THREE, [1.5, 2.05, .06], materials.glassOff.clone(), "social-screen", [3.35, 2.1, -2.78], [0, 0, 0], .045, 3);
+  group.add(roundedBox(THREE, [1.7, 2.25, .14], materials.paintedMetal, "social-display-frame", [3.35, 2.1, -2.87], [0, 0, 0], .08, 3), screen);
   group.userData.screen = screen;
   return group;
 }
@@ -155,11 +191,11 @@ function buildSocialDisplay(THREE, materials) {
 function buildAssessmentConsole(THREE, materials) {
   const group = new THREE.Group();
   group.name = "assessment-console";
-  const screen = box(THREE, [1.48, .78, .07], materials.glassOff.clone(), "assessment-screen", [2.55, .95, -.6], [-.5, 0, 0]);
+  const screen = roundedBox(THREE, [1.48, .78, .07], materials.glassOff.clone(), "assessment-screen", [2.55, .95, -.6], [-.5, 0, 0], .04, 3);
   group.add(
-    box(THREE, [1.7, .95, .16], materials.metal, "assessment-tablet-frame", [2.55, .92, -.66], [-.5, 0, 0]),
+    roundedBox(THREE, [1.7, .95, .16], materials.paintedMetal, "assessment-tablet-frame", [2.55, .92, -.66], [-.5, 0, 0], .065, 3),
     screen,
-    box(THREE, [.16, 1.0, .3], materials.metal, "assessment-stand", [2.55, .42, -.96], [-.25, 0, 0])
+    roundedBox(THREE, [.16, 1.0, .3], materials.paintedMetal, "assessment-stand", [2.55, .42, -.96], [-.25, 0, 0], .035, 2)
   );
   group.userData.screen = screen;
   return group;
@@ -168,8 +204,8 @@ function buildAssessmentConsole(THREE, materials) {
 function buildProgressDisplay(THREE, materials) {
   const group = new THREE.Group();
   group.name = "progress-display";
-  const screen = box(THREE, [1.85, 1.1, .06], materials.glassOff.clone(), "progress-screen", [-.95, 1.05, -2.8]);
-  group.add(box(THREE, [2.05, 1.3, .14], materials.metal, "progress-display-frame", [-.95, 1.05, -2.89]), screen);
+  const screen = roundedBox(THREE, [1.85, 1.1, .06], materials.glassOff.clone(), "progress-screen", [-.95, 1.05, -2.8], [0, 0, 0], .045, 3);
+  group.add(roundedBox(THREE, [2.05, 1.3, .14], materials.paintedMetal, "progress-display-frame", [-.95, 1.05, -2.89], [0, 0, 0], .07, 3), screen);
   group.userData.screen = screen;
   return group;
 }
@@ -178,13 +214,13 @@ function buildFutureArchive(THREE, materials) {
   const group = new THREE.Group();
   group.name = "future-archive";
   group.add(
-    box(THREE, [3.0, 1.8, .48], materials.wood, "archive-cabinet", [.75, 3.18, -2.72]),
-    box(THREE, [2.32, 1.28, .11], materials.metal, "future-directory-frame", [.75, 3.26, -2.43])
+    roundedBox(THREE, [3.0, 1.8, .48], materials.wood, "archive-cabinet", [.75, 3.18, -2.72], [0, 0, 0], .07, 3),
+    roundedBox(THREE, [2.32, 1.28, .11], materials.paintedMetal, "future-directory-frame", [.75, 3.26, -2.43], [0, 0, 0], .06, 3)
   );
-  const screen = box(THREE, [2.14, 1.1, .035], materials.glassOff.clone(), "future-directory-screen", [.75, 3.26, -2.362]);
+  const screen = roundedBox(THREE, [2.14, 1.1, .035], materials.glassOff.clone(), "future-directory-screen", [.75, 3.26, -2.362], [0, 0, 0], .035, 3);
   group.add(screen);
   for (let index = 0; index < 3; index += 1) {
-    group.add(box(THREE, [.48, .32, .32], materials.fabric, `future-binder-${index + 1}`, [-.05 + index * .8, 2.38, -2.48]));
+    group.add(roundedBox(THREE, [.44 + index * .025, .3 + (index % 2) * .035, .3], materials.fabric, `future-binder-${index + 1}`, [-.05 + index * .8, 2.38, -2.48], [0, 0, (index - 1) * .02], .025, 2));
   }
   group.userData.screen = screen;
   return group;
@@ -292,11 +328,22 @@ export function buildStudyRoom({ THREE, materials }) {
     baseY: object.position.y
   }));
 
+  const roundedProps = [];
+  const curvedProps = [];
+  group.traverse(object => {
+    if (object.userData?.silhouetteRefined) roundedProps.push(object);
+    if (object.userData?.curvedSilhouette) curvedProps.push(object);
+  });
+
   return {
     group,
     stations,
     openingCamera: OPENING_CAMERA,
     occlusionAudit: auditOpeningComposition(THREE, monitor, chair),
+    realismAudit: Object.freeze({
+      roundedProps: roundedProps.length,
+      curvedProps: curvedProps.length
+    }),
     parallaxAudit: Object.freeze({
       count: parallaxLayers.length,
       depths: Object.freeze(parallaxLayers.map(layer => layer.depth))
