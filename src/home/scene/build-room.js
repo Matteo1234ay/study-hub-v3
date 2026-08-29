@@ -60,6 +60,14 @@ function cylinderBetween(THREE, radius, start, end, material, name, segments = 2
   return value;
 }
 
+function curvedTube(THREE, points, radius, material, name, tubularSegments = 24, radialSegments = 10) {
+  const curve = new THREE.CatmullRomCurve3(points.map(point => new THREE.Vector3(...point)), false, "centripetal");
+  const value = mesh(THREE, new THREE.TubeGeometry(curve, tubularSegments, radius, radialSegments, false), material, name, [0, 0, 0]);
+  value.userData.curvedSilhouette = true;
+  value.userData.silhouetteRefined = true;
+  return value;
+}
+
 function createHitArea(THREE, size, position, name) {
   const material = new THREE.MeshBasicMaterial({ transparent: true, opacity: .001, depthWrite: false });
   const hitArea = box(THREE, size, material, name, position);
@@ -88,8 +96,14 @@ function buildDesk(THREE, materials) {
   mug.userData.curvedSilhouette = true;
   mug.userData.silhouetteRefined = true;
   const mugBase = cylinder(THREE, .165, .025, materials.ceramic, "mug-base", [1.3, 1.16, -.55], [0, 0, 0], 36);
-  const handle = mesh(THREE, new THREE.TorusGeometry(.14, .035, 10, 28, Math.PI * 1.72), materials.ceramic, "mug-handle", [1.48, 1.34, -.55], [Math.PI / 2, 0, Math.PI / 2]);
-  handle.userData.curvedSilhouette = true;
+  const handle = curvedTube(THREE, [
+    [1.43, 1.48, -.55],
+    [1.57, 1.47, -.55],
+    [1.64, 1.39, -.55],
+    [1.64, 1.29, -.55],
+    [1.57, 1.21, -.55],
+    [1.43, 1.2, -.55]
+  ], .034, materials.ceramic, "mug-handle", 28, 10);
   group.add(mug, mugBase, handle);
   return group;
 }
@@ -110,8 +124,11 @@ function buildErgonomicChair(THREE, materials) {
     const angle = index / 5 * Math.PI * 2;
     const end = [2.35 + Math.cos(angle) * .54, -.11, 1.28 + Math.sin(angle) * .54];
     group.add(cylinderBetween(THREE, .035, [2.35, -.08, 1.28], end, materials.metal, `chair-spoke-${index + 1}`, 14));
-    const wheel = mesh(THREE, new THREE.TorusGeometry(.07, .025, 8, 16), materials.paintedMetal, `chair-wheel-${index + 1}`, [end[0], -.17, end[2]], [Math.PI / 2, 0, 0]);
-    group.add(wheel);
+    const casterFork = cylinderBetween(THREE, .025, [end[0], -.11, end[2]], [end[0], -.19, end[2]], materials.paintedMetal, `chair-caster-fork-${index + 1}`, 12);
+    const wheel = cylinder(THREE, .065, .045, materials.paintedMetal, `chair-wheel-${index + 1}`, [end[0], -.2, end[2]], [Math.PI / 2, 0, -angle], 20);
+    wheel.userData.curvedSilhouette = true;
+    wheel.userData.silhouetteRefined = true;
+    group.add(casterFork, wheel);
   }
   return group;
 }
