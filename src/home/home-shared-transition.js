@@ -31,7 +31,34 @@ function createPortal(documentTarget) {
   element.className = "paths-shared-portal";
   element.dataset.direction = "forward";
   element.dataset.phase = "tracking";
+  element.textContent = "PERCORSI";
   element.setAttribute?.("aria-hidden", "true");
+  const styles = {
+    position: "fixed",
+    zIndex: "1600",
+    pointerEvents: "none",
+    overflow: "hidden",
+    display: "grid",
+    placeItems: "center",
+    left: "var(--paths-portal-left, 50vw)",
+    top: "var(--paths-portal-top, 50vh)",
+    width: "var(--paths-portal-width, 1px)",
+    height: "var(--paths-portal-height, 1px)",
+    opacity: "var(--paths-portal-opacity, 1)",
+    color: "rgba(238, 247, 255, .9)",
+    fontFamily: "system-ui, sans-serif",
+    fontSize: "clamp(.72rem, 2.4vw, 2rem)",
+    fontWeight: "760",
+    letterSpacing: ".18em",
+    textTransform: "uppercase",
+    background: "radial-gradient(circle at 58% 42%, rgba(95, 167, 236, .24), transparent 34%), linear-gradient(145deg, #142332, #09121c 62%, #05090e)",
+    border: "1px solid rgba(160, 205, 244, .28)",
+    boxShadow: "0 1.5rem 5rem rgba(0, 0, 0, .5), inset 0 0 3rem rgba(112, 180, 240, .08)",
+    backdropFilter: "blur(10px)",
+    transition: "opacity 160ms ease",
+    willChange: "left, top, width, height, opacity"
+  };
+  for (const [name, value] of Object.entries(styles)) element.style?.setProperty?.(name.replace(/[A-Z]/g, match => `-${match.toLowerCase()}`), value);
   documentTarget.body.append(element);
   return element;
 }
@@ -82,6 +109,7 @@ export function createSharedPathsTransition({
     node.style?.setProperty?.("--paths-portal-height", `${height}px`);
     node.style?.setProperty?.("--paths-portal-progress", String(clamp01(progress)));
     node.style?.setProperty?.("--paths-portal-opacity", String(reducedMotion ? clamp01(progress) : 1));
+    node.style?.setProperty?.("border-radius", `${interpolate(18, 0, amount)}px`);
   }
 
   return {
