@@ -1,0 +1,90 @@
+.home-preload {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-content: center;
+  gap: .8rem;
+  min-height: 100svh;
+  color: rgba(237, 243, 249, .78);
+  background:
+    radial-gradient(circle at 50% 42%, rgba(85, 104, 128, .18), transparent 29%),
+    linear-gradient(145deg, #10151b, #090d12 58%, #06090d);
+  transition: opacity 260ms ease, visibility 260ms ease;
+}
+
+.home-preload-mark {
+  font-size: .68rem;
+  font-weight: 780;
+  letter-spacing: .24em;
+  text-align: center;
+}
+
+.home-preload-line {
+  display: block;
+  width: min(12rem, 46vw);
+  height: 1px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, .11);
+}
+
+.home-preload-line::after {
+  display: block;
+  width: 42%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(122, 184, 255, .9), transparent);
+  content: "";
+  animation: home-preload-sweep 1.25s ease-in-out infinite;
+}
+
+.home-journey[data-home-state="loading"] .home-fallback,
+.home-journey[data-home-state="preparing"] .home-fallback,
+.home-journey[data-home-state="loading"] .home-quick-actions,
+.home-journey[data-home-state="preparing"] .home-quick-actions,
+.home-journey[data-home-state="loading"] .home-captions,
+.home-journey[data-home-state="preparing"] .home-captions,
+.home-journey[data-home-state="loading"] .home-progress,
+.home-journey[data-home-state="preparing"] .home-progress {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.home-journey[data-home-state="ready"] .home-preload,
+.home-journey[data-home-state="dom"] .home-preload {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+@keyframes home-preload-sweep {
+  from { transform: translateX(-120%); }
+  to { transform: translateX(340%); }
+}
+
+@media (max-width: 760px) {
+  body:has(.home-journey[data-home-state="loading"]) .site-header,
+  body:has(.home-journey[data-home-state="loading"]) .site-footer,
+  body:has(.home-journey[data-home-state="preparing"]) .site-header,
+  body:has(.home-journey[data-home-state="preparing"]) .site-footer {
+    display: none;
+  }
+
+  .home-journey[data-home-state="loading"],
+  .home-journey[data-home-state="preparing"],
+  .home-journey[data-home-state="loading"] .home-stage,
+  .home-journey[data-home-state="preparing"] .home-stage {
+    min-height: 100svh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-preload-line::after {
+    animation: none;
+    transform: translateX(70%);
+  }
+
+  .home-preload {
+    transition: none;
+  }
+}
