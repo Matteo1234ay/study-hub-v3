@@ -14,7 +14,7 @@ test("realism helpers are vendored locally with no runtime network dependency", 
 });
 
 test("renderer uses local PMREM image-based lighting without changing the visible background", async () => {
-  const source = await read("src/home/scene/study-room-renderer.js");
+  const source = await read("src/home/scene/renderer-setup.js");
   assert.match(source, /RoomEnvironment/);
   assert.match(source, /PMREMGenerator/);
   assert.match(source, /fromScene/);
