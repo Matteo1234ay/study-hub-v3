@@ -43,6 +43,7 @@ test("the complete changed homepage graph uses one Safari-safe token", async () 
     "src/views/paths-view.js",
     "src/home/home-experience.js",
     "src/home/scene/study-room-renderer.js",
+    "src/home/scene/renderer-setup.js",
     "src/home/scene/build-room.js"
   ];
   const sources = Object.fromEntries(await Promise.all(files.map(async file => [
@@ -57,7 +58,8 @@ test("the complete changed homepage graph uses one Safari-safe token", async () 
     "src/views/home-view.js": ["config/paths.js", "home/home-stations.js", "home/home-experience.js"],
     "src/views/paths-view.js": ["config/paths.js", "ui/components.js", "home/home-route-state.js", "home/paths-return-controller.js", "home/home-shared-transition.js"],
     "src/home/home-experience.js": ["home-route-state.js", "home-shared-transition.js", "scene/study-room-renderer.js", "home-transition-manager.js"],
-    "src/home/scene/study-room-renderer.js": ["materials.js", "build-room.js", "camera-timeline.js", "lighting-controller.js", "interaction-controller.js", "parallax-rig.js", "quality-controller.js", "RoomEnvironment.js", "three.module.min.js"],
+    "src/home/scene/study-room-renderer.js": ["camera-timeline.js", "lighting-controller.js", "parallax-rig.js", "renderer-setup.js", "renderer-projection.js", "three.module.min.js"],
+    "src/home/scene/renderer-setup.js": ["materials.js", "build-room.js", "interaction-controller.js", "quality-controller.js", "RoomEnvironment.js"],
     "src/home/scene/build-room.js": ["screen-ui.js", "RoundedBoxGeometry.js"]
   })) {
     for (const imported of imports) {
