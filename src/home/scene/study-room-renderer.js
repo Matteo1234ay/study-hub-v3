@@ -205,6 +205,38 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     if (reducedMotion) draw(performance.now());
   }
 
+  function projectScreenToCss(stationId) {
+    const screen = room.stations[stationId]?.screen;
+    if (!screen) return null;
+    screen.updateWorldMatrix(true, false);
+    camera.updateMatrixWorld(true);
+    const bounds = new THREE.Box3().setFromObject(screen);
+    const points = [];
+    for (const x of [bounds.min.x, bounds.max.x]) {
+      for (const y of [bounds.min.y, bounds.max.y]) {
+        for (const z of [bounds.min.z, bounds.max.z]) points.push(new THREE.Vector3(x, y, z).project(camera));
+      }
+    }
+    if (!points.length || points.some(point => !Number.isFinite(point.x) || !Number.isFinite(point.y))) return null;
+    const minX = Math.min(...points.map(point => point.x));
+    const maxX = Math.max(...points.map(point => point.x));
+    const minY = Math.min(...points.map(point => point.y));
+    const maxY = Math.max(...points.map(point => point.y));
+    const canvasRect = canvas.getBoundingClientRect();
+    const left = canvasRect.left + (minX + 1) * .5 * canvasRect.width;
+    const right = canvasRect.left + (maxX + 1) * .5 * canvasRect.width;
+    const top = canvasRect.top + (1 - maxY) * .5 * canvasRect.height;
+    const bottom = canvasRect.top + (1 - minY) * .5 * canvasRect.height;
+    return {
+      left,
+      top,
+      right,
+      bottom,
+      width: Math.max(1, right - left),
+      height: Math.max(1, bottom - top)
+    };
+  }
+
   function draw(now) {
     if (disposed) return;
     if (!reducedMotion) frameId = requestAnimationFrame(draw);
@@ -233,7 +265,8 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     lighting.apply(sceneProgress, {
       focusStation: shot.stationId,
       target: shot.target,
-      cameraPosition: shot.position
+      cameraPosition: shot.position,
+      exitProgress
     });
     renderer.render(scene, camera);
     if (!readySettled) {
@@ -287,6 +320,9 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     },
     getActiveStation(value) {
       return timeline.activeStation(value);
+    },
+    getPathsProjection() {
+      return projectScreenToCss("future-paths");
     },
     resize,
     focusStation(stationId, { duration = 650 } = {}) {
