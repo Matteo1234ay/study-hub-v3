@@ -45,7 +45,7 @@ test("focuses, presents a semantic overlay and then navigates", async () => {
   assert.deepEqual(events, ["focus:progress", "overlay:progress", "navigate:#/progress"]);
 });
 
-test("automatic scroll exit navigates through a view transition without refocusing or showing a card", async () => {
+test("legacy automatic scroll exit can still use a view transition", async () => {
   const events = [];
   const manager = createHomeTransitionManager({
     root: fakeExitRoot(events),
@@ -60,6 +60,24 @@ test("automatic scroll exit navigates through a view transition without refocusi
   );
 
   assert.deepEqual(events, ["view-transition", "navigate:#/paths"]);
+});
+
+test("shared Paths exit commits the body portal before route navigation", async () => {
+  const events = [];
+  const sharedPortal = { commit() { events.push("portal:commit"); return true; } };
+  const manager = createHomeTransitionManager({
+    root: fakeExitRoot(events),
+    renderer: {},
+    navigate(href) { events.push(`navigate:${href}`); },
+    wait: async () => {}
+  });
+
+  await manager.activate(
+    { id: "future-paths", href: "#/paths" },
+    { focus: false, overlay: false, sharedPortal }
+  );
+
+  assert.deepEqual(events, ["portal:commit", "navigate:#/paths"]);
 });
 
 test("clamps cinematic duration between 400 and 900 milliseconds", () => {
