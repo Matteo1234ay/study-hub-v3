@@ -82,10 +82,10 @@ test("every station keeps a large dominant message and Social stays especially l
   }
 });
 
-test("room integration exposes one active-screen switch instead of redrawing all screens each frame", async () => {
-  const room = await readFile(new URL("../src/home/scene/build-room.js", import.meta.url), "utf8");
+test("renderer switches only the active screen tier and uploads the resized canvas texture", async () => {
   const renderer = await readFile(new URL("../src/home/scene/study-room-renderer.js", import.meta.url), "utf8");
-  assert.match(room, /setActiveScreen\s*\(/);
-  assert.match(room, /screenHandle\.setActive/);
-  assert.match(renderer, /room\.setActiveScreen\(shot\.stationId\)/);
+  assert.match(renderer, /activeScreenId/);
+  assert.match(renderer, /screenHandle\?\.setActive/);
+  assert.match(renderer, /texture\.needsUpdate\s*=\s*true/);
+  assert.match(renderer, /syncActiveScreen\(shot\.stationId\)/);
 });
