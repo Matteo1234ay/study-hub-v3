@@ -59,13 +59,14 @@ test("pointer leave eases back while immediate disable restores immutable bases 
 });
 
 test("the Home renderer registers 8 to 12 semantic objects and disables pointer depth on mobile reduced motion and exit", async () => {
-  const source = await readFile(new URL("../src/home/scene/study-room-renderer.js", import.meta.url), "utf8");
-  assert.match(source, /createParallaxRig/);
+  const rendererSource = await readFile(new URL("../src/home/scene/study-room-renderer.js", import.meta.url), "utf8");
+  const setupSource = await readFile(new URL("../src/home/scene/renderer-setup.js", import.meta.url), "utf8");
+  assert.match(rendererSource, /createParallaxRig/);
   for (const name of ["review-card-1", "review-card-3", "review-card-5", "ceramic-mug", "keyboard", "mouse", "future-binder-1", "future-binder-2", "future-binder-3"]) {
-    assert.match(source, new RegExp(name));
+    assert.match(setupSource, new RegExp(name));
   }
-  assert.match(source, /!reducedMotion\s*&&\s*cameraLayout\s*!==\s*["']mobile["']\s*&&\s*exitProgress\s*===\s*0/);
-  assert.match(source, /parallaxRig\.restoreImmediately/);
+  assert.match(rendererSource, /!reducedMotion\s*&&\s*cameraLayout\s*!==\s*["']mobile["']\s*&&\s*exitProgress\s*===\s*0/);
+  assert.match(rendererSource, /parallaxRig\.restoreImmediately/);
 });
 
 test("interaction controller exposes normalized pointer target separately from the tiny camera offset", async () => {
