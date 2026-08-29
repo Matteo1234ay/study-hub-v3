@@ -70,6 +70,16 @@ export function renderHomeView({ mountExperience = mountHomeExperience, navigate
     className: "study-room-canvas",
     attrs: { "aria-hidden": "true" }
   });
+  const preload = element("div", {
+    className: "home-preload",
+    attrs: {
+      "aria-live": "polite",
+      "aria-label": "Preparazione Study Hub"
+    }
+  }, [
+    element("span", { className: "home-preload-mark", text: "STUDY HUB" }),
+    element("span", { className: "home-preload-line", attrs: { "aria-hidden": "true" } })
+  ]);
   const fallback = element("div", { className: "home-fallback" }, [
     element("p", { className: "home-kicker", text: "Study Hub V3 · Il tuo spazio di studio" }),
     element("h1", { text: "Riprendi da ciò che stai costruendo." }),
@@ -89,6 +99,7 @@ export function renderHomeView({ mountExperience = mountHomeExperience, navigate
   );
   const stage = element("div", { className: "home-stage" }, [
     canvas,
+    preload,
     element("div", { className: "home-stage-shade", attrs: { "aria-hidden": "true" } }),
     fallback,
     quickNavigation(actions),
@@ -105,7 +116,7 @@ export function renderHomeView({ mountExperience = mountHomeExperience, navigate
     try {
       await mountExperience(root, { stations, navigate });
     } catch (error) {
-      root.dataset.homeState = "fallback";
+      root.dataset.homeState = "dom";
       console.warn("La scena 3D non è disponibile; uso la homepage accessibile.", error);
     }
   });
