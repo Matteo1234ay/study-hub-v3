@@ -28,8 +28,16 @@ export function createHomeTransitionManager({
   let active = null;
   let disposed = false;
 
-  function navigateOnce(record, { viewTransition = false } = {}) {
+  function navigateOnce(record, { viewTransition = false, sharedPortal = null } = {}) {
     if (record.navigated) return;
+    if (sharedPortal && !record.portalCommitted) {
+      try {
+        sharedPortal.commit?.();
+      } catch {
+        // Shared visual continuity may fail, but internal navigation must remain available.
+      }
+      record.portalCommitted = true;
+    }
     const performNavigation = () => {
       if (record.navigated) return;
       record.navigated = true;
@@ -67,17 +75,19 @@ export function createHomeTransitionManager({
     const focus = options.focus !== false;
     const overlay = options.overlay !== false;
     const viewTransition = Boolean(options.viewTransition);
+    const sharedPortal = options.sharedPortal ?? null;
     const record = {
       station,
       controller: new AbortController(),
       navigated: false,
+      portalCommitted: false,
       overlay: null
     };
     active = record;
     root.dataset.homeTransition = station.id;
     try {
       if (reducedMotion) {
-        navigateOnce(record);
+        navigateOnce(record, { sharedPortal });
         await Promise.resolve();
         return true;
       }
@@ -98,7 +108,7 @@ export function createHomeTransitionManager({
         await wait(120, record.controller.signal);
       }
       if (record.controller.signal.aborted) return true;
-      navigateOnce(record, { viewTransition });
+      navigateOnce(record, { viewTransition, sharedPortal });
       return true;
     } finally {
       record.overlay?.remove?.();
