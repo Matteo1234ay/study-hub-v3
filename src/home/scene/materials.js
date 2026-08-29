@@ -10,9 +10,9 @@ function proceduralTexture(THREE, {
       const offset = (y * size + x) * 4;
       const value = sample(x / size, y / size, x, y);
       const channels = Array.isArray(value) ? value : [value, value, value];
-      data[offset] = channels[0];
-      data[offset + 1] = channels[1];
-      data[offset + 2] = channels[2];
+      data[offset] = Math.max(0, Math.min(255, channels[0]));
+      data[offset + 1] = Math.max(0, Math.min(255, channels[1]));
+      data[offset + 2] = Math.max(0, Math.min(255, channels[2]));
       data[offset + 3] = 255;
     }
   }
@@ -31,80 +31,85 @@ function hash(x, y) {
   return value - Math.floor(value);
 }
 
+function layeredNoise(x, y) {
+  return hash(x, y) * .58 + hash(x * .43 + 17, y * .71 + 31) * .28 + hash(x * .13 + 7, y * .19 + 23) * .14;
+}
+
 export function createRoomMaterials(THREE) {
   const woodMap = proceduralTexture(THREE, {
-    size: 192,
-    repeat: [3, 1],
+    size: 256,
+    repeat: [3.2, 1],
     sample: (u, v, x, y) => {
-      const grain = Math.sin((v * 36 + Math.sin(u * 8) * .9) * Math.PI) * .5 + .5;
-      const noise = hash(x, y) * 10;
-      return [76 + grain * 34 + noise, 39 + grain * 18 + noise * .4, 20 + grain * 9];
+      const longGrain = Math.sin((v * 31 + Math.sin(u * 5.5) * 1.1) * Math.PI) * .5 + .5;
+      const fineGrain = Math.sin((v * 103 + Math.sin(u * 17) * .34) * Math.PI) * .5 + .5;
+      const noise = layeredNoise(x, y);
+      return [69 + longGrain * 34 + fineGrain * 7 + noise * 8, 36 + longGrain * 18 + noise * 4, 19 + longGrain * 9 + noise * 2];
     }
   });
-  const fabricRoughness = proceduralTexture(THREE, {
-    size: 128,
-    color: false,
-    repeat: [8, 8],
-    sample: (u, v) => 195 + ((Math.sin(u * Math.PI * 64) + Math.sin(v * Math.PI * 64)) * .5 + 1) * 18
-  });
   const woodRoughness = proceduralTexture(THREE, {
-    size: 192,
+    size: 256,
     color: false,
-    repeat: [3, 1],
-    sample: (u, v, x, y) => 126 + hash(x, y) * 34 + Math.sin(v * Math.PI * 36) * 15
+    repeat: [3.2, 1],
+    sample: (u, v, x, y) => 116 + layeredNoise(x, y) * 46 + Math.sin(v * Math.PI * 31) * 13 + Math.sin(v * Math.PI * 103) * 4
   });
   const woodNormal = proceduralTexture(THREE, {
-    size: 192,
+    size: 256,
     color: false,
-    repeat: [3, 1],
+    repeat: [3.2, 1],
     sample: (u, v, x, y) => [
-      128 + Math.sin(v * Math.PI * 34) * 18,
-      128 + (hash(x, y) - .5) * 16,
-      244
+      128 + Math.sin(v * Math.PI * 31) * 16 + Math.sin(v * Math.PI * 97) * 5,
+      128 + (layeredNoise(x, y) - .5) * 13,
+      247
     ]
   });
-  const fabricNormal = proceduralTexture(THREE, {
-    size: 128,
+  const fabricRoughness = proceduralTexture(THREE, {
+    size: 192,
     color: false,
-    repeat: [8, 8],
+    repeat: [9, 9],
+    sample: (u, v, x, y) => 198 + ((Math.sin(u * Math.PI * 72) + Math.sin(v * Math.PI * 70)) * .5 + 1) * 14 + layeredNoise(x, y) * 8
+  });
+  const fabricNormal = proceduralTexture(THREE, {
+    size: 192,
+    color: false,
+    repeat: [9, 9],
     sample: (u, v) => [
-      128 + Math.sin(u * Math.PI * 64) * 14,
-      128 + Math.sin(v * Math.PI * 64) * 14,
-      246
+      128 + Math.sin(u * Math.PI * 72) * 12,
+      128 + Math.sin(v * Math.PI * 70) * 12,
+      247
     ]
   });
   const floorRoughness = proceduralTexture(THREE, {
-    size: 128,
+    size: 192,
     color: false,
     repeat: [5, 5],
-    sample: (u, v, x, y) => 170 + hash(x, y) * 42 + Math.sin((u + v) * 18) * 8
-  });
-  const wallMap = proceduralTexture(THREE, {
-    size: 128,
-    repeat: [4, 3],
-    sample: (u, v, x, y) => {
-      const variation = hash(x, y) * 7 + Math.sin((u - v) * 24) * 2;
-      return [48 + variation, 50 + variation, 53 + variation];
-    }
+    sample: (u, v, x, y) => 167 + layeredNoise(x, y) * 42 + Math.sin((u + v) * 17) * 6
   });
   const floorNormal = proceduralTexture(THREE, {
-    size: 128,
+    size: 192,
     color: false,
     repeat: [5, 5],
     sample: (u, v, x, y) => [
-      128 + (hash(x, y) - .5) * 20,
-      128 + Math.sin((u + v) * Math.PI * 12) * 9,
-      248
+      128 + (layeredNoise(x, y) - .5) * 18,
+      128 + Math.sin((u + v) * Math.PI * 11) * 8,
+      249
     ]
   });
+  const wallMap = proceduralTexture(THREE, {
+    size: 192,
+    repeat: [4, 3],
+    sample: (u, v, x, y) => {
+      const variation = layeredNoise(x, y) * 7 + Math.sin((u - v) * 23) * 1.5;
+      return [46 + variation, 49 + variation, 52 + variation];
+    }
+  });
   const wallNormal = proceduralTexture(THREE, {
-    size: 128,
+    size: 192,
     color: false,
     repeat: [4, 3],
     sample: (u, v, x, y) => [
-      128 + (hash(x, y) - .5) * 13,
-      128 + (hash(y, x) - .5) * 13,
-      250
+      128 + (layeredNoise(x, y) - .5) * 11,
+      128 + (layeredNoise(y, x) - .5) * 11,
+      251
     ]
   });
 
@@ -114,57 +119,85 @@ export function createRoomMaterials(THREE) {
       map: woodMap,
       roughnessMap: woodRoughness,
       normalMap: woodNormal,
-      normalScale: new THREE.Vector2(.42, .22),
+      normalScale: new THREE.Vector2(.38, .2),
       color: 0xffffff,
-      roughness: .58,
-      metalness: 0
+      roughness: .57,
+      metalness: 0,
+      envMapIntensity: .72
     }),
     metal: new THREE.MeshPhysicalMaterial({
       name: "satin-metal",
-      color: 0x353a40,
-      roughness: .31,
-      metalness: .82,
-      clearcoat: .08,
-      clearcoatRoughness: .46
+      color: 0x343a40,
+      roughness: .29,
+      metalness: .84,
+      clearcoat: .06,
+      clearcoatRoughness: .48,
+      envMapIntensity: .86
     }),
-    fabric: new THREE.MeshStandardMaterial({
+    paintedMetal: new THREE.MeshPhysicalMaterial({
+      name: "powder-coated-metal",
+      color: 0x252a30,
+      roughness: .49,
+      metalness: .43,
+      clearcoat: .05,
+      clearcoatRoughness: .62,
+      envMapIntensity: .64
+    }),
+    ceramic: new THREE.MeshPhysicalMaterial({
+      name: "matte-ceramic",
+      color: 0xd8d2c7,
+      roughness: .46,
+      metalness: 0,
+      clearcoat: .14,
+      clearcoatRoughness: .5,
+      ior: 1.48,
+      envMapIntensity: .7
+    }),
+    fabric: new THREE.MeshPhysicalMaterial({
       name: "woven-fabric",
-      color: 0x292d32,
-      roughness: .92,
+      color: 0x292e34,
+      roughness: .91,
       roughnessMap: fabricRoughness,
       normalMap: fabricNormal,
-      normalScale: new THREE.Vector2(.3, .3),
-      metalness: 0
+      normalScale: new THREE.Vector2(.28, .28),
+      metalness: 0,
+      sheen: .18,
+      sheenRoughness: .8,
+      sheenColor: new THREE.Color(0x6f7680),
+      envMapIntensity: .38
     }),
     glassOff: new THREE.MeshPhysicalMaterial({
       name: "screen-glass-off",
       color: 0x090d12,
-      roughness: .16,
-      metalness: .08,
-      clearcoat: .65,
-      clearcoatRoughness: .2,
+      roughness: .15,
+      metalness: .06,
+      clearcoat: .7,
+      clearcoatRoughness: .18,
       ior: 1.46,
       thickness: .08,
       emissive: 0x000000,
-      emissiveIntensity: 0
+      emissiveIntensity: 0,
+      envMapIntensity: .9
     }),
     wall: new THREE.MeshStandardMaterial({
       name: "matte-wall",
       map: wallMap,
       color: 0xffffff,
       normalMap: wallNormal,
-      normalScale: new THREE.Vector2(.16, .16),
+      normalScale: new THREE.Vector2(.14, .14),
       roughness: .94,
-      metalness: 0
+      metalness: 0,
+      envMapIntensity: .22
     }),
     floor: new THREE.MeshStandardMaterial({
       name: "dark-floor",
-      color: 0x2a2723,
-      roughness: .82,
+      color: 0x292722,
+      roughness: .8,
       roughnessMap: floorRoughness,
       normalMap: floorNormal,
-      normalScale: new THREE.Vector2(.28, .28),
-      metalness: 0
+      normalScale: new THREE.Vector2(.25, .25),
+      metalness: 0,
+      envMapIntensity: .4
     })
   };
 }
