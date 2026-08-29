@@ -21,11 +21,13 @@ test("the renderer resolves readiness only after a successful first frame", asyn
 });
 
 test("normal loading hides legacy copy and genuine failure uses DOM fallback", async () => {
-  const css = await read("styles/home-immersive.css");
+  const css = await read("styles/home-startup.css");
   const view = await read("src/views/home-view.js");
-  assert.match(css, /data-home-state="loading"[\s\S]{0,220}\.home-fallback[^{]*\{[^}]*visibility:\s*hidden/s);
-  assert.match(css, /data-home-state="preparing"[\s\S]{0,220}\.home-fallback[^{]*\{[^}]*visibility:\s*hidden/s);
+  const index = await read("index.html");
+  assert.match(css, /data-home-state="loading"[\s\S]{0,420}\.home-fallback[^{]*\{[^}]*visibility:\s*hidden/s);
+  assert.match(css, /data-home-state="preparing"[\s\S]{0,420}\.home-fallback[^{]*\{[^}]*visibility:\s*hidden/s);
   assert.match(view, /home-preload/);
   assert.match(view, /root\.dataset\.homeState\s*=\s*["']dom["']/);
   assert.doesNotMatch(view, /root\.dataset\.homeState\s*=\s*["']fallback["']/);
+  assert.match(index, /styles\/home-startup\.css\?v=/);
 });
