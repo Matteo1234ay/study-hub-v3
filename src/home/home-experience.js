@@ -1,7 +1,13 @@
 import { createCinematicRouteState } from "./home-route-state.js?v=20260829-23";
+import { createSharedPathsTransition } from "./home-shared-transition.js?v=20260829-23";
 
 function clamp01(value) {
   return Math.min(1, Math.max(0, Number(value) || 0));
+}
+
+function smoothRange(value, start, end) {
+  const t = clamp01((clamp01(value) - start) / Math.max(.0001, end - start));
+  return t * t * (3 - 2 * t);
 }
 
 const JOURNEY_EXIT_TRIGGER = .995;
@@ -14,14 +20,26 @@ export function resolveJourneyLayout(width = 1440) {
   return { contentVh, exitVh, totalVh, contentEnd: contentVh / totalVh };
 }
 
+export function resolveExitChoreography(exitProgress) {
+  const progress = clamp01(exitProgress);
+  return {
+    establish: smoothRange(progress, 0, .2),
+    dolly: smoothRange(progress, .18, .88),
+    handoff: smoothRange(progress, .82, 1)
+  };
+}
+
 export function resolveJourneyPhases(progress, width = 1440) {
   const rawProgress = clamp01(progress);
   const { contentEnd } = resolveJourneyLayout(width);
+  const exitProgress = clamp01((rawProgress - contentEnd) / (1 - contentEnd));
+  const choreography = resolveExitChoreography(exitProgress);
   return {
     rawProgress,
     sceneProgress: clamp01(rawProgress / contentEnd),
-    exitProgress: clamp01((rawProgress - contentEnd) / (1 - contentEnd)),
-    shouldExit: rawProgress >= JOURNEY_EXIT_TRIGGER
+    exitProgress,
+    choreography,
+    shouldExit: rawProgress >= JOURNEY_EXIT_TRIGGER && choreography.handoff >= .9
   };
 }
 
@@ -66,6 +84,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
   if (mode === "dom") {
     root.dataset.homeState = "dom";
     delete document.body.dataset.homeImmersive;
+    document.body.querySelector?.(".paths-shared-portal")?.remove?.();
     return () => {};
   }
   syncImmersiveChrome();
@@ -79,6 +98,11 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
   let reentryLocked = Boolean(resume);
   let restoreFrameId = 0;
   let restoreReleaseFrameId = 0;
+  const sharedTransition = createSharedPathsTransition({
+    documentTarget: document,
+    reducedMotion,
+    create: false
+  });
   const removalObserver = new MutationObserver(() => {
     if (!root.isConnected) cleanup();
   });
@@ -103,6 +127,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     if (disposed) return;
     root.dataset.homeState = "dom";
     delete document.body.dataset.homeImmersive;
+    sharedTransition.finishReverse?.();
     renderer?.dispose();
     if (!warned) {
       warned = true;
@@ -171,6 +196,24 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     captions.forEach(caption => caption.classList.toggle("is-active", caption.dataset.stationId === activeId));
   }
 
+  function updateSharedHandoff(phases) {
+    const sourceRect = renderer.getPathsProjection?.();
+    if (!sourceRect) return;
+    if (resume) {
+      const { contentEnd } = resolveJourneyLayout(innerWidth);
+      const resumeProgress = Math.max(contentEnd + .001, Number(resume.resumeProgress) || .97);
+      const reverseProgress = restoring || reentryLocked
+        ? 1
+        : clamp01((phases.rawProgress - contentEnd) / Math.max(.001, resumeProgress - contentEnd));
+      sharedTransition.update({ sourceRect, progress: reverseProgress });
+      if (!restoring && !reentryLocked && reverseProgress <= .01) sharedTransition.finishReverse();
+      return;
+    }
+    if (phases.choreography.handoff > 0) {
+      sharedTransition.update({ sourceRect, progress: phases.choreography.handoff });
+    }
+  }
+
   function beginAutomaticExit() {
     if (exitTriggered || disposed || reentryLocked || restoring) return;
     const pathsStation = stations.find(item => item.id === "future-paths") ?? {
@@ -182,11 +225,12 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     Promise.resolve(transitionManager.activate(pathsStation, {
       focus: false,
       overlay: false,
-      viewTransition: true
+      sharedPortal: sharedTransition
     })).then(started => {
       if (!started && !disposed) {
         exitTriggered = false;
         routeState.clear();
+        sharedTransition.dispose();
       }
     });
   }
@@ -206,7 +250,15 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     setActive(phases.sceneProgress, phases.rawProgress);
     renderer.setJourney(phases.sceneProgress);
     renderer.setExitProgress?.(phases.exitProgress);
+    updateSharedHandoff(phases);
     root.dataset.homeExit = phases.exitProgress > .01 ? "true" : "false";
+    root.dataset.homeExitPhase = phases.choreography.handoff > 0
+      ? "handoff"
+      : phases.choreography.dolly > 0
+        ? "dolly"
+        : phases.choreography.establish > 0
+          ? "establish"
+          : "none";
     if (phases.shouldExit && !reentryLocked && !restoring) beginAutomaticExit();
   }
 
@@ -250,6 +302,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     removeEventListener("keydown", onKeyDown);
     removalObserver.disconnect();
     transitionManager?.dispose();
+    sharedTransition.dispose();
     renderer?.dispose();
     delete document.body.dataset.homeImmersive;
   }
