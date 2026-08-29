@@ -29,12 +29,13 @@ export function createInertialParallax({ maximum = MAX_PARALLAX, easing = .14 } 
 export function createInteractionController({ THREE, canvas, camera, stations, onActivate = () => {} }) {
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2(2, 2);
+  const parallaxTarget = { x: 0, y: 0 };
   const hitAreas = Object.entries(stations).map(([id, station]) => {
     station.hitArea.userData.stationId = id;
     return station.hitArea;
   });
   let hovered = null;
-  const parallax = createInertialParallax();
+  const cameraParallax = createInertialParallax();
 
   function setHovered(next) {
     if (hovered === next) return;
@@ -49,7 +50,9 @@ export function createInteractionController({ THREE, canvas, camera, stations, o
     const x = (event.clientX - rect.left) / Math.max(1, rect.width);
     const y = (event.clientY - rect.top) / Math.max(1, rect.height);
     pointer.set(x * 2 - 1, -(y * 2 - 1));
-    parallax.setTarget((x - .5) * 2, (y - .5) * 2);
+    parallaxTarget.x = Math.min(1, Math.max(-1, (x - .5) * 2));
+    parallaxTarget.y = Math.min(1, Math.max(-1, (y - .5) * 2));
+    cameraParallax.setTarget(parallaxTarget.x, parallaxTarget.y);
   }
 
   function pick() {
@@ -65,7 +68,9 @@ export function createInteractionController({ THREE, canvas, camera, stations, o
 
   function onPointerLeave() {
     pointer.set(2, 2);
-    parallax.reset();
+    parallaxTarget.x = 0;
+    parallaxTarget.y = 0;
+    cameraParallax.reset();
     setHovered(null);
   }
 
@@ -83,9 +88,16 @@ export function createInteractionController({ THREE, canvas, camera, stations, o
 
   return {
     update() {
-      return parallax.update();
+      return cameraParallax.update();
     },
-    reset() { parallax.reset(); },
+    getParallaxTarget() {
+      return parallaxTarget;
+    },
+    reset() {
+      parallaxTarget.x = 0;
+      parallaxTarget.y = 0;
+      cameraParallax.reset();
+    },
     dispose() {
       canvas.removeEventListener("pointermove", onPointerMove);
       canvas.removeEventListener("pointerleave", onPointerLeave);
