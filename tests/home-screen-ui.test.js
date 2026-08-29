@@ -127,7 +127,7 @@ test("screen textures remain bounded and redraw only when data changes", () => {
 });
 
 test("renderer sharpens station textures at oblique viewing angles", async () => {
-  const source = await readFile(new URL("../src/home/scene/study-room-renderer.js", import.meta.url), "utf8");
+  const source = await readFile(new URL("../src/home/scene/renderer-setup.js", import.meta.url), "utf8");
   assert.match(source, /getMaxAnisotropy/);
   assert.match(source, /anisotropy/);
 });
