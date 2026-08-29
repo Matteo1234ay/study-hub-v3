@@ -1,5 +1,5 @@
-import { createStationScreen } from "./screen-ui.js?v=20260829-23";
-import { RoundedBoxGeometry } from "../../../vendor/three/examples/jsm/geometries/RoundedBoxGeometry.js?v=20260829-23";
+import { createStationScreen } from "./screen-ui.js?v=20260829-24";
+import { RoundedBoxGeometry } from "../../../vendor/three/examples/jsm/geometries/RoundedBoxGeometry.js?v=20260829-24";
 
 const OPENING_CAMERA = Object.freeze({
   position: [-5.6, 3.05, 5.75],
