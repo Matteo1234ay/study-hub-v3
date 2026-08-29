@@ -37,7 +37,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
   let readySettled = false;
   let resolveReady;
   let rejectReady;
-  const ready = new Promise((resolve, reject) => {
+  const readyPromise = new Promise((resolve, reject) => {
     resolveReady = resolve;
     rejectReady = reject;
   });
@@ -144,7 +144,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
   else frameId = requestAnimationFrame(draw);
 
   return {
-    ready,
+    ready: readyPromise,
     setJourney(value) {
       journey = clamp01(value);
       if (reducedMotion) draw(performance.now());
