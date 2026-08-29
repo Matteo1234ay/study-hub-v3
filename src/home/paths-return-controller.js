@@ -4,11 +4,12 @@ const TOUCH_THRESHOLD = 56;
 export function createPathsReturnController({
   routeState,
   navigate,
+  sharedTransition = null,
   windowTarget = globalThis,
   top = () => Number(windowTarget.scrollY ?? windowTarget.document?.documentElement?.scrollTop ?? 0)
 } = {}) {
   const entry = routeState?.consumePathsEntry?.();
-  if (!entry || typeof navigate !== "function") return { active: false, dispose() {} };
+  if (!entry || typeof navigate !== "function") return { active: false, entry: null, dispose() {} };
 
   let active = true;
   let wheelDistance = 0;
@@ -24,6 +25,7 @@ export function createPathsReturnController({
 
   function restoreHome() {
     if (!active || top() > 4) return false;
+    sharedTransition?.beginReverse?.();
     routeState.markReturn?.({ resumeProgress: entry.resumeProgress });
     dispose();
     navigate("#/home");
@@ -55,6 +57,7 @@ export function createPathsReturnController({
 
   return {
     get active() { return active; },
+    entry,
     dispose
   };
 }
