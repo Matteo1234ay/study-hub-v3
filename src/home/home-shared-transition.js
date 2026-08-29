@@ -20,6 +20,11 @@ function findPortal(documentTarget) {
   return documentTarget?.body?.querySelector?.(".paths-shared-portal") ?? null;
 }
 
+export function shouldPreserveCinematicScroll(documentTarget = globalThis.document) {
+  const phase = findPortal(documentTarget)?.dataset?.phase;
+  return phase === "committed" || phase === "reversing";
+}
+
 function createPortal(documentTarget) {
   if (!documentTarget?.body?.append || !documentTarget?.createElement) return null;
   const element = documentTarget.createElement("div");
