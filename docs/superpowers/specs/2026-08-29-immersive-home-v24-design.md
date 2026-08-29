@@ -177,21 +177,24 @@ Realism is only accepted if mobile remains usable.
 
 ### Asset budget
 
-Target budgets for the initial V24 pass:
+Hard budgets for V24:
 
-- 5–7 imported hero/secondary glTF assets maximum;
-- prefer one shared material/texture set when visually reasonable;
-- avoid 4K textures;
-- hero textures generally 512–1024 px, with 2048 only when a measurable close-up need justifies it;
-- keep total initial 3D asset payload conservative enough for GitHub Pages and mobile networks;
-- lazy-load non-critical props only if it does not reintroduce visible object popping.
+- maximum 7 imported glTF/glb props in the initial room;
+- total committed runtime payload for new V24 3D models plus their textures: target <= 8 MB, hard ceiling 12 MB;
+- assets required before the first complete room frame: target <= 5 MB total;
+- no 4K textures;
+- hero texture dimension normally <= 1024 px per axis;
+- 2048 px is allowed only for one asset if a close-up projection test demonstrates that 1024 is insufficient;
+- optional/non-critical assets may lazy-load only if their absence is visually hidden by the initial camera or a procedural fallback, so visible popping is not introduced.
+
+If candidate free assets exceed the hard ceiling, optimize or reject them rather than weakening the mobile target.
 
 ### Rendering budget
 
 - Preserve adaptive DPR and existing quality profiles.
 - Mobile begins in balanced mode.
 - High-quality shadows only where the quality profile permits them.
-- Limit shadow-casting lights and shadow maps.
+- Maximum two simultaneous shadow-casting lights; prefer one directional/key shadow plus one practical where visually justified.
 - Avoid per-frame allocations in parallax/motion code.
 - Dispose glTF geometries/materials/textures correctly on route teardown.
 - Keep WebGL context-loss handling.
@@ -232,6 +235,8 @@ Each layer may respond to normalized pointer X/Y with:
 - No parallax during final exit transition.
 - No autonomous parallax under reduced motion.
 - No mouse parallax on mobile.
+- Register at least 4 visibly distinct depth coefficients and no more than 12 moving scene layers in the initial implementation.
+- Camera amplitude must remain lower than every intentionally visible foreground layer.
 
 ### Visual success criterion
 
@@ -275,17 +280,15 @@ The final phase should become a continuous visual transformation:
 
 ### Shared transition surface
 
-Introduce an explicit transition element/state shared conceptually between Home and Paths.
+Introduce an explicit transition surface/state used by both Home and Paths.
 
-The 3D Paths screen must expose the visual data needed to construct the outgoing handoff: position/orientation/projection or an equivalent full-screen transition phase. The Paths view begins with a matching hero/surface that can receive the View Transition.
+The outgoing Home phase must be able to provide a screen-aligned rectangle/state for the Paths display once it occupies the final viewport. The incoming Paths view renders a matching transition surface with the same title/visual identity and a stable `view-transition-name` when the API is available.
 
-The final change must not depend solely on browser `startViewTransition`; provide a CSS/DOM fallback that still looks intentional.
+Fallback behavior is mandatory: without View Transitions API, the outgoing surface must still expand/fade to full viewport, route navigation occurs, and the incoming Paths surface fades out to reveal the actual page. The user must not see an unstyled hard cut.
 
 ### Timing
 
-Keep the extended final runway introduced in V23, but tune easing so the user has time to understand the approach. Navigation should occur near the visual completion of the zoom, not abruptly at an arbitrary normalized threshold.
-
-The final movement should feel slower than the station-to-station choreography.
+Keep the extended final runway introduced in V23, but tune easing so the user has time to understand the approach. Navigation should occur only after at least 90% of the exit visual has completed. The final movement should feel slower than the station-to-station choreography.
 
 ## 8. Reversibility
 
@@ -295,10 +298,12 @@ When Paths was reached through the cinematic exit:
 
 - upward wheel/trackpad/touch at the top returns to Home;
 - Home resumes inside the final runway rather than at the beginning;
-- the shared transition may run in reverse when practical;
+- the reverse handoff is required: with View Transitions API the matching Paths surface contracts toward the resumed Home exit state; without the API, Paths fades through the same shared transition surface before Home resumes;
 - hysteresis prevents immediate re-entry to Paths;
 - normal menu navigation to Paths does not acquire special behavior;
 - stale cinematic state expires.
+
+The reverse transition is therefore not optional; only its rendering mechanism differs by browser capability.
 
 ## 9. Reduced motion
 
@@ -310,7 +315,7 @@ With reduced motion enabled:
 - keep camera positions driven by scroll;
 - keep station reveal/lighting states driven by scroll;
 - keep Home → Paths navigation functional;
-- use a simpler/faster cross-route visual handoff instead of extra autonomous cinematic motion where necessary.
+- replace the autonomous shared-surface zoom with a short opacity handoff while preserving route continuity and the ability to reverse from Paths.
 
 ## 10. Loading and asset failure handling
 
@@ -324,11 +329,11 @@ For each critical glTF asset:
 - failure of one chair/lamp/prop must not collapse the whole homepage;
 - screen UI and navigation must remain available.
 
-The loading shell must not wait indefinitely for optional props.
+The loading shell must not wait indefinitely for optional props. Critical preload has a 6-second upper bound; after that, unresolved props fall back procedurally and the room becomes usable.
 
 ## 11. Files/modules expected
 
-Likely additions/changes include:
+The design expects these boundaries unless implementation discovers a concrete incompatibility with the existing code:
 
 - `src/home/home-experience.js` — startup state and final journey integration;
 - `src/views/home-view.js` — non-flashing loading shell;
@@ -337,14 +342,14 @@ Likely additions/changes include:
 - `src/home/scene/build-room.js` — hybrid procedural/imported object anchors and layer registry;
 - `src/home/scene/materials.js` — upgraded local material system;
 - `src/home/scene/interaction-controller.js` — multi-layer inertial pointer state;
-- `src/home/scene/camera-timeline.js` — final runway tuning only where necessary;
+- `src/home/scene/camera-timeline.js` — final runway tuning;
 - new `src/home/scene/asset-registry.js` — local glTF loading, caching, fallbacks and disposal;
-- new `src/home/home-shared-transition.js` or equivalent — Home/Paths handoff state;
+- new `src/home/home-shared-transition.js` — Home/Paths handoff state;
 - `src/views/paths-view.js` — receiving transition surface and reverse-entry support;
 - `assets/3d/**` — local optimized free assets;
 - `assets/3d/ATTRIBUTION.md` — source/license record.
 
-Exact module names may change during implementation if the existing architecture suggests a cleaner boundary.
+If a boundary must change during implementation, the reason must be documented in the corresponding implementation commit rather than silently introducing a parallel mechanism.
 
 ## 12. Testing strategy
 
@@ -354,18 +359,19 @@ Add or strengthen tests for:
 
 - successful WebGL startup never exposing the legacy fallback;
 - WebGL failure still exposing fallback navigation;
-- asset registry local-only policy and fallback behavior;
-- attribution/license metadata for imported assets;
-- glTF asset count/weight budget where measurable in CI;
+- first-frame ready contract;
+- asset registry local-only policy and procedural fallback behavior;
+- attribution/license metadata for every imported asset;
+- imported asset count and total byte budget;
 - disposal of imported geometries/materials/textures;
 - bounded multi-layer parallax amplitudes;
-- distinct depth coefficients across layers;
+- at least 4 distinct depth coefficients and maximum 12 moving layers;
 - pointer leave reset;
 - reduced-motion parallax disable;
 - no mouse parallax on mobile;
-- final transition runway timing/easing contract;
-- shared Home→Paths handoff state;
-- Paths→Home reverse behavior and anti-loop hysteresis;
+- final transition runway timing/easing and >=90% visual-completion navigation threshold;
+- shared Home→Paths handoff state and fallback path;
+- Paths→Home reverse handoff and anti-loop hysteresis;
 - existing screen legibility/projection constraints;
 - desktop and 390×844 camera composition;
 - Safari-safe coherent release-token graph;
@@ -381,6 +387,7 @@ Before claiming V24 complete:
 - verify GitHub Pages build and deployment on that exact SHA;
 - verify no external runtime asset URLs are required;
 - verify all imported assets have recorded licenses;
+- verify new model/texture payload stays within the specified byte ceiling;
 - inspect desktop and 390×844 behavior as far as available tooling permits;
 - do not claim visual parity with Igloo Inc.; validate interaction contracts and ask for user visual confirmation where browser rendering cannot be inspected directly.
 
@@ -395,6 +402,7 @@ V24 is done only when all of the following are true:
 - reduced motion still preserves the scroll journey while disabling autonomous parallax;
 - mobile keeps readable screens without losing room context;
 - the final Paths transition reads as entering the Paths surface rather than switching pages;
-- the transition remains reversible from the top of Paths;
+- the transition reverses from the top of Paths through the same shared visual handoff concept;
 - no paid runtime dependency or recurring cost is introduced;
+- new runtime 3D assets stay within the V24 payload ceiling;
 - tests, secret checks and GitHub Pages deployment are green on the final commit.
