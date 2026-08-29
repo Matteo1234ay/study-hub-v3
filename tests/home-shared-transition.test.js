@@ -96,6 +96,23 @@ test("a committed body portal survives the Home subtree replacement and is recei
   assert.equal(receiver.dataset.cinematicEntry, "true");
 });
 
+test("app scroll reset is suppressed only while the shared portal owns the route handoff", async () => {
+  const module = await loadSharedTransition();
+  assert.equal(typeof module?.shouldPreserveCinematicScroll, "function");
+  if (!module?.shouldPreserveCinematicScroll) return;
+
+  const documentTarget = fakeDocument();
+  assert.equal(module.shouldPreserveCinematicScroll(documentTarget), false);
+  const transition = module.createSharedPathsTransition({ documentTarget });
+  transition.update({ sourceRect: { left: 100, top: 80, width: 300, height: 180 }, progress: 1 });
+  transition.commit();
+  assert.equal(module.shouldPreserveCinematicScroll(documentTarget), true);
+  transition.element.dataset.phase = "received";
+  assert.equal(module.shouldPreserveCinematicScroll(documentTarget), false);
+  transition.element.dataset.phase = "reversing";
+  assert.equal(module.shouldPreserveCinematicScroll(documentTarget), true);
+});
+
 test("reverse handoff is one-shot and reduced motion remains non-zooming", async () => {
   const module = await loadSharedTransition();
   assert.equal(typeof module?.createSharedPathsTransition, "function");
