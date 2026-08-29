@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 
 async function loadSharedTransition() {
   try {
@@ -66,6 +67,13 @@ test("shared portal grows from the projected Paths screen to the viewport", asyn
   assert.equal(portal.style.getPropertyValue("--paths-portal-top"), "0px");
   assert.equal(portal.style.getPropertyValue("--paths-portal-width"), "1200px");
   assert.equal(portal.style.getPropertyValue("--paths-portal-height"), "800px");
+});
+
+test("renderer exposes the projected future Paths screen in CSS pixels", async () => {
+  const source = await readFile(new URL("../src/home/scene/study-room-renderer.js", import.meta.url), "utf8");
+  assert.match(source, /getPathsProjection\s*\(/);
+  assert.match(source, /getBoundingClientRect/);
+  assert.match(source, /future-paths/);
 });
 
 test("a committed body portal survives the Home subtree replacement and is received by Paths", async () => {
