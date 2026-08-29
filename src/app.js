@@ -11,6 +11,7 @@ import { renderReviewView } from "./views/review-view.js?v=20260829-23";
 import { renderAssessmentView } from "./views/assessment-view.js?v=20260829-23";
 import { renderPathAssessmentView } from "./views/path-assessment-view.js?v=20260829-23";
 import { createPreferencesStore } from "./study/preferences.js?v=20260829-23";
+import { shouldPreserveCinematicScroll } from "./home/home-shared-transition.js?v=20260829-23";
 
 const app = document.querySelector("#app");
 const preferences = createPreferencesStore();
@@ -74,7 +75,9 @@ async function render(route) {
   document.title = `Study Hub V3 · ${route.name}`;
   app.focus({ preventScroll: true });
   const reducedMotion = preferences.get().motion === "reduced" || matchMedia("(prefers-reduced-motion: reduce)").matches;
-  scrollTo({ top: 0, behavior: reducedMotion ? "auto" : "smooth" });
+  if (!shouldPreserveCinematicScroll(document)) {
+    scrollTo({ top: 0, behavior: reducedMotion ? "auto" : "smooth" });
+  }
 }
 
 startRouter(render);
