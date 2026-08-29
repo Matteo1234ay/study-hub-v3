@@ -99,6 +99,7 @@ export function createSharedPathsTransition({
       reverseStarted = false;
       node.dataset.phase = "committed";
       node.dataset.direction = "forward";
+      node.style?.setProperty?.("--paths-portal-opacity", "1");
       return true;
     },
     receive(root) {
@@ -106,6 +107,7 @@ export function createSharedPathsTransition({
       if (!node || (node.dataset.phase !== "committed" && node.dataset.phase !== "received")) return false;
       committed = true;
       node.dataset.phase = "received";
+      node.style?.setProperty?.("--paths-portal-opacity", "0");
       root?.classList?.add?.("paths-cinematic-receiver");
       if (root?.dataset) root.dataset.cinematicEntry = "true";
       return true;
@@ -117,6 +119,8 @@ export function createSharedPathsTransition({
       committed = true;
       node.dataset.direction = "reverse";
       node.dataset.phase = "reversing";
+      node.style?.setProperty?.("--paths-portal-opacity", "1");
+      node.style?.setProperty?.("--paths-portal-progress", "1");
       return true;
     },
     finishReverse() {
