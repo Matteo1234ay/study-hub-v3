@@ -50,6 +50,28 @@ test("a deliberate upward wheel gesture at the top returns Home once", () => {
   assert.deepEqual(navigations, ["#/home"]);
 });
 
+test("cinematic return reverses the shared portal exactly once before navigating Home", () => {
+  const target = eventTarget();
+  const state = routeState();
+  const events = [];
+  const sharedTransition = {
+    beginReverse() { events.push("portal:reverse"); return events.filter(item => item === "portal:reverse").length === 1; }
+  };
+  createPathsReturnController({
+    routeState: state,
+    navigate: href => events.push(`navigate:${href}`),
+    windowTarget: target,
+    sharedTransition
+  });
+
+  target.emit("wheel", { deltaY: -20 });
+  target.emit("wheel", { deltaY: -24 });
+  target.emit("wheel", { deltaY: -100 });
+
+  assert.deepEqual(events, ["portal:reverse", "navigate:#/home"]);
+  assert.deepEqual(state.returns, [{ resumeProgress: .96 }]);
+});
+
 test("wheel return is disabled after the user descends into Paths", () => {
   const target = eventTarget();
   const state = routeState();
