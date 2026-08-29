@@ -144,6 +144,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
   let finishFocus = null;
   let lastFrame = performance.now();
   let lastProfile = quality.profile;
+  let activeScreenId = null;
   let readySettled = false;
   let resolveReady;
   let rejectReady;
@@ -151,6 +152,18 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     resolveReady = resolve;
     rejectReady = reject;
   });
+
+  function syncActiveScreen(stationId) {
+    if (stationId === activeScreenId) return false;
+    for (const [id, station] of Object.entries(room.stations)) {
+      const changed = station.screenHandle?.setActive?.(id === stationId) ?? false;
+      if (!changed) continue;
+      const texture = station.screen?.material?.map;
+      if (texture) texture.needsUpdate = true;
+    }
+    activeScreenId = stationId;
+    return true;
+  }
 
   function resize() {
     if (disposed) return;
@@ -176,6 +189,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     const shot = exitProgress > 0 ? timeline.exit(exitProgress) : timeline.sample(journey);
     const sceneProgress = journey;
     room.setJourney(sceneProgress);
+    syncActiveScreen(shot.stationId);
     camera.position.set(...shot.position);
     camera.fov = shot.fov;
     camera.updateProjectionMatrix();
