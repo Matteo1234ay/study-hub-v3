@@ -2,6 +2,7 @@ import { PATHS } from "../config/paths.js?v=20260829-23";
 import { element, pageHeader } from "../ui/components.js?v=20260829-23";
 import { createCinematicRouteState } from "../home/home-route-state.js?v=20260829-23";
 import { createPathsReturnController } from "../home/paths-return-controller.js?v=20260829-23";
+import { createSharedPathsTransition } from "../home/home-shared-transition.js?v=20260829-23";
 
 export function renderPathsView({ navigate } = {}) {
   const root = element("section", { className: "content-page" }, [
@@ -18,15 +19,29 @@ export function renderPathsView({ navigate } = {}) {
   ]);
   queueMicrotask(() => {
     if (!root.isConnected || typeof navigate !== "function") return;
+    const mediaReduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const motionPreference = document.documentElement.dataset.motion ?? "system";
+    const sharedTransition = createSharedPathsTransition({
+      documentTarget: root.ownerDocument ?? document,
+      reducedMotion: motionPreference === "reduced" || mediaReduced,
+      create: false
+    });
     const controller = createPathsReturnController({
       routeState: createCinematicRouteState(),
-      navigate
+      navigate,
+      sharedTransition
     });
-    if (!controller.active) return;
+    if (!controller.active) {
+      sharedTransition.dispose();
+      return;
+    }
+    sharedTransition.receive(root);
     root.dataset.cinematicEntry = "true";
     const observer = new MutationObserver(() => {
       if (root.isConnected) return;
       controller.dispose();
+      if (sharedTransition.element?.dataset?.direction === "reverse") sharedTransition.dispose();
+      else sharedTransition.finishReverse();
       observer.disconnect();
     });
     observer.observe(document.documentElement, { childList: true, subtree: true });
