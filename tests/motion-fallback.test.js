@@ -5,6 +5,7 @@ import {
   initialVisualizationState,
   nextVisualizationState,
 } from "../src/visualizations/visualization-registry.js";
+import { readFile } from "node:fs/promises";
 
 test("WebGL keeps the user-driven cinematic journey even when reduced motion is requested", () => {
   assert.equal(resolveHomeMotionMode({ preference: "reduced", mediaReduced: false, width: 1440, webgl: true }), "cinematic");
@@ -21,6 +22,13 @@ test("small screens keep the same scroll-driven 3D journey when WebGL is availab
 test("reduced motion no longer collapses the mobile journey to a static frame", () => {
   assert.equal(resolveHomeMotionMode({ preference: "reduced", mediaReduced: false, width: 420, webgl: true }), "cinematic");
   assert.equal(resolveHomeMotionMode({ preference: "normal", mediaReduced: true, width: 420, webgl: true }), "cinematic");
+});
+
+test("reduced motion preserves the physical scroll runway", async () => {
+  const css = await readFile(new URL("../styles/home-immersive.css", import.meta.url), "utf8");
+  const reducedMotionRules = css.slice(css.indexOf("@media (prefers-reduced-motion: reduce)"));
+  assert.doesNotMatch(reducedMotionRules, /\.home-journey[\s\S]{0,120}min-height:\s*auto/);
+  assert.doesNotMatch(reducedMotionRules, /\[data-motion="reduced"\][\s\S]{0,120}min-height:\s*auto/);
 });
 
 test("reduced motion starts visualizations at the complete explanatory state", () => {

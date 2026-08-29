@@ -20,13 +20,19 @@ test("creates the six approved realistic material families", () => {
   assert.ok(materials.glassOff.roughness <= 0.25);
   assert.equal(materials.glassOff.emissiveIntensity, 0);
   assert.ok(materials.wood.map?.image?.data?.length > 0);
+  assert.ok(materials.wood.roughnessMap?.image?.data?.length > 0);
+  assert.ok(materials.wood.normalMap?.image?.data?.length > 0);
   assert.ok(materials.fabric.roughnessMap?.image?.data?.length > 0);
+  assert.ok(materials.fabric.normalMap?.image?.data?.length > 0);
+  assert.ok(materials.wall.normalMap?.image?.data?.length > 0);
+  assert.ok(materials.floor.normalMap?.image?.data?.length > 0);
+  assert.ok(materials.metal.metalness <= 1 && materials.metal.roughness >= .2);
 });
 
 test("procedural material textures stay within the lightweight budget", () => {
   const materials = createRoomMaterials(THREE);
   for (const material of Object.values(materials)) {
-    for (const texture of [material.map, material.roughnessMap].filter(Boolean)) {
+    for (const texture of [material.map, material.roughnessMap, material.normalMap].filter(Boolean)) {
       assert.ok(texture.image.width <= 256);
       assert.ok(texture.image.height <= 256);
     }

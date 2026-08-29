@@ -1,5 +1,5 @@
-import { resolveLegacyChapterId } from "../lessons/lesson-compatibility.js?v=20260828-15";
-import { createNote, normalizeNote } from "./note-model.js?v=20260828-15";
+import { resolveLegacyChapterId } from "../lessons/lesson-compatibility.js?v=20260829-23";
+import { createNote, normalizeNote } from "./note-model.js?v=20260829-23";
 
 const PREFIX = "study-hub-v3:note:";
 const V2_PREFIX = "study-hub-v3:notes:v2:";

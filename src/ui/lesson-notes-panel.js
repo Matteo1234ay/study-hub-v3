@@ -1,4 +1,4 @@
-import { element } from "./components.js?v=20260828-15";
+import { element } from "./components.js?v=20260829-23";
 
 export function notesForScope(notes, scope, context) {
   if (scope === "section") return notes.filter(note => note.chapterId === context.chapterId && note.sectionId === context.sectionId);

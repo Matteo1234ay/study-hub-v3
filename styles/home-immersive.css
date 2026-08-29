@@ -143,7 +143,7 @@
 }
 
 .home-journey[data-home-state="ready"] {
-  min-height: 600svh;
+  min-height: 740svh;
 }
 
 .home-journey[data-home-state="ready"] .home-stage {
@@ -338,7 +338,7 @@
   }
 
   .home-journey[data-home-state="ready"] {
-    min-height: 1100svh;
+    min-height: 1280svh;
   }
 
   .home-journey[data-home-state="ready"] .home-stage {
@@ -471,17 +471,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .home-journey,
-  .home-stage {
-    min-height: auto;
-  }
-
   .study-room-canvas {
     transition: none;
   }
-}
-
-[data-motion="reduced"] .home-journey,
-[data-motion="reduced"] .home-stage {
-  min-height: auto;
 }

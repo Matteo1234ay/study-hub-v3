@@ -1,4 +1,4 @@
-import { element } from "./components.js?v=20260828-15";
+import { element } from "./components.js?v=20260829-23";
 
 export function createStudyDialog({
   kicker = "Contenuto pubblico",

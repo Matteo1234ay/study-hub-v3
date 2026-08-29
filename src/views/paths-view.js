@@ -1,8 +1,10 @@
-import { PATHS } from "../config/paths.js?v=20260828-15";
-import { element, pageHeader } from "../ui/components.js?v=20260828-15";
+import { PATHS } from "../config/paths.js?v=20260829-23";
+import { element, pageHeader } from "../ui/components.js?v=20260829-23";
+import { createCinematicRouteState } from "../home/home-route-state.js?v=20260829-23";
+import { createPathsReturnController } from "../home/paths-return-controller.js?v=20260829-23";
 
-export function renderPathsView() {
-  return element("section", { className: "content-page" }, [
+export function renderPathsView({ navigate } = {}) {
+  const root = element("section", { className: "content-page" }, [
     pageHeader("Archivio didattico", "Percorsi", "Entra in un’area, scegli la lezione e raggiungi direttamente il capitolo che vuoi studiare o ripassare."),
     element("div", { className: "path-grid" }, PATHS.map((path, index) =>
       element("a", { className: `path-card accent-${path.accent}`, href: `#/paths/${path.id}` }, [
@@ -14,4 +16,20 @@ export function renderPathsView() {
       ])
     ))
   ]);
+  queueMicrotask(() => {
+    if (!root.isConnected || typeof navigate !== "function") return;
+    const controller = createPathsReturnController({
+      routeState: createCinematicRouteState(),
+      navigate
+    });
+    if (!controller.active) return;
+    root.dataset.cinematicEntry = "true";
+    const observer = new MutationObserver(() => {
+      if (root.isConnected) return;
+      controller.dispose();
+      observer.disconnect();
+    });
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+  });
+  return root;
 }

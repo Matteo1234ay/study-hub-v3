@@ -1,9 +1,9 @@
-import { validateAssessment } from "../assessment/assessment-schema.js?v=20260828-15";
-import { scoreAttempt } from "../assessment/assessment-engine.js?v=20260828-15";
-import { createAssessmentStore } from "../assessment/assessment-store.js?v=20260828-15";
-import { element, pageHeader } from "../ui/components.js?v=20260828-15";
-import { buildAssessmentReviewPackage } from "../assessment/review-package.js?v=20260828-15";
-import { createStudyDialog } from "../ui/study-dialog.js?v=20260828-15";
+import { validateAssessment } from "../assessment/assessment-schema.js?v=20260829-23";
+import { scoreAttempt } from "../assessment/assessment-engine.js?v=20260829-23";
+import { createAssessmentStore } from "../assessment/assessment-store.js?v=20260829-23";
+import { element, pageHeader } from "../ui/components.js?v=20260829-23";
+import { buildAssessmentReviewPackage } from "../assessment/review-package.js?v=20260829-23";
+import { createStudyDialog } from "../ui/study-dialog.js?v=20260829-23";
 
 const STATUS_LABELS = { correct: "Corretta", partial: "Parzialmente corretta", review: "Da rivedere", unanswered: "Non compilata" };
 

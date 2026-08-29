@@ -1,8 +1,8 @@
-import { element } from "../ui/components.js?v=20260828-15";
-import { metricVisualizations } from "./metric-visualizations.js?v=20260828-15";
-import { causalityVisualization } from "./causality-visualization.js?v=20260828-15";
-import { testBuilderVisualization } from "./test-builder.js?v=20260828-15";
-import { reportBuilderVisualization } from "./report-builder.js?v=20260828-15";
+import { element } from "../ui/components.js?v=20260829-23";
+import { metricVisualizations } from "./metric-visualizations.js?v=20260829-23";
+import { causalityVisualization } from "./causality-visualization.js?v=20260829-23";
+import { testBuilderVisualization } from "./test-builder.js?v=20260829-23";
+import { reportBuilderVisualization } from "./report-builder.js?v=20260829-23";
 
 const definitions = new Map([
   ...metricVisualizations,

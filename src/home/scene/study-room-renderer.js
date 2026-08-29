@@ -1,9 +1,21 @@
-import { createRoomMaterials } from "./materials.js?v=20260828-22";
-import { buildStudyRoom } from "./build-room.js?v=20260828-22";
-import { createCameraTimeline } from "./camera-timeline.js?v=20260828-22";
-import { createLightingController } from "./lighting-controller.js?v=20260828-22";
-import { createInteractionController } from "./interaction-controller.js?v=20260828-22";
-import { createQualityController } from "./quality-controller.js?v=20260828-22";
+import { createRoomMaterials } from "./materials.js?v=20260829-23";
+import { buildStudyRoom } from "./build-room.js?v=20260829-23";
+import { createCameraTimeline } from "./camera-timeline.js?v=20260829-23";
+import { createLightingController } from "./lighting-controller.js?v=20260829-23";
+import { createInteractionController } from "./interaction-controller.js?v=20260829-23";
+import { createQualityController } from "./quality-controller.js?v=20260829-23";
+
+const ZERO_PARALLAX = Object.freeze({ x: 0, y: 0 });
+
+export function configureStudyRenderer(THREE, renderer, quality) {
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.04;
+  renderer.shadowMap.enabled = quality?.profile === "high";
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.autoUpdate = quality?.profile !== "low";
+  return renderer;
+}
 
 function createLightRig(THREE, room) {
   const ambient = new THREE.HemisphereLight(0xc7d6e6, 0x211a14, .5);
@@ -68,9 +80,7 @@ function initializeRoom({ THREE, canvas, stations, reducedMotion, onActivate }) 
       initialProfile: compact ? "balanced" : undefined
     });
     renderer = new THREE.WebGLRenderer({ canvas, antialias: quality.profile !== "low", alpha: false, powerPreference: "high-performance" });
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.shadowMap.enabled = quality.profile === "high";
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    configureStudyRenderer(THREE, renderer, quality);
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0b1016);
     scene.fog = new THREE.Fog(0x0b1016, 12, 25);
@@ -89,6 +99,9 @@ function initializeRoom({ THREE, canvas, stations, reducedMotion, onActivate }) 
     const keyLight = new THREE.DirectionalLight(0xe4edf7, .88);
     keyLight.position.set(-4, 6, 5);
     keyLight.castShadow = quality.profile === "high";
+    keyLight.shadow.mapSize.set(quality.profile === "high" ? 1024 : 512, quality.profile === "high" ? 1024 : 512);
+    keyLight.shadow.bias = -.00035;
+    keyLight.shadow.normalBias = .025;
     const fillLight = new THREE.DirectionalLight(0x8fa8bf, .28);
     fillLight.position.set(4, 3.5, 4.5);
     scene.add(keyLight, fillLight);
@@ -105,7 +118,7 @@ function initializeRoom({ THREE, canvas, stations, reducedMotion, onActivate }) 
 
 export async function createStudyRoomRenderer({ canvas, stations, reducedMotion = false, onActivate = () => {}, onFailure = () => {} }) {
   if (!canvas?.getContext) throw new Error("Canvas della stanza non disponibile");
-  const THREE = await import("../../../vendor/three/three.module.min.js?v=20260828-22");
+  const THREE = await import("../../../vendor/three/three.module.min.js?v=20260829-23");
   const { renderer, room, interaction, quality, scene, camera, lightRig } = initializeRoom({
     THREE, canvas, stations, reducedMotion, onActivate
   });
@@ -150,9 +163,12 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     camera.fov = shot.fov;
     camera.updateProjectionMatrix();
     camera.lookAt(new THREE.Vector3(...shot.target));
-    const parallax = reducedMotion || cameraLayout === "mobile" || exitProgress > 0 ? { x: 0, y: 0 } : interaction.update();
-    camera.rotation.y += parallax.x;
-    camera.rotation.x += parallax.y;
+    const parallaxEnabled = !reducedMotion && cameraLayout !== "mobile" && exitProgress === 0;
+    if (!parallaxEnabled) interaction.reset();
+    const parallax = parallaxEnabled ? interaction.update() : ZERO_PARALLAX;
+    room.setParallax(parallax);
+    camera.rotation.y += parallax.x * .35;
+    camera.rotation.x += parallax.y * .35;
     lighting.apply(sceneProgress, {
       focusStation: shot.stationId,
       target: shot.target,
@@ -235,7 +251,13 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       });
     },
     getAudit() {
-      return { ...room.occlusionAudit, profile: quality.profile, dpr: quality.getDprCap(), cameraLayout };
+      return {
+        ...room.occlusionAudit,
+        profile: quality.profile,
+        dpr: quality.getDprCap(),
+        cameraLayout,
+        toneMappingExposure: renderer.toneMappingExposure
+      };
     },
     dispose() {
       if (disposed) return;

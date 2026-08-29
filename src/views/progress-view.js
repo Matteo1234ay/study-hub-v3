@@ -1,13 +1,13 @@
-import { PATHS } from "../config/paths.js?v=20260828-15";
-import { exportLocalData, importLocalData } from "../progress/backup.js?v=20260828-15";
-import { calculateLessonProgress, createProgressStore } from "../progress/local-progress.js?v=20260828-15";
-import { element, pageHeader } from "../ui/components.js?v=20260828-15";
-import { createStudyStore } from "../study/study-store.js?v=20260828-15";
-import { createPreferencesStore } from "../study/preferences.js?v=20260828-15";
-import { createAssessmentStore } from "../assessment/assessment-store.js?v=20260828-15";
-import { deriveAssessmentInsights, summarizeAssessmentProgress } from "../assessment/insights.js?v=20260828-15";
-import { validateAssessment } from "../assessment/assessment-schema.js?v=20260828-15";
-import { createPathAssessmentStore } from "../path-assessment/path-store.js?v=20260828-15";
+import { PATHS } from "../config/paths.js?v=20260829-23";
+import { exportLocalData, importLocalData } from "../progress/backup.js?v=20260829-23";
+import { calculateLessonProgress, createProgressStore } from "../progress/local-progress.js?v=20260829-23";
+import { element, pageHeader } from "../ui/components.js?v=20260829-23";
+import { createStudyStore } from "../study/study-store.js?v=20260829-23";
+import { createPreferencesStore } from "../study/preferences.js?v=20260829-23";
+import { createAssessmentStore } from "../assessment/assessment-store.js?v=20260829-23";
+import { deriveAssessmentInsights, summarizeAssessmentProgress } from "../assessment/insights.js?v=20260829-23";
+import { validateAssessment } from "../assessment/assessment-schema.js?v=20260829-23";
+import { createPathAssessmentStore } from "../path-assessment/path-store.js?v=20260829-23";
 
 function downloadBackup() {
   const blob = new Blob([JSON.stringify(exportLocalData(), null, 2)], { type: "application/json" });

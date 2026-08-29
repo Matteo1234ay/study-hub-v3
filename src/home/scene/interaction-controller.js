@@ -1,5 +1,31 @@
 const MAX_PARALLAX = .012;
 
+export function createInertialParallax({ maximum = MAX_PARALLAX, easing = .14 } = {}) {
+  const limit = Math.max(0, Number(maximum) || MAX_PARALLAX);
+  const amount = Math.min(1, Math.max(.01, Number(easing) || .14));
+  const output = { x: 0, y: 0 };
+  let targetX = 0;
+  let targetY = 0;
+
+  return {
+    setTarget(x, y) {
+      targetX = Math.min(limit, Math.max(-limit, (Number(x) || 0) * limit));
+      targetY = Math.min(limit, Math.max(-limit, (Number(y) || 0) * limit));
+    },
+    reset() {
+      targetX = 0;
+      targetY = 0;
+    },
+    update() {
+      output.x += (targetX - output.x) * amount;
+      output.y += (targetY - output.y) * amount;
+      if (Math.abs(output.x) < .00001 && targetX === 0) output.x = 0;
+      if (Math.abs(output.y) < .00001 && targetY === 0) output.y = 0;
+      return output;
+    }
+  };
+}
+
 export function createInteractionController({ THREE, canvas, camera, stations, onActivate = () => {} }) {
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2(2, 2);
@@ -8,8 +34,7 @@ export function createInteractionController({ THREE, canvas, camera, stations, o
     return station.hitArea;
   });
   let hovered = null;
-  let parallaxX = 0;
-  let parallaxY = 0;
+  const parallax = createInertialParallax();
 
   function setHovered(next) {
     if (hovered === next) return;
@@ -24,8 +49,7 @@ export function createInteractionController({ THREE, canvas, camera, stations, o
     const x = (event.clientX - rect.left) / Math.max(1, rect.width);
     const y = (event.clientY - rect.top) / Math.max(1, rect.height);
     pointer.set(x * 2 - 1, -(y * 2 - 1));
-    parallaxX = Math.max(-MAX_PARALLAX, Math.min(MAX_PARALLAX, (x - .5) * MAX_PARALLAX * 2));
-    parallaxY = Math.max(-MAX_PARALLAX, Math.min(MAX_PARALLAX, (y - .5) * MAX_PARALLAX * 2));
+    parallax.setTarget((x - .5) * 2, (y - .5) * 2);
   }
 
   function pick() {
@@ -41,8 +65,7 @@ export function createInteractionController({ THREE, canvas, camera, stations, o
 
   function onPointerLeave() {
     pointer.set(2, 2);
-    parallaxX = 0;
-    parallaxY = 0;
+    parallax.reset();
     setHovered(null);
   }
 
@@ -60,8 +83,9 @@ export function createInteractionController({ THREE, canvas, camera, stations, o
 
   return {
     update() {
-      return { x: parallaxX, y: parallaxY };
+      return parallax.update();
     },
+    reset() { parallax.reset(); },
     dispose() {
       canvas.removeEventListener("pointermove", onPointerMove);
       canvas.removeEventListener("pointerleave", onPointerLeave);

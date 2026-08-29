@@ -1,4 +1,4 @@
-import { createNotesDocx } from "./docx-writer.js?v=20260828-15";
+import { createNotesDocx } from "./docx-writer.js?v=20260829-23";
 
 function formatDate(value) {
   return new Intl.DateTimeFormat("it-IT", { timeZone: "UTC", day: "2-digit", month: "2-digit", year: "numeric" }).format(value);

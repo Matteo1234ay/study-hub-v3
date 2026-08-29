@@ -1,16 +1,16 @@
-import { findLesson, findPath } from "./config/paths.js?v=20260828-22";
-import { navigateToHash, startRouter } from "./router.js?v=20260828-22";
-import { element, pageHeader } from "./ui/components.js?v=20260828-22";
-import { renderHomeView } from "./views/home-view.js?v=20260828-22";
-import { renderPathView } from "./views/path-view.js?v=20260828-22";
-import { renderPathsView } from "./views/paths-view.js?v=20260828-22";
-import { renderLessonView } from "./views/lesson-view.js?v=20260828-22";
-import { renderProgressView } from "./views/progress-view.js?v=20260828-22";
-import { renderSearchView } from "./views/search-view.js?v=20260828-22";
-import { renderReviewView } from "./views/review-view.js?v=20260828-22";
-import { renderAssessmentView } from "./views/assessment-view.js?v=20260828-22";
-import { renderPathAssessmentView } from "./views/path-assessment-view.js?v=20260828-22";
-import { createPreferencesStore } from "./study/preferences.js?v=20260828-22";
+import { findLesson, findPath } from "./config/paths.js?v=20260829-23";
+import { navigateToHash, startRouter } from "./router.js?v=20260829-23";
+import { element, pageHeader } from "./ui/components.js?v=20260829-23";
+import { renderHomeView } from "./views/home-view.js?v=20260829-23";
+import { renderPathView } from "./views/path-view.js?v=20260829-23";
+import { renderPathsView } from "./views/paths-view.js?v=20260829-23";
+import { renderLessonView } from "./views/lesson-view.js?v=20260829-23";
+import { renderProgressView } from "./views/progress-view.js?v=20260829-23";
+import { renderSearchView } from "./views/search-view.js?v=20260829-23";
+import { renderReviewView } from "./views/review-view.js?v=20260829-23";
+import { renderAssessmentView } from "./views/assessment-view.js?v=20260829-23";
+import { renderPathAssessmentView } from "./views/path-assessment-view.js?v=20260829-23";
+import { createPreferencesStore } from "./study/preferences.js?v=20260829-23";
 
 const app = document.querySelector("#app");
 const preferences = createPreferencesStore();
@@ -40,7 +40,7 @@ async function render(route) {
   const sequence = ++renderSequence;
   let view;
   if (route.name === "home") view = renderHomeView({ navigate: navigateToHash });
-  else if (route.name === "paths") view = renderPathsView();
+  else if (route.name === "paths") view = renderPathsView({ navigate: navigateToHash });
   else if (route.name === "path") view = renderPathView(findPath(route.params.pathId));
   else if (route.name === "path-assessment" || route.name === "path-final-exam") {
     view = await renderPathAssessmentView({

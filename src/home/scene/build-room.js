@@ -1,4 +1,4 @@
-import { createStationScreen } from "./screen-ui.js?v=20260828-22";
+import { createStationScreen } from "./screen-ui.js?v=20260829-23";
 
 const OPENING_CAMERA = Object.freeze({
   position: [-5.6, 3.05, 5.75],
@@ -275,12 +275,40 @@ export function buildStudyRoom({ THREE, materials }) {
   const progressBaseY = progress.position.y;
   const socialBaseZ = social.position.z;
   const screenHandles = [];
+  const parallaxLayers = [
+    [group.getObjectByName("review-card-1"), .9],
+    [group.getObjectByName("review-card-3"), .72],
+    [group.getObjectByName("review-card-5"), .56],
+    [group.getObjectByName("ceramic-mug"), .44],
+    [group.getObjectByName("keyboard"), .3],
+    [group.getObjectByName("mouse"), .24],
+    [group.getObjectByName("future-binder-1"), .5],
+    [group.getObjectByName("future-binder-2"), .38],
+    [group.getObjectByName("future-binder-3"), .28]
+  ].filter(([object]) => Boolean(object)).map(([object, depth]) => ({
+    object,
+    depth,
+    baseX: object.position.x,
+    baseY: object.position.y
+  }));
 
   return {
     group,
     stations,
     openingCamera: OPENING_CAMERA,
     occlusionAudit: auditOpeningComposition(THREE, monitor, chair),
+    parallaxAudit: Object.freeze({
+      count: parallaxLayers.length,
+      depths: Object.freeze(parallaxLayers.map(layer => layer.depth))
+    }),
+    setParallax({ x = 0, y = 0 } = {}) {
+      const offsetX = Number(x) || 0;
+      const offsetY = Number(y) || 0;
+      for (const layer of parallaxLayers) {
+        layer.object.position.x = layer.baseX + offsetX * layer.depth * 4;
+        layer.object.position.y = layer.baseY - offsetY * layer.depth * 2.5;
+      }
+    },
     setJourney(value) {
       const journey = clamp01(value);
       const chairMove = smoothRange(journey, .135, .225);
@@ -354,6 +382,7 @@ export function buildStudyRoom({ THREE, materials }) {
           disposedMaterials.add(material);
           material.map?.dispose?.();
           material.roughnessMap?.dispose?.();
+          material.normalMap?.dispose?.();
           material.dispose?.();
         }
       });
