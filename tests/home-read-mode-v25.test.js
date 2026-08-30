@@ -7,7 +7,7 @@ function recordingCanvas() {
   const draws = [];
   const context = new Proxy({
     fillText(text) { draws.push(String(text)); },
-    clearRect() {}, fillRect() {}, save() {}, restore() {}, scale() {},
+    clearRect() { draws.length = 0; }, fillRect() {}, save() {}, restore() {}, scale() {},
     beginPath() {}, moveTo() {}, lineTo() {}, stroke() {}, strokeRect() {}, arc() {}, fill() {}, setLineDash() {},
     measureText(text) { return { width: String(text).length * 8 }; }
   }, { set(target, key, value) { target[key] = value; return true; } });
