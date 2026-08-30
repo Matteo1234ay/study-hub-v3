@@ -1,4 +1,5 @@
 import { createCameraTimeline } from "./camera-timeline.js?v=20260829-24";
+import { createDirectorController } from "./director-controller.js?v=20260829-24";
 import { createLightingController } from "./lighting-controller.js?v=20260829-24";
 import { createParallaxRig } from "./parallax-rig.js?v=20260829-24";
 import {
@@ -13,6 +14,7 @@ export { configureStudyRenderer };
 
 const ZERO_PARALLAX = Object.freeze({ x: 0, y: 0 });
 const clamp01 = value => Math.min(1, Math.max(0, Number(value) || 0));
+const clampVelocity = value => Math.min(6, Math.abs(Number(value) || 0));
 
 export async function createStudyRoomRenderer({ canvas, stations, reducedMotion = false, onActivate = () => {}, onFailure = () => {} }) {
   if (!canvas?.getContext) throw new Error("Canvas della stanza non disponibile");
@@ -25,7 +27,9 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
 
   let cameraLayout = "desktop";
   let timeline = createCameraTimeline({ layout: cameraLayout });
+  let director = createDirectorController({ timeline, layout: cameraLayout });
   let journey = 0;
+  let scrollVelocity = 0;
   let exitProgress = 0;
   let disposed = false;
   let frameId = 0;
@@ -63,6 +67,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     if (nextLayout !== cameraLayout) {
       cameraLayout = nextLayout;
       timeline = createCameraTimeline({ layout: cameraLayout });
+      director = createDirectorController({ timeline, layout: cameraLayout });
     }
     renderer.setPixelRatio(quality.getDprCap());
     renderer.setSize(width, height, false);
@@ -76,9 +81,10 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     if (!reducedMotion) frameId = requestAnimationFrame(draw);
     if (!quality.isVisible) return;
     const frameSeconds = Math.min(.05, Math.max(0, (now - lastFrame) / 1000));
+    const direction = director.sample(journey, { scrollVelocity });
     const shot = exitProgress > 0 ? timeline.exit(exitProgress) : timeline.sample(journey);
     room.setJourney(journey);
-    syncActiveScreen(shot.stationId);
+    syncActiveScreen(direction.stationId);
     camera.position.set(...shot.position);
     camera.fov = shot.fov;
     camera.updateProjectionMatrix();
@@ -97,10 +103,12 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     camera.rotation.y += cameraParallax.x * .35;
     camera.rotation.x += cameraParallax.y * .35;
     lighting.apply(journey, {
-      focusStation: shot.stationId,
+      focusStation: direction.stationId,
       target: shot.target,
       cameraPosition: shot.position,
-      exitProgress
+      exitProgress,
+      readStrength: direction.readStrength,
+      lightingScale: direction.lightingScale
     });
     renderer.render(scene, camera);
 
@@ -145,8 +153,9 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
 
   return {
     ready: readyPromise,
-    setJourney(value) {
+    setJourney(value, { scrollVelocity: nextVelocity = 0 } = {}) {
       journey = clamp01(value);
+      scrollVelocity = clampVelocity(nextVelocity);
       if (reducedMotion) draw(performance.now());
     },
     setExitProgress(value) {
@@ -155,6 +164,9 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     },
     getActiveStation(value) {
       return timeline.activeStation(value);
+    },
+    getPresentationState(value, { scrollVelocity: nextVelocity = 0 } = {}) {
+      return director.sample(clamp01(value), { scrollVelocity: clampVelocity(nextVelocity) });
     },
     getPathsProjection() {
       return projectStationScreenToCss({ THREE, canvas, camera, stations: room.stations, stationId: "future-paths" });
@@ -165,6 +177,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       if (focusFrameId) cancelAnimationFrame(focusFrameId);
       finishFocus?.(false);
       exitProgress = 0;
+      scrollVelocity = 0;
       const startValue = journey;
       const destination = timeline.stationProgress(stationId);
       const startTime = performance.now();
