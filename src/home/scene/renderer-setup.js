@@ -1,3 +1,4 @@
+import { createAssetRegistry } from "./asset-registry.js?v=20260829-24";
 import { createRoomMaterials } from "./materials.js?v=20260829-24";
 import { buildStudyRoom } from "./build-room.js?v=20260829-24";
 import { createInteractionController } from "./interaction-controller.js?v=20260829-24";
@@ -48,6 +49,37 @@ export function createRoomParallaxLayers(room) {
   })).filter(layer => Boolean(layer.object));
 }
 
+function mountLoadedLamp({ THREE, room, loadedLamp }) {
+  if (!loadedLamp) return false;
+  const proceduralLamp = room.group.getObjectByName("articulated-desk-lamp");
+  if (!proceduralLamp?.parent) return false;
+
+  loadedLamp.updateMatrixWorld(true);
+  const initialBounds = new THREE.Box3().setFromObject(loadedLamp);
+  const initialSize = initialBounds.getSize(new THREE.Vector3());
+  if (!Number.isFinite(initialSize.y) || initialSize.y <= .001) return false;
+
+  loadedLamp.scale.multiplyScalar(.98 / initialSize.y);
+  loadedLamp.updateMatrixWorld(true);
+  const bounds = new THREE.Box3().setFromObject(loadedLamp);
+  const center = bounds.getCenter(new THREE.Vector3());
+  loadedLamp.position.x += 1.48 - center.x;
+  loadedLamp.position.y += 1.18 - bounds.min.y;
+  loadedLamp.position.z += -.68 - center.z;
+  loadedLamp.name = "articulated-desk-lamp";
+  loadedLamp.userData = { ...proceduralLamp.userData, ...loadedLamp.userData, sourceAsset: "desk-lamp-arm-01" };
+  loadedLamp.traverse(child => {
+    if (!child.isMesh) return;
+    child.castShadow = true;
+    child.receiveShadow = true;
+  });
+
+  proceduralLamp.name = "articulated-desk-lamp-fallback";
+  proceduralLamp.visible = false;
+  proceduralLamp.parent.add(loadedLamp);
+  return true;
+}
+
 function createLightRig(THREE, room) {
   const ambient = new THREE.HemisphereLight(0xc7d6e6, 0x211a14, .5);
   const roomLight = new THREE.PointLight(0xffe6c7, 0, 20, 1.35);
@@ -70,7 +102,7 @@ function createLightRig(THREE, room) {
 }
 
 export function initializeStudyRoom({ THREE, canvas, stations, reducedMotion, onActivate }) {
-  let renderer = null, room = null, interaction = null, environmentTarget = null;
+  let renderer = null, room = null, interaction = null, environmentTarget = null, assetRegistry = null;
   try {
     const rect = canvas.getBoundingClientRect();
     const compact = resolveCameraLayout(rect.width || globalThis.innerWidth || 1440, rect.height || globalThis.innerHeight || 900) === "mobile";
@@ -92,6 +124,13 @@ export function initializeStudyRoom({ THREE, canvas, stations, reducedMotion, on
     room.attachScreens({ stationDefinitions: stations, dataByStation: Object.fromEntries(stations.map(station => [station.id, station.screenData ?? {}])) });
     sharpenScreenTextures(THREE, renderer, room);
     scene.add(room.group);
+
+    assetRegistry = createAssetRegistry({ THREE });
+    const heroAssetPromise = assetRegistry.loadDeskLamp().then(loadedLamp => {
+      if (loadedLamp) mountLoadedLamp({ THREE, room, loadedLamp });
+      return loadedLamp;
+    });
+
     const lightRig = createLightRig(THREE, room);
     scene.add(lightRig.ambient, lightRig.room, lightRig.guide.light, lightRig.guide.target);
     for (const key of ["desk", "memory", "social", "assessment", "progress", "future"]) scene.add(lightRig[key].light);
@@ -106,9 +145,10 @@ export function initializeStudyRoom({ THREE, canvas, stations, reducedMotion, on
     fillLight.position.set(4, 3.5, 4.5);
     scene.add(keyLight, fillLight);
     interaction = createInteractionController({ THREE, canvas, camera, stations: room.stations, onActivate });
-    return { renderer, room, interaction, quality, scene, camera, lightRig, environmentTarget };
+    return { renderer, room, interaction, quality, scene, camera, lightRig, environmentTarget, assetRegistry, heroAssetPromise };
   } catch (error) {
     interaction?.dispose();
+    assetRegistry?.dispose();
     room?.dispose();
     environmentTarget?.dispose?.();
     renderer?.dispose();
