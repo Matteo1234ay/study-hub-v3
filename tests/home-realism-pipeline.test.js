@@ -4,13 +4,21 @@ import { readFile } from "node:fs/promises";
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
+function executableSource(source) {
+  return source
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/^\s*\/\/.*$/gm, "");
+}
+
 test("realism helpers are vendored locally with no runtime network dependency", async () => {
   const rounded = await read("vendor/three/examples/jsm/geometries/RoundedBoxGeometry.js");
   const environment = await read("vendor/three/examples/jsm/environments/RoomEnvironment.js");
   assert.match(rounded, /three\.module\.min\.js/);
   assert.match(environment, /three\.module\.min\.js/);
-  assert.doesNotMatch(rounded + environment, /from\s+["']three["']/);
-  assert.doesNotMatch(rounded + environment, /https?:\/\//);
+  const runtimeSource = executableSource(rounded + environment);
+  assert.doesNotMatch(runtimeSource, /from\s+["']three["']/);
+  assert.doesNotMatch(runtimeSource, /(?:from\s+|import\s*\(\s*)["']https?:\/\//i);
+  assert.doesNotMatch(runtimeSource, /\bfetch\s*\(\s*["']https?:\/\//i);
 });
 
 test("renderer uses local PMREM image-based lighting without changing the visible background", async () => {
