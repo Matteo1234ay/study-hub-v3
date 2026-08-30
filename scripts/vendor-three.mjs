@@ -44,5 +44,8 @@ await Promise.all([
     resolve(destination, "LICENSE")
   ),
   vendorAddon("geometries/RoundedBoxGeometry.js", "geometries/RoundedBoxGeometry.js"),
-  vendorAddon("environments/RoomEnvironment.js", "environments/RoomEnvironment.js")
+  vendorAddon("environments/RoomEnvironment.js", "environments/RoomEnvironment.js"),
+  vendorAddon("utils/BufferGeometryUtils.js", "utils/BufferGeometryUtils.js"),
+  vendorAddon("utils/SkeletonUtils.js", "utils/SkeletonUtils.js"),
+  vendorAddon("loaders/GLTFLoader.js", "loaders/GLTFLoader.js")
 ]);
