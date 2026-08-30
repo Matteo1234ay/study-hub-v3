@@ -13,7 +13,7 @@ export const MOBILE_HOME_SHOTS = Object.freeze([
   Object.freeze({ stationId: "social", enter: .29, settleStart: .47, settleEnd: .51, exit: .64, position: [4.4, 2.55, 2.5], target: [3.35, 2.12, -2.75], fov: 48, chairClearance: 1.05 }),
   Object.freeze({ stationId: "assessment", enter: .51, settleStart: .64, settleEnd: .68, exit: .81, position: [3.8, 2.05, 3.62], target: [2.55, .95, -.58], fov: 50, chairClearance: 1.05 }),
   Object.freeze({ stationId: "progress", enter: .68, settleStart: .81, settleEnd: .85, exit: .96, position: [-2.8, 1.9, 2.8], target: [-.95, 1.08, -2.75], fov: 48, chairClearance: 1.05 }),
-  Object.freeze({ stationId: "future-paths", enter: .85, settleStart: .96, settleEnd: 1, exit: 1, position: [-1.2, 3.35, 3.0], target: [.75, 3.26, -2.36], fov: 49, chairClearance: 1.05 })
+  Object.freeze({ stationId: "future-paths", enter: .85, settleStart: .96, settleEnd: 1, exit: 1, position: [-1.2, 3.35, 3.3], target: [.75, 3.26, -2.36], fov: 49, chairClearance: 1.05 })
 ]);
 
 const HOME_OVERVIEW = Object.freeze({ position: [-4.65, 3.45, 7.8], target: [0, 1.65, -1.75], fov: 48, stationId: "overview", settled: true, monitorVisible: true, chairClearance: 1 });
