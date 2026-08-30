@@ -16,6 +16,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node --test
+      - name: Tests
+        shell: bash
+        run: |
+          set -o pipefail
+          node --test 2>&1 | tee test-output.txt
+      - name: Upload test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-diagnostics
+          path: test-output.txt
+          if-no-files-found: error
+          retention-days: 1
       - name: Check for committed secrets
         run: node scripts/check-secrets.mjs
