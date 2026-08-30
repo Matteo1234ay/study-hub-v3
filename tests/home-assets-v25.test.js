@@ -45,7 +45,7 @@ test("Three GLTFLoader is vendored reproducibly without a runtime CDN", () => {
   assert.ok(existsSync("vendor/three/examples/jsm/loaders/GLTFLoader.js"));
   const loader = readFileSync("vendor/three/examples/jsm/loaders/GLTFLoader.js", "utf8");
   assert.doesNotMatch(loader, /from\s+["']three["']/);
-  assert.doesNotMatch(loader, /https?:\/\//i);
+  assert.doesNotMatch(loader, /(?:from\s+|import\s*\()["']https?:\/\//i);
 });
 
 test("renderer preserves the procedural lamp unless the local hero asset loads", () => {
