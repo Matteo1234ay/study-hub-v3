@@ -33,18 +33,18 @@ export function sharpenScreenTextures(THREE, renderer, room) {
 
 export function createRoomParallaxLayers(room) {
   const definitions = [
-    ["review-card-1", 1, 10, { x: .055, y: .035 }, { x: .018, y: .028 }],
-    ["review-card-3", .82, 9, { x: .048, y: .03 }, { x: .015, y: .023 }],
-    ["review-card-5", .68, 8, { x: .042, y: .027 }, { x: .013, y: .02 }],
-    ["ceramic-mug", .58, 7.5, { x: .037, y: .022 }, { x: .011, y: .016 }],
-    ["future-binder-1", .5, 7, { x: .032, y: .021 }, { x: .009, y: .014 }],
-    ["future-binder-2", .4, 6, { x: .027, y: .018 }, { x: .007, y: .011 }],
-    ["future-binder-3", .32, 5.5, { x: .023, y: .016 }, { x: .006, y: .009 }],
-    ["keyboard", .24, 5, { x: .018, y: .012 }, { x: .004, y: .007 }],
-    ["mouse", .18, 4.2, { x: .014, y: .01 }, { x: .003, y: .006 }]
+    ["review-card-1", "memory-notes", "light", 1, 10, { x: .055, y: .035 }, { x: .018, y: .028 }],
+    ["review-card-3", "memory-notes", "light", .82, 9, { x: .048, y: .03 }, { x: .015, y: .023 }],
+    ["review-card-5", "memory-notes", "light", .68, 8, { x: .042, y: .027 }, { x: .013, y: .02 }],
+    ["ceramic-mug", "desk-break", "medium", .58, 7.5, { x: .037, y: .022 }, { x: .011, y: .016 }],
+    ["future-binder-1", "future-library", "heavy", .5, 7, { x: .032, y: .021 }, { x: .009, y: .014 }],
+    ["future-binder-2", "future-library", "heavy", .4, 6, { x: .027, y: .018 }, { x: .007, y: .011 }],
+    ["future-binder-3", "future-library", "heavy", .32, 5.5, { x: .023, y: .016 }, { x: .006, y: .009 }],
+    ["keyboard", "desk-input", "heavy", .24, 5, { x: .018, y: .012 }, { x: .004, y: .007 }],
+    ["mouse", "desk-input", "medium", .18, 4.2, { x: .014, y: .01 }, { x: .003, y: .006 }]
   ];
-  return definitions.map(([name, depth, damping, translation, rotation]) => ({
-    object: room.group.getObjectByName(name), depth, damping, translation, rotation
+  return definitions.map(([name, cluster, weight, depth, damping, translation, rotation]) => ({
+    object: room.group.getObjectByName(name), cluster, weight, depth, damping, translation, rotation
   })).filter(layer => Boolean(layer.object));
 }
 
