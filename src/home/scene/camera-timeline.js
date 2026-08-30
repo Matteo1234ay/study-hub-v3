@@ -8,12 +8,12 @@ export const HOME_SHOTS = Object.freeze([
 ]);
 
 export const MOBILE_HOME_SHOTS = Object.freeze([
-  Object.freeze({ stationId: "desk", enter: 0, settleStart: 0, settleEnd: .12, exit: .25, position: [-5.0, 2.95, 5.0], target: [-.08, 1.94, -1.02], fov: 48, monitorVisible: true, chairClearance: 1.08 }),
-  Object.freeze({ stationId: "memory", enter: .12, settleStart: .25, settleEnd: .29, exit: .47, position: [-4.5, 2.55, 2.6], target: [-3.35, 2.18, -2.68], fov: 56, chairClearance: 1.05 }),
-  Object.freeze({ stationId: "social", enter: .29, settleStart: .47, settleEnd: .51, exit: .64, position: [4.4, 2.55, 2.5], target: [3.35, 2.12, -2.75], fov: 52, chairClearance: 1.05 }),
-  Object.freeze({ stationId: "assessment", enter: .51, settleStart: .64, settleEnd: .68, exit: .81, position: [3.8, 2.05, 3.6], target: [2.55, .95, -.58], fov: 56, chairClearance: 1.05 }),
-  Object.freeze({ stationId: "progress", enter: .68, settleStart: .81, settleEnd: .85, exit: .96, position: [-2.8, 1.9, 2.8], target: [-.95, 1.08, -2.75], fov: 52, chairClearance: 1.05 }),
-  Object.freeze({ stationId: "future-paths", enter: .85, settleStart: .96, settleEnd: 1, exit: 1, position: [-1.2, 3.35, 3.0], target: [.75, 3.26, -2.36], fov: 54, chairClearance: 1.05 })
+  Object.freeze({ stationId: "desk", enter: 0, settleStart: 0, settleEnd: .12, exit: .25, position: [-5.0, 2.95, 5.0], target: [-.08, 1.94, -1.02], fov: 46, monitorVisible: true, chairClearance: 1.08 }),
+  Object.freeze({ stationId: "memory", enter: .12, settleStart: .25, settleEnd: .29, exit: .47, position: [-4.5, 2.55, 2.6], target: [-3.35, 2.18, -2.68], fov: 49, chairClearance: 1.05 }),
+  Object.freeze({ stationId: "social", enter: .29, settleStart: .47, settleEnd: .51, exit: .64, position: [4.4, 2.55, 2.5], target: [3.35, 2.12, -2.75], fov: 48, chairClearance: 1.05 }),
+  Object.freeze({ stationId: "assessment", enter: .51, settleStart: .64, settleEnd: .68, exit: .81, position: [3.8, 2.05, 3.6], target: [2.55, .95, -.58], fov: 50, chairClearance: 1.05 }),
+  Object.freeze({ stationId: "progress", enter: .68, settleStart: .81, settleEnd: .85, exit: .96, position: [-2.8, 1.9, 2.8], target: [-.95, 1.08, -2.75], fov: 48, chairClearance: 1.05 }),
+  Object.freeze({ stationId: "future-paths", enter: .85, settleStart: .96, settleEnd: 1, exit: 1, position: [-1.2, 3.35, 3.0], target: [.75, 3.26, -2.36], fov: 49, chairClearance: 1.05 })
 ]);
 
 const HOME_OVERVIEW = Object.freeze({ position: [-4.65, 3.45, 7.8], target: [0, 1.65, -1.75], fov: 48, stationId: "overview", settled: true, monitorVisible: true, chairClearance: 1 });
@@ -46,6 +46,37 @@ function interpolateVector(from, to, value) {
 function interpolateNumber(from, to, value) {
   const t = clamp01(value);
   return from + (to - from) * t;
+}
+
+function cubicPoint(from, controlA, controlB, to, value) {
+  const t = clamp01(value);
+  const u = 1 - t;
+  return from.map((item, index) => (
+    u ** 3 * item
+    + 3 * u ** 2 * t * controlA[index]
+    + 3 * u * t ** 2 * controlB[index]
+    + t ** 3 * to[index]
+  ));
+}
+
+function curvedControls(from, to, index, layout, target = false) {
+  const sign = index % 2 === 0 ? 1 : -1;
+  const compact = layout === "mobile";
+  const lateral = compact ? .11 : .2;
+  const lift = compact ? .08 : .16;
+  const depth = compact ? .035 : .07;
+  const firstAmount = target ? .38 : .28;
+  const secondAmount = target ? .86 : .72;
+  const first = interpolateVector(from, to, firstAmount);
+  const second = interpolateVector(from, to, secondAmount);
+  const targetScale = target ? .7 : 1;
+  first[0] += sign * lateral * targetScale;
+  first[1] += lift * targetScale;
+  first[2] += sign * depth * targetScale;
+  second[0] += sign * lateral * .55 * targetScale;
+  second[1] += lift * .5 * targetScale;
+  second[2] -= sign * depth * .45 * targetScale;
+  return [first, second];
 }
 
 function snapshot(shot, settled = true) {
@@ -91,14 +122,16 @@ export function createCameraTimeline({ shots = null, layout = "desktop" } = {}) 
       const next = selectedShots[index + 1];
       if (value > current.settleEnd && value < next.settleStart) {
         const amount = (value - current.settleEnd) / Math.max(.0001, next.settleStart - current.settleEnd);
+        const [positionControlA, positionControlB] = curvedControls(current.position, next.position, index, layout, false);
+        const [targetControlA, targetControlB] = curvedControls(current.target, next.target, index, layout, true);
         return {
-          position: interpolateVector(current.position, next.position, amount),
-          target: interpolateVector(current.target, next.target, amount),
-          fov: interpolateNumber(current.fov, next.fov, amount),
+          position: cubicPoint(current.position, positionControlA, positionControlB, next.position, amount),
+          target: cubicPoint(current.target, targetControlA, targetControlB, next.target, amount),
+          fov: interpolateNumber(current.fov, next.fov, smooth(amount)),
           stationId: amount < .72 ? current.stationId : next.stationId,
           settled: false,
           monitorVisible: amount < .72 && current.stationId === "desk",
-          chairClearance: interpolateNumber(current.chairClearance ?? 1, next.chairClearance ?? 1, amount)
+          chairClearance: interpolateNumber(current.chairClearance ?? 1, next.chairClearance ?? 1, smooth(amount))
         };
       }
     }
