@@ -17,6 +17,17 @@ const ACTIVATION = Object.freeze({
   room: [.94, 1]
 });
 
+const LIGHTING = Object.freeze({
+  ambient: .5,
+  roomBase: .28,
+  roomLift: .25,
+  peripheralFloor: .14,
+  focusBoost: .52,
+  zoneRange: .78,
+  guideBase: 1.1,
+  guideFocus: .52
+});
+
 const ZONE_KEYS = Object.freeze(["desk", "memory", "social", "assessment", "progress", "future"]);
 
 function normalizeFocus(value) {
@@ -29,35 +40,41 @@ export function createLightingController(lightRig = null) {
     const value = clamp01(progress);
     const focus = normalizeFocus(focusStation);
     return {
-      ambient: .5,
+      ambient: LIGHTING.ambient,
       desk: ramp(value, ...ACTIVATION.desk),
       memory: ramp(value, ...ACTIVATION.memory),
       social: ramp(value, ...ACTIVATION.social),
       assessment: ramp(value, ...ACTIVATION.assessment),
       progress: ramp(value, ...ACTIVATION.progress),
       future: ramp(value, ...ACTIVATION.future),
-      room: ramp(value, ...ACTIVATION.room),
+      room: LIGHTING.roomBase + ramp(value, ...ACTIVATION.room) * LIGHTING.roomLift,
+      peripheralFloor: LIGHTING.peripheralFloor,
       focusStation: focus,
-      focusBoost: focus ? 2.8 : 1
+      focusBoost: focus ? LIGHTING.focusBoost : 0
     };
   }
 
   function apply(progress, context = {}) {
     const state = sample(progress, context.focusStation);
     if (!lightRig) return state;
+    const directionScale = .82 + clamp01(context.lightingScale ?? 1) * .18;
+    const readScale = .94 + clamp01(context.readStrength ?? 0) * .06;
     if (lightRig.ambient) lightRig.ambient.intensity = state.ambient;
-    if (lightRig.room) lightRig.room.intensity = state.room * 2.55;
+    if (lightRig.room) lightRig.room.intensity = state.room;
 
     for (const key of ZONE_KEYS) {
       const zone = lightRig[key];
       const focused = state.focusStation === key;
       const screenPower = state[key];
-      if (zone?.light) zone.light.intensity = state[key] * 1.35 + (focused ? state.focusBoost : 0);
+      const persistentLight = state.peripheralFloor + screenPower * LIGHTING.zoneRange;
+      if (zone?.light) {
+        zone.light.intensity = persistentLight * directionScale + (focused ? state.focusBoost * readScale : 0);
+      }
       if (zone?.screen?.material) {
         if (zone.screen.material.color?.setScalar) {
           zone.screen.material.color.setScalar(.035 + screenPower * .965);
         }
-        zone.screen.material.emissiveIntensity = screenPower * (focused ? 1.45 : .88);
+        zone.screen.material.emissiveIntensity = screenPower * (focused ? 1.14 : .82);
       }
     }
 
@@ -65,7 +82,7 @@ export function createLightingController(lightRig = null) {
     const cameraPosition = Array.isArray(context.cameraPosition) ? context.cameraPosition : null;
     if (lightRig.guide?.light && target) {
       const light = lightRig.guide.light;
-      light.intensity = state.focusStation ? 3.35 : 1.45;
+      light.intensity = (LIGHTING.guideBase + (state.focusStation ? LIGHTING.guideFocus : 0)) * directionScale;
       lightRig.guide.target?.position?.set?.(...target);
       lightRig.guide.target?.updateMatrixWorld?.();
       if (cameraPosition && light.position?.set) {
