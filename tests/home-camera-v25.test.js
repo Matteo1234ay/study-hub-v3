@@ -33,7 +33,11 @@ test("V25 portrait read shots use narrower FOV without losing room context", () 
     const shot = timeline.sample(timeline.stationProgress(stationId));
     assert.equal(shot.fov, expectedFov, `${stationId} mobile read FOV`);
     const subjectDistance = distance(shot.position, shot.target);
-    assert.ok(subjectDistance > 3.8 && subjectDistance < 6.5, `${stationId} keeps spatial context: ${subjectDistance}`);
+    if (stationId === "desk") {
+      assert.ok(subjectDistance > 6 && subjectDistance < 9, `desk remains an establishing composition: ${subjectDistance}`);
+    } else {
+      assert.ok(subjectDistance > 3.8 && subjectDistance < 6.5, `${stationId} keeps spatial context: ${subjectDistance}`);
+    }
   }
 });
 
