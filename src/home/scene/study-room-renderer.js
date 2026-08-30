@@ -19,7 +19,7 @@ const clampVelocity = value => Math.min(6, Math.abs(Number(value) || 0));
 export async function createStudyRoomRenderer({ canvas, stations, reducedMotion = false, onActivate = () => {}, onFailure = () => {} }) {
   if (!canvas?.getContext) throw new Error("Canvas della stanza non disponibile");
   const THREE = await import("../../../vendor/three/three.module.min.js?v=20260829-24");
-  const { renderer, room, interaction, quality, scene, camera, lightRig, environmentTarget } = initializeStudyRoom({
+  const { renderer, room, interaction, quality, scene, camera, lightRig, environmentTarget, assetRegistry } = initializeStudyRoom({
     THREE, canvas, stations, reducedMotion, onActivate
   });
   const parallaxRig = createParallaxRig({ layers: createRoomParallaxLayers(room), maxLayers: 12 });
@@ -242,6 +242,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       canvas.removeEventListener("webglcontextlost", onContextLost);
       interaction.dispose();
       parallaxRig.restoreImmediately();
+      assetRegistry?.dispose();
       room.dispose();
       environmentTarget?.dispose?.();
       renderer.dispose();
