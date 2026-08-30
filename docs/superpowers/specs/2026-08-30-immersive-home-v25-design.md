@@ -470,10 +470,10 @@ It must not feel like:
 
 Use a combined camera-position and FOV curve rather than only changing FOV.
 
-The crash zoom should include:
+The crash zoom must use:
 
 - a quick increase in forward camera velocity toward the Paths display;
-- a modest coordinated FOV compression/expansion curve depending on the chosen lens feel;
+- a **moderate FOV narrowing** synchronized with the forward rush; desktop may narrow more than mobile, but neither path may widen the FOV during the crash phase;
 - a stable target locked on the display center;
 - minimal lateral movement during the crash phase;
 - peripheral depth separation from nearby props;
@@ -499,13 +499,14 @@ Navigation must not commit before the handoff surface is visually dominant; targ
 
 ## Desktop crash zoom
 
-Desktop may use a slightly stronger positional rush and mild lens compression because peripheral context is visible before the crash.
+Desktop may use a slightly stronger positional rush and moderate FOV narrowing because peripheral context is visible before the crash.
 
 ## Mobile crash zoom
 
 Mobile crash zoom must be shorter and composition-safe:
 
-- no huge FOV spike;
+- no FOV widening;
+- only moderate FOV narrowing;
 - no rapid sideways movement;
 - maintain the Paths display centered;
 - avoid motion that causes browser chrome/safe-area conflicts;
@@ -699,6 +700,7 @@ Add/strengthen tests for:
 - crash begins only after pre-crash settle;
 - crash camera target remains Paths display;
 - position and FOV both participate within bounded limits;
+- FOV narrows during crash and never widens;
 - no lateral overshoot during crash;
 - navigation cannot commit before >=90% visual completion;
 - reduced motion replaces crash acceleration with controlled handoff;
