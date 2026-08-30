@@ -4,6 +4,7 @@
   --home-blue: #7ab8ff;
   --home-scene-shade: .34;
   --home-mobile-scene-shade: .28;
+  --home-caption-strength: 1;
   position: relative;
   width: 100%;
   max-width: 100%;
@@ -189,9 +190,19 @@
 
 .home-journey[data-home-state="ready"] .home-station-caption.is-active,
 .home-journey[data-home-state="static-3d"] .home-station-caption.is-active {
-  opacity: 1;
+  opacity: var(--home-caption-strength, 1);
   visibility: visible;
   transform: translateY(0);
+}
+
+.home-journey[data-home-state="ready"][data-home-phase="read"] .home-station-caption.is-active {
+  background: linear-gradient(90deg, rgba(7, 11, 17, .54), rgba(7, 11, 17, .12));
+  backdrop-filter: blur(6px);
+}
+
+.home-journey[data-home-state="ready"][data-home-phase="read"] .home-station-caption.is-active small,
+.home-journey[data-home-state="ready"][data-home-phase="read"] .home-station-caption.is-active b {
+  display: none;
 }
 
 .home-journey[data-home-state="ready"] .home-progress {
