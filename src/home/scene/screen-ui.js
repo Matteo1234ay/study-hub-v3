@@ -22,6 +22,24 @@ function screenSize(screenKind, active = false) {
   };
 }
 
+export function resolveScreenPresentation({
+  screenKind = "default",
+  active = false,
+  read = false,
+  compact = false
+} = {}) {
+  const sharp = Boolean(active || read);
+  const compactCopy = Boolean(read && compact);
+  return {
+    ...screenSize(screenKind, sharp),
+    active: Boolean(active),
+    read: Boolean(read),
+    compact: Boolean(compact),
+    compactCopy,
+    maxSupportLines: compactCopy ? 2 : 4
+  };
+}
+
 function normalizeData(data = {}) {
   return {
     lessonId: typeof data.lessonId === "string" ? data.lessonId : "SMM-01",
@@ -79,7 +97,7 @@ function drawMemory(context, data) {
   label(context, "Apri il ripasso →", 292, 286, 20, "#f2cf82", 800);
 }
 
-function drawSocial(context, data) {
+function drawSocial(context, data, station, presentation = {}) {
   label(context, "PERCORSO ATTIVO", 52, 84, 26, "#8bc4ff", 800);
   label(context, data.pathTitle, 52, 166, 56, "#ffffff", 840);
 
@@ -88,9 +106,14 @@ function drawSocial(context, data) {
   label(context, "Reach · Impression", 82, 370, 30, "#d9ebf8", 720);
   label(context, "Watch time · Retention", 82, 418, 30, "#d9ebf8", 720);
 
+  if (presentation.compactCopy) {
+    panel(context, 52, 520, 536, 150, "#0f1c28");
+    label(context, "Apri il percorso →", 82, 612, 36, "#91c9ff", 820);
+    return;
+  }
+
   label(context, "LETTURA STRATEGICA", 52, 538, 26, "#8bc4ff", 780);
   label(context, "Metriche nel contesto", 52, 600, 36, "#f7fafc", 780);
-
   panel(context, 52, 710, 536, 120, "#0f1c28");
   label(context, "Apri il percorso →", 82, 788, 34, "#91c9ff", 820);
 }
@@ -143,30 +166,46 @@ export function createStationScreen({
   const canvas = canvasFactory();
   const context = canvas.getContext("2d");
   let current = normalizeData(data);
-  let active = false;
+  let presentation = Object.freeze({ active: false, read: false, compact: false });
   let disposed = false;
 
-  function currentSize() {
-    return screenSize(station?.screenKind, active);
+  function presentationState() {
+    return resolveScreenPresentation({ screenKind: station?.screenKind, ...presentation });
   }
 
   function applySize() {
-    const size = currentSize();
+    const size = presentationState();
     canvas.width = size.width;
     canvas.height = size.height;
     return size;
   }
 
   function draw() {
-    const size = currentSize();
+    const state = presentationState();
     context.clearRect(0, 0, canvas.width, canvas.height);
     context.fillStyle = "#090d12";
     context.fillRect(0, 0, canvas.width, canvas.height);
     const drawer = DRAWERS[station?.screenKind] ?? drawFuture;
     context.save();
-    context.scale(canvas.width / size.logicalWidth, canvas.height / size.logicalHeight);
-    drawer(context, current, station);
+    context.scale(canvas.width / state.logicalWidth, canvas.height / state.logicalHeight);
+    drawer(context, current, station, state);
     context.restore();
+  }
+
+  function setPresentation(nextState = {}) {
+    if (disposed) return false;
+    const next = Object.freeze({
+      active: Boolean(nextState.active),
+      read: Boolean(nextState.read),
+      compact: Boolean(nextState.compact)
+    });
+    if (next.active === presentation.active && next.read === presentation.read && next.compact === presentation.compact) return false;
+    const before = presentationState();
+    presentation = next;
+    const after = presentationState();
+    if (before.width !== after.width || before.height !== after.height) applySize();
+    draw();
+    return true;
   }
 
   applySize();
@@ -174,14 +213,9 @@ export function createStationScreen({
   return {
     canvas,
     setActive(value) {
-      if (disposed) return false;
-      const next = Boolean(value);
-      if (next === active) return false;
-      active = next;
-      applySize();
-      draw();
-      return true;
+      return setPresentation({ ...presentation, active: Boolean(value) });
     },
+    setPresentation,
     update(nextData = {}) {
       if (disposed) return false;
       const next = normalizeData({ ...current, ...nextData });
