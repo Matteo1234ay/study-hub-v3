@@ -84,7 +84,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     const direction = director.sample(journey, { scrollVelocity });
     const shot = exitProgress > 0 ? timeline.exit(exitProgress) : timeline.sample(journey);
     room.setJourney(journey);
-    syncActiveScreen(direction.stationId);
+    syncActiveScreen(shot.stationId);
     camera.position.set(...shot.position);
     camera.fov = shot.fov;
     camera.updateProjectionMatrix();
