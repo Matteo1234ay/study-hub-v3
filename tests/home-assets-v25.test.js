@@ -14,6 +14,12 @@ function collectFiles(directory) {
   return result;
 }
 
+function executableSource(source) {
+  return source
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/^\s*\/\/.*$/gm, "");
+}
+
 test("V25 hero model is local, CC0 documented and inside budget", () => {
   assert.ok(existsSync("assets/3d/ATTRIBUTION.md"));
   const attribution = readFileSync("assets/3d/ATTRIBUTION.md", "utf8");
@@ -43,9 +49,10 @@ test("Three GLTFLoader is vendored reproducibly without a runtime CDN", () => {
   const vendorScript = readFileSync("scripts/vendor-three.mjs", "utf8");
   assert.match(vendorScript, /loaders\/GLTFLoader\.js/);
   assert.ok(existsSync("vendor/three/examples/jsm/loaders/GLTFLoader.js"));
-  const loader = readFileSync("vendor/three/examples/jsm/loaders/GLTFLoader.js", "utf8");
+  const loader = executableSource(readFileSync("vendor/three/examples/jsm/loaders/GLTFLoader.js", "utf8"));
   assert.doesNotMatch(loader, /from\s+["']three["']/);
-  assert.doesNotMatch(loader, /(?:from\s+|import\s*\()["']https?:\/\//i);
+  assert.doesNotMatch(loader, /(?:from\s+|import\s*\(\s*)["']https?:\/\//i);
+  assert.doesNotMatch(loader, /\bfetch\s*\(\s*["']https?:\/\//i);
 });
 
 test("renderer preserves the procedural lamp unless the local hero asset loads", () => {
