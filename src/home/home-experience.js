@@ -43,6 +43,11 @@ export function resolveJourneyPhases(progress, width = 1440) {
   };
 }
 
+export function resolveScrollVelocity({ deltaProgress = 0, deltaMs = 16 } = {}) {
+  const seconds = Math.max(.016, (Number(deltaMs) || 16) / 1000);
+  return Math.min(6, Math.abs(Number(deltaProgress) || 0) / seconds);
+}
+
 export function resolveReentryLock({ locked, restoring, resumeProgress, rawProgress }) {
   if (!locked || restoring) return Boolean(locked);
   const delta = Number(rawProgress) - Number(resumeProgress);
@@ -98,6 +103,8 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
   let reentryLocked = Boolean(resume);
   let restoreFrameId = 0;
   let restoreReleaseFrameId = 0;
+  let previousRawProgress = null;
+  let previousProgressTime = null;
   const sharedTransition = createSharedPathsTransition({
     documentTarget: document,
     reducedMotion,
@@ -188,8 +195,8 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     if (event.key === "Escape") transitionManager.cancel();
   }
 
-  function setActive(sceneProgress, rawProgress) {
-    const activeId = renderer.getActiveStation(sceneProgress);
+  function setActive(sceneProgress, rawProgress, presentation = null) {
+    const activeId = presentation?.stationId ?? renderer.getActiveStation(sceneProgress);
     if (progressMeter) progressMeter.value = Math.round(clamp01(rawProgress) * 100);
     root.dataset.activeStation = activeId;
     root.dataset.journeyStarted = rawProgress > .025 ? "true" : "false";
@@ -241,15 +248,29 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     const rect = root.getBoundingClientRect();
     const distance = Math.max(1, root.offsetHeight - innerHeight);
     const phases = resolveJourneyPhases(-rect.top / distance, innerWidth);
+    const now = performance.now();
+    const scrollVelocity = previousRawProgress == null || previousProgressTime == null
+      ? 0
+      : resolveScrollVelocity({
+        deltaProgress: phases.rawProgress - previousRawProgress,
+        deltaMs: now - previousProgressTime
+      });
+    previousRawProgress = phases.rawProgress;
+    previousProgressTime = now;
     reentryLocked = resolveReentryLock({
       locked: reentryLocked,
       restoring,
       resumeProgress: resume?.resumeProgress ?? 0,
       rawProgress: phases.rawProgress
     });
-    setActive(phases.sceneProgress, phases.rawProgress);
-    renderer.setJourney(phases.sceneProgress);
+    const presentation = renderer.getPresentationState?.(phases.sceneProgress, { scrollVelocity }) ?? null;
+    setActive(phases.sceneProgress, phases.rawProgress, presentation);
+    renderer.setJourney(phases.sceneProgress, { scrollVelocity });
     renderer.setExitProgress?.(phases.exitProgress);
+    if (presentation) {
+      root.dataset.homePhase = presentation.phase;
+      root.style.setProperty("--home-caption-strength", String(presentation.captionStrength));
+    }
     updateSharedHandoff(phases);
     root.dataset.homeExit = phases.exitProgress > .01 ? "true" : "false";
     root.dataset.homeExitPhase = phases.choreography.handoff > 0
@@ -285,6 +306,8 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
       scrollTo({ top: pageTop + distance * resume.resumeProgress, behavior: "auto" });
       restoreReleaseFrameId = requestAnimationFrame(() => {
         restoring = false;
+        previousRawProgress = null;
+        previousProgressTime = null;
         updateJourney();
       });
     });
