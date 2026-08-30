@@ -58,6 +58,19 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     return true;
   }
 
+  function syncScreenPresentation(shotStationId, direction) {
+    for (const [id, station] of Object.entries(room.stations)) {
+      const changed = station.screenHandle?.setPresentation?.({
+        active: id === shotStationId,
+        read: direction.phase === "read" && id === direction.stationId,
+        compact: cameraLayout === "mobile"
+      }) ?? false;
+      if (!changed) continue;
+      const texture = station.screen?.material?.map;
+      if (texture) texture.needsUpdate = true;
+    }
+  }
+
   function resize() {
     if (disposed) return;
     const rect = canvas.getBoundingClientRect();
@@ -85,6 +98,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     const shot = exitProgress > 0 ? timeline.exit(exitProgress) : timeline.sample(journey);
     room.setJourney(journey);
     syncActiveScreen(shot.stationId);
+    syncScreenPresentation(shot.stationId, direction);
     camera.position.set(...shot.position);
     camera.fov = shot.fov;
     camera.updateProjectionMatrix();
