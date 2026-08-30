@@ -9,7 +9,7 @@ export const HOME_SHOTS = Object.freeze([
 
 export const MOBILE_HOME_SHOTS = Object.freeze([
   Object.freeze({ stationId: "desk", enter: 0, settleStart: 0, settleEnd: .12, exit: .25, position: [-5.0, 2.95, 5.0], target: [-.08, 1.94, -1.02], fov: 46, monitorVisible: true, chairClearance: 1.08 }),
-  Object.freeze({ stationId: "memory", enter: .12, settleStart: .25, settleEnd: .29, exit: .47, position: [-4.5, 2.55, 2.6], target: [-3.35, 2.18, -2.68], fov: 49, chairClearance: 1.05 }),
+  Object.freeze({ stationId: "memory", enter: .12, settleStart: .25, settleEnd: .29, exit: .47, position: [-4.5, 2.55, 3.35], target: [-3.35, 2.18, -2.68], fov: 49, chairClearance: 1.05 }),
   Object.freeze({ stationId: "social", enter: .29, settleStart: .47, settleEnd: .51, exit: .64, position: [4.4, 2.55, 2.5], target: [3.35, 2.12, -2.75], fov: 48, chairClearance: 1.05 }),
   Object.freeze({ stationId: "assessment", enter: .51, settleStart: .64, settleEnd: .68, exit: .81, position: [3.8, 2.05, 3.6], target: [2.55, .95, -.58], fov: 50, chairClearance: 1.05 }),
   Object.freeze({ stationId: "progress", enter: .68, settleStart: .81, settleEnd: .85, exit: .96, position: [-2.8, 1.9, 2.8], target: [-.95, 1.08, -2.75], fov: 48, chairClearance: 1.05 }),
@@ -48,6 +48,10 @@ function interpolateNumber(from, to, value) {
   return from + (to - from) * t;
 }
 
+function vectorDistance(from, to) {
+  return Math.hypot(...from.map((item, index) => item - to[index]));
+}
+
 function cubicPoint(from, controlA, controlB, to, value) {
   const t = clamp01(value);
   const u = 1 - t;
@@ -62,11 +66,13 @@ function cubicPoint(from, controlA, controlB, to, value) {
 function curvedControls(from, to, index, layout, target = false) {
   const sign = index % 2 === 0 ? 1 : -1;
   const compact = layout === "mobile";
-  const lateral = compact ? .11 : .2;
-  const lift = compact ? .08 : .16;
-  const depth = compact ? .035 : .07;
-  const firstAmount = target ? .38 : .28;
-  const secondAmount = target ? .86 : .72;
+  const segmentLength = vectorDistance(from, to);
+  const lengthScale = Math.max(.04, Math.min(1, (6 - segmentLength) / 3));
+  const lateral = (compact ? .11 : .2) * lengthScale;
+  const lift = (compact ? .08 : .16) * lengthScale;
+  const depth = (compact ? .035 : .07) * lengthScale;
+  const firstAmount = target ? .36 : 1 / 3;
+  const secondAmount = target ? .72 : 2 / 3;
   const first = interpolateVector(from, to, firstAmount);
   const second = interpolateVector(from, to, secondAmount);
   const targetScale = target ? .7 : 1;
