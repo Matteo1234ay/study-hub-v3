@@ -1,5 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import * as homeExperience from "../src/home/home-experience.js";
 import { createCameraTimeline } from "../src/home/scene/camera-timeline.js";
 import { createDirectorController } from "../src/home/scene/director-controller.js";
 
@@ -57,4 +59,19 @@ test("director output remains bounded at journey edges", () => {
       assert.ok(state[key] >= 0 && state[key] <= 1, `${key} must stay in 0..1`);
     }
   }
+});
+
+test("home converts scroll deltas into bounded visual velocity", () => {
+  assert.equal(typeof homeExperience.resolveScrollVelocity, "function");
+  if (typeof homeExperience.resolveScrollVelocity !== "function") return;
+  assert.ok(homeExperience.resolveScrollVelocity({ deltaProgress: .02, deltaMs: 16 }) > 0);
+  assert.equal(homeExperience.resolveScrollVelocity({ deltaProgress: 5, deltaMs: 1 }), 6);
+  assert.equal(homeExperience.resolveScrollVelocity({ deltaProgress: 0, deltaMs: 16 }), 0);
+});
+
+test("renderer owns the V25 director and exposes presentation state", async () => {
+  const source = await readFile(new URL("../src/home/scene/study-room-renderer.js", import.meta.url), "utf8");
+  assert.match(source, /createDirectorController/);
+  assert.match(source, /getPresentationState/);
+  assert.match(source, /scrollVelocity/);
 });
