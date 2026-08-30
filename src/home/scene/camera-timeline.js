@@ -118,7 +118,26 @@ export function createCameraTimeline({ shots = null, layout = "desktop" } = {}) 
     const shot = selectedShots.find(item => item.stationId === stationId);
     return shot ? (shot.settleStart + shot.settleEnd) / 2 : 0;
   }
+  function stationWindows() {
+    return selectedShots.map((shot, index) => {
+      const previous = selectedShots[index - 1] ?? null;
+      const next = selectedShots[index + 1] ?? null;
+      const enter = previous
+        ? previous.settleEnd + (shot.settleStart - previous.settleEnd) * .55
+        : 0;
+      const releaseEnd = next
+        ? shot.settleEnd + (next.settleStart - shot.settleEnd) * .55
+        : 1;
+      return {
+        stationId: shot.stationId,
+        enter,
+        readStart: shot.settleStart,
+        readEnd: shot.settleEnd,
+        releaseEnd
+      };
+    });
+  }
   function overview() { return { ...selectedOverview, position: [...selectedOverview.position], target: [...selectedOverview.target] }; }
 
-  return { sample, exit, activeStation, stationProgress, overview, layout };
+  return { sample, exit, activeStation, stationProgress, stationWindows, overview, layout };
 }
