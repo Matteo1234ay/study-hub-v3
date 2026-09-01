@@ -1,0 +1,83 @@
+.home-journey {
+  --v30-glass: rgba(17, 18, 20, .70);
+  --v30-glass-soft: rgba(17, 18, 20, .46);
+  --v30-border: rgba(245, 242, 235, .12);
+  --v30-ink: #f1eee7;
+  --v30-muted: #bbb8b0;
+  --v30-accent: #78aef5;
+  --home-shadow-rgb: 10, 10, 11;
+  --home-ink: var(--v30-ink);
+  --home-muted: var(--v30-muted);
+  --home-blue: var(--v30-accent);
+  background:
+    radial-gradient(circle at 68% 18%, rgba(255, 244, 224, .05), transparent 28%),
+    linear-gradient(145deg, #171717, #0d0e10 68%, #090a0c);
+}
+
+.home-stage-shade {
+  background: linear-gradient(90deg, rgba(7, 7, 8, .26), transparent 50%);
+}
+
+.home-quick-actions {
+  border-color: var(--v30-border);
+  background: var(--v30-glass);
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, .16);
+  backdrop-filter: blur(20px) saturate(.88);
+}
+
+.home-quick-actions a {
+  color: #d2d0ca;
+}
+
+.home-quick-actions a:hover,
+.home-quick-actions a:focus-visible,
+.home-quick-actions a.is-primary {
+  color: #fff;
+  background: rgba(120, 174, 245, .11);
+}
+
+.home-station-caption {
+  border-color: var(--v30-border);
+  background: var(--v30-glass);
+  box-shadow: 0 1.4rem 4rem rgba(0, 0, 0, .18);
+}
+
+.home-journey[data-home-state="ready"][data-home-phase="read"] .home-station-caption.is-active {
+  background: linear-gradient(90deg, rgba(16, 16, 17, .70), rgba(16, 16, 17, .18));
+}
+
+.home-progress progress,
+.home-progress progress::-webkit-progress-bar {
+  background: rgba(242, 238, 230, .16);
+}
+
+.home-progress progress::-webkit-progress-value,
+.home-progress progress::-moz-progress-bar {
+  background: var(--v30-accent);
+}
+
+.home-journey[data-home-exit="true"] .home-stage-shade {
+  background:
+    radial-gradient(circle at 55% 50%, rgba(120, 174, 245, .055), transparent 30%),
+    linear-gradient(180deg, rgba(9, 9, 10, .01), rgba(9, 9, 10, .24));
+}
+
+.home-journey[data-home-state="dom"] .home-stage {
+  background:
+    linear-gradient(105deg, rgba(8, 8, 9, .10) 38%, rgba(8, 8, 9, .82) 72%),
+    linear-gradient(180deg, transparent 58%, rgba(33, 31, 28, .48) 58.2%, rgba(10, 10, 11, .88) 100%),
+    radial-gradient(ellipse at 29% 43%, rgba(237, 226, 209, .12), transparent 18%),
+    linear-gradient(145deg, #242321, #141414 58%, #0a0b0c);
+}
+
+@media (max-width: 760px) {
+  .home-journey[data-home-state="ready"] .home-station-caption {
+    border-left-color: rgba(120, 174, 245, .68);
+    background: linear-gradient(90deg, rgba(13, 13, 14, .72), rgba(13, 13, 14, .18));
+    box-shadow: 0 .8rem 2.8rem rgba(0, 0, 0, .15);
+  }
+
+  .home-journey[data-home-state="static-3d"] .home-station-caption {
+    background: var(--v30-glass);
+  }
+}
