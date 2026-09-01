@@ -176,7 +176,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     const parallaxEnabled = !reducedMotion && cameraLayout !== "mobile" && exitProgress === 0;
     let cameraParallax = ZERO_PARALLAX;
     if (parallaxEnabled) {
-      parallaxRig.setAmplitude(direction.parallaxScale * (1 - archiveState.archive * .9));
+      parallaxRig.setAmplitude(direction.parallaxScale);
       parallaxRig.setTarget(interaction.getParallaxTarget());
       parallaxRig.update(frameSeconds);
       cameraParallax = interaction.update();
