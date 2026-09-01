@@ -3,13 +3,13 @@ import { createRoomMaterials } from "./materials.js?v=20260901-29";
 import { buildStudyRoom } from "./build-room.js?v=20260901-29";
 import { createInteractionController } from "./interaction-controller.js?v=20260901-29";
 import { createQualityController } from "./quality-controller.js?v=20260901-29";
-import { prepareHomeV29, setProceduralHeroVisible } from "./home-v29-mount.js?v=20260901-29";
+import { prepareHomeV30 } from "./home-v30-mount.js?v=20260901-29";
 import { RoomEnvironment } from "../../../vendor/three/examples/jsm/environments/RoomEnvironment.js?v=20260901-29";
 
 export function configureStudyRenderer(THREE, renderer, quality) {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = .98;
+  renderer.toneMappingExposure = 1.04;
   renderer.shadowMap.enabled = quality?.profile === "high";
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.shadowMap.autoUpdate = quality?.profile !== "low";
@@ -50,82 +50,10 @@ export function createRoomParallaxLayers(room) {
   })).filter(layer => Boolean(layer.object));
 }
 
-function mountLoadedLamp({ THREE, room, loadedLamp }) {
-  if (!loadedLamp) return false;
-  const proceduralLamp = room.group.getObjectByName("articulated-desk-lamp");
-  if (!proceduralLamp?.parent) return false;
-  loadedLamp.updateMatrixWorld(true);
-  const initialBounds = new THREE.Box3().setFromObject(loadedLamp);
-  const initialSize = initialBounds.getSize(new THREE.Vector3());
-  if (!Number.isFinite(initialSize.y) || initialSize.y <= .001) return false;
-  loadedLamp.scale.multiplyScalar(.98 / initialSize.y);
-  loadedLamp.updateMatrixWorld(true);
-  const bounds = new THREE.Box3().setFromObject(loadedLamp);
-  const center = bounds.getCenter(new THREE.Vector3());
-  loadedLamp.position.x += 1.48 - center.x;
-  loadedLamp.position.y += 1.18 - bounds.min.y;
-  loadedLamp.position.z += -.68 - center.z;
-  loadedLamp.name = "articulated-desk-lamp";
-  loadedLamp.userData = { ...proceduralLamp.userData, ...loadedLamp.userData, sourceAsset: "desk-lamp-arm-01" };
-  loadedLamp.traverse(child => {
-    if (!child.isMesh) return;
-    child.castShadow = true;
-    child.receiveShadow = true;
-  });
-  proceduralLamp.name = "articulated-desk-lamp-fallback";
-  proceduralLamp.visible = false;
-  proceduralLamp.parent.add(loadedLamp);
-  return true;
-}
-
-const STUDIO_FALLBACK_NAMES = Object.freeze([
-  "desk-top", "desk-leg-left", "desk-leg-right", "desk-crossbar",
-  "keyboard", "mouse", "ceramic-mug", "mug-base", "mug-handle",
-  "chair-seat", "chair-back", "chair-column", "chair-hub",
-  "monitor-frame", "monitor-neck", "monitor-foot"
-]);
-
-export function applyStudioCoreAxisCorrection(loadedStudio) {
-  if (!loadedStudio?.rotation) return loadedStudio;
-  loadedStudio.rotation.x += Math.PI / 2;
-  loadedStudio.userData = {
-    ...(loadedStudio.userData ?? {}),
-    axisCorrection: "blender-z-up-to-authored-three-y-up"
-  };
-  loadedStudio.updateMatrixWorld?.(true);
-  return loadedStudio;
-}
-
-function mountStudioCore({ room, loadedStudio }) {
-  if (!loadedStudio) return false;
-  applyStudioCoreAxisCorrection(loadedStudio);
-  loadedStudio.name = "studio-core-asset";
-  loadedStudio.userData.sourceAsset = "studio-core";
-  loadedStudio.userData.archiveBase = {
-    position: loadedStudio.position.clone(),
-    rotation: loadedStudio.rotation.clone(),
-    scale: loadedStudio.scale.clone()
-  };
-  loadedStudio.traverse(child => {
-    if (!child.isMesh) return;
-    child.castShadow = true;
-    child.receiveShadow = true;
-    if (child.name === "studio-monitor-screen") child.visible = false;
-  });
-  for (const name of STUDIO_FALLBACK_NAMES) {
-    const object = room.group.getObjectByName(name);
-    if (!object || object.name === "main-monitor-screen") continue;
-    object.visible = false;
-  }
-  room.heroAsset = loadedStudio;
-  room.group.add(loadedStudio);
-  return true;
-}
-
 function createLightRig(THREE, room) {
-  const ambient = new THREE.HemisphereLight(0xf1e6dc, 0x323946, .46);
-  const roomLight = new THREE.PointLight(0xffead6, 0, 20, 1.35);
-  roomLight.position.set(0, 4.8, 1.2);
+  const ambient = new THREE.HemisphereLight(0xf1e6dc, 0x2a3038, .50);
+  const roomLight = new THREE.PointLight(0xffd7ad, .24, 18, 1.4);
+  roomLight.position.set(1.6, 3.0, 1.4);
   const positions = {
     desk: [-.7, 2.75, -.1], memory: [-3.15, 3.3, -1.55], social: [3.2, 3.4, -1.65],
     assessment: [2.55, 2.15, .15], progress: [-.9, 2.45, -1.75], future: [.8, 4.45, -1.75]
@@ -143,17 +71,6 @@ function createLightRig(THREE, room) {
   return rig;
 }
 
-async function loadV28Fallback({ THREE, room, assetRegistry }) {
-  setProceduralHeroVisible(room, true);
-  const [loadedLamp, loadedStudio] = await Promise.all([
-    assetRegistry.loadDeskLamp(),
-    assetRegistry.loadStudioCore()
-  ]);
-  if (loadedLamp) mountLoadedLamp({ THREE, room, loadedLamp });
-  if (loadedStudio) mountStudioCore({ room, loadedStudio });
-  return { heroMode: "v28-fallback", homeV29: null };
-}
-
 export function initializeStudyRoom({ THREE, canvas, stations, reducedMotion, onActivate }) {
   let renderer = null, room = null, interaction = null, environmentTarget = null, assetRegistry = null;
   try {
@@ -162,55 +79,61 @@ export function initializeStudyRoom({ THREE, canvas, stations, reducedMotion, on
     const quality = createQualityController({ devicePixelRatio: globalThis.devicePixelRatio ?? 1, reducedMotion, initialProfile: compact ? "balanced" : undefined });
     renderer = new THREE.WebGLRenderer({ canvas, antialias: quality.profile !== "low", alpha: false, powerPreference: "high-performance" });
     configureStudyRenderer(THREE, renderer, quality);
+
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x12161b);
-    scene.fog = new THREE.Fog(0x171b20, 14, 29);
+    scene.background = new THREE.Color(0x17191b);
+    scene.fog = new THREE.Fog(0x1d2022, 15, 32);
     const environmentScene = new RoomEnvironment();
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     environmentTarget = pmremGenerator.fromScene(environmentScene, .04);
     scene.environment = environmentTarget.texture;
-    if ("environmentIntensity" in scene) scene.environmentIntensity = compact ? .52 : .62;
+    if ("environmentIntensity" in scene) scene.environmentIntensity = compact ? .66 : .78;
     environmentScene.dispose();
     pmremGenerator.dispose();
-    const camera = new THREE.PerspectiveCamera(42, 1, .1, 50);
+    const camera = new THREE.PerspectiveCamera(38, 1, .1, 60);
 
     room = buildStudyRoom({ THREE, materials: createRoomMaterials(THREE) });
     room.attachScreens({ stationDefinitions: stations, dataByStation: Object.fromEntries(stations.map(station => [station.id, station.screenData ?? {}])) });
     sharpenScreenTextures(THREE, renderer, room);
-    setProceduralHeroVisible(room, false);
+    room.group.visible = false;
     scene.add(room.group);
 
     assetRegistry = createAssetRegistry({ THREE });
-    const heroState = { heroMode: "pending", homeV29: null };
-    const heroAssetPromise = assetRegistry.loadHomeV29().then(async result => {
-      const homeV29 = prepareHomeV29({ THREE, room, scene, result });
-      if (homeV29) {
-        heroState.heroMode = "v29";
-        heroState.homeV29 = homeV29;
-        return heroState;
+    const heroState = { heroMode: "pending", homeV30: null, error: null };
+    const heroAssetPromise = assetRegistry.loadHomeV30().then(result => {
+      if (result?.status === "ok") {
+        const homeV30 = prepareHomeV30({ THREE, scene, result });
+        if (homeV30) {
+          const state = { heroMode: "v30", homeV30, error: null };
+          Object.assign(heroState, state);
+          return state;
+        }
+        const state = { heroMode: "poster", homeV30: null, error: new Error("Scena V30 non valida") };
+        Object.assign(heroState, state);
+        return state;
       }
-      const fallback = await loadV28Fallback({ THREE, room, assetRegistry });
-      Object.assign(heroState, fallback);
-      return heroState;
-    }).catch(async () => {
-      const fallback = await loadV28Fallback({ THREE, room, assetRegistry });
-      Object.assign(heroState, fallback);
-      return heroState;
+      const state = { heroMode: "poster", homeV30: null, error: result?.error ?? new Error("Caricamento V30 non riuscito"), status: result?.status ?? "error" };
+      Object.assign(heroState, state);
+      return state;
+    }).catch(error => {
+      const state = { heroMode: "poster", homeV30: null, error };
+      Object.assign(heroState, state);
+      return state;
     });
 
     const lightRig = createLightRig(THREE, room);
     scene.add(lightRig.ambient, lightRig.room, lightRig.guide.light, lightRig.guide.target);
     for (const key of ["desk", "memory", "social", "assessment", "progress", "future"]) scene.add(lightRig[key].light);
 
-    const keyLight = new THREE.DirectionalLight(0xffefe2, 1.18);
-    keyLight.position.set(-4.8, 6.5, 4.8);
+    const keyLight = new THREE.DirectionalLight(0xffe3c6, 1.34);
+    keyLight.position.set(3.8, 6.2, 4.6);
     keyLight.castShadow = quality.profile === "high";
     const shadowSize = quality.profile === "high" ? 1024 : 512;
     keyLight.shadow.mapSize.set(shadowSize, shadowSize);
     keyLight.shadow.bias = -.00035;
     keyLight.shadow.normalBias = .025;
-    const fillLight = new THREE.DirectionalLight(0xa8b7c9, .22);
-    fillLight.position.set(4.4, 3.8, 4.6);
+    const fillLight = new THREE.DirectionalLight(0xb9c8d7, .34);
+    fillLight.position.set(-4.6, 3.5, 4.1);
     scene.add(keyLight, fillLight);
 
     interaction = createInteractionController({ THREE, canvas, camera, stations: room.stations, onActivate });

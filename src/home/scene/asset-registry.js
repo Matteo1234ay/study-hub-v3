@@ -3,7 +3,9 @@ import { GLTFLoader } from "../../../vendor/three/examples/jsm/loaders/GLTFLoade
 const DESK_LAMP_MODEL = new URL("../../../assets/3d/desk-lamp-arm-01/desk_lamp_arm_01_1k.gltf", import.meta.url).href;
 const STUDIO_CORE_MODEL = new URL("../../../assets/3d/studio-core/studio-core.glb", import.meta.url).href;
 const HOME_V29_MODEL = new URL("../../../assets/3d/home-v29/study-hub-home-v29.glb", import.meta.url).href;
+const HOME_V30_MODEL = new URL("../../../assets/3d/home-v30/study-hub-home-v30.glb", import.meta.url).href;
 const DEFAULT_TIMEOUT_MS = 12000;
+const V30_TIMEOUT_MS = 20000;
 
 function disposeMaterial(material) {
   if (!material) return;
@@ -74,6 +76,39 @@ export function createAssetRegistry({ THREE, timeoutMs = DEFAULT_TIMEOUT_MS } = 
     };
   }
 
+  async function loadHomeV30() {
+    if (disposed) return { status: "error", error: new Error("Registro asset chiuso") };
+    const finiteTimeout = Math.min(30000, Math.max(3000, Number(timeoutMs) || V30_TIMEOUT_MS));
+    let timer = 0;
+    const timeoutError = new Error("Timeout durante il caricamento della scena V30");
+    try {
+      const loadPromise = loader.loadAsync(HOME_V30_MODEL)
+        .then(result => ({ status: "ok", result }))
+        .catch(error => ({ status: "error", error }));
+      const timeoutPromise = new Promise(resolve => {
+        timer = globalThis.setTimeout(() => resolve({ status: "timeout", error: timeoutError }), finiteTimeout);
+      });
+      const decision = await Promise.race([loadPromise, timeoutPromise]);
+      if (decision.status !== "ok") return decision;
+      const object = decision.result?.scene ?? null;
+      if (!object) return { status: "error", error: new Error("La scena V30 non contiene un root") };
+      if (disposed) {
+        disposeObject(object);
+        return { status: "error", error: new Error("Registro asset chiuso durante il caricamento V30") };
+      }
+      tracked.add(object);
+      return {
+        status: "ok",
+        scene: object,
+        animations: Array.isArray(decision.result.animations) ? decision.result.animations : []
+      };
+    } catch (error) {
+      return { status: "error", error };
+    } finally {
+      if (timer) globalThis.clearTimeout(timer);
+    }
+  }
+
   function dispose() {
     if (disposed) return;
     disposed = true;
@@ -81,5 +116,5 @@ export function createAssetRegistry({ THREE, timeoutMs = DEFAULT_TIMEOUT_MS } = 
     tracked.clear();
   }
 
-  return { loadDeskLamp, loadStudioCore, loadHomeV29, dispose };
+  return { loadDeskLamp, loadStudioCore, loadHomeV29, loadHomeV30, dispose };
 }

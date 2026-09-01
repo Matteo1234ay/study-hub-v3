@@ -63,7 +63,18 @@ export function renderHomeView({ mountExperience = mountHomeExperience, navigate
     className: "home-journey",
     attrs: {
       "data-home-state": "loading",
+      "data-home-renderer": "poster",
       "data-motion": "semantic-room"
+    }
+  });
+  const poster = element("img", {
+    className: "home-v30-poster",
+    attrs: {
+      src: "assets/3d/home-v30/home-v30-poster.webp",
+      alt: "",
+      "aria-hidden": "true",
+      decoding: "async",
+      fetchpriority: "high"
     }
   });
   const canvas = element("canvas", {
@@ -98,6 +109,7 @@ export function renderHomeView({ mountExperience = mountHomeExperience, navigate
     stations.map(stationCaption)
   );
   const stage = element("div", { className: "home-stage" }, [
+    poster,
     canvas,
     preload,
     element("div", { className: "home-stage-shade", attrs: { "aria-hidden": "true" } }),
@@ -117,7 +129,9 @@ export function renderHomeView({ mountExperience = mountHomeExperience, navigate
       await mountExperience(root, { stations, navigate });
     } catch (error) {
       root.dataset.homeState = "dom";
-      console.warn("La scena 3D non è disponibile; uso la homepage accessibile.", error);
+      root.dataset.homeRenderer = "poster";
+      root.dataset.homeRendererError = "load";
+      console.warn("La scena V30 non è disponibile; uso la homepage accessibile.", error);
     }
   });
   return root;

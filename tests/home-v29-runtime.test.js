@@ -9,45 +9,29 @@ function executableSource(source) {
     .replace(/^\s*\/\/.*$/gm, "");
 }
 
-test("V29 controller exists and scrubs centralized Blender clips with AnimationMixer", () => {
+test("historical V29 controller remains deterministic for regression reference", () => {
   const path = "src/home/scene/home-v29-controller.js";
   assert.ok(existsSync(path), "missing V29 runtime controller");
   const source = executableSource(readFileSync(path, "utf8"));
   assert.match(source, /HOME_V29_CLIPS/);
   assert.match(source, /HOME_V29_WINDOWS/);
   assert.match(source, /new\s+THREE\.AnimationMixer\s*\(/);
-  assert.match(source, /for\s*\(const name of HOME_V29_CLIPS\)/);
-  assert.match(source, /action\.play\(\)[\s\S]*action\.paused\s*=\s*true/,
-    "V29 may activate Three.js actions only when they are immediately paused for scroll scrubbing");
+  assert.match(source, /action\.play\(\)[\s\S]*action\.paused\s*=\s*true/);
   assert.match(source, /entry\.action\.time\s*=/);
-  assert.match(source, /HOME_V29_WINDOWS\[name\]/);
   assert.match(source, /mixer\.update\(0\)/);
   for (const clip of HOME_V29_CLIPS) {
-    assert.ok(Array.isArray(HOME_V29_WINDOWS[clip]), `missing scroll window for ${clip}`);
+    assert.ok(Array.isArray(HOME_V29_WINDOWS[clip]), `missing historical scroll window for ${clip}`);
   }
 });
 
-test("V29 asset registry loads only the local GLB with a finite fallback", () => {
-  const source = executableSource(readFileSync("src/home/scene/asset-registry.js", "utf8"));
-  assert.match(source, /home-v29\/study-hub-home-v29\.glb/);
-  assert.match(source, /loadHomeV29/);
-  assert.match(source, /Promise\.race/);
-  assert.match(source, /return null/);
-  assert.doesNotMatch(source, /https?:\/\//i);
-});
-
-test("V29 renderer keeps procedural hero hidden until load success or explicit fallback", () => {
-  const setup = readFileSync("src/home/scene/renderer-setup.js", "utf8");
-  assert.match(setup, /heroMode/);
-  assert.match(setup, /"v29"/);
-  assert.match(setup, /"v28-fallback"/);
-  assert.match(setup, /setProceduralHeroVisible/);
-  assert.match(setup, /loadHomeV29/);
-});
-
-test("V29 readiness waits for the V29 hero decision", () => {
-  const renderer = readFileSync("src/home/scene/study-room-renderer.js", "utf8");
-  assert.match(renderer, /heroAssetPromise/);
-  assert.match(renderer, /await\s+heroAssetPromise/);
-  assert.match(renderer, /homeV29/i);
+test("legacy V29 asset remains local but is not selected by the V30 production renderer", () => {
+  const registry = executableSource(readFileSync("src/home/scene/asset-registry.js", "utf8"));
+  const setup = executableSource(readFileSync("src/home/scene/renderer-setup.js", "utf8"));
+  const renderer = executableSource(readFileSync("src/home/scene/study-room-renderer.js", "utf8"));
+  assert.match(registry, /home-v29\/study-hub-home-v29\.glb/);
+  assert.doesNotMatch(registry, /https?:\/\//i);
+  assert.doesNotMatch(setup, /loadHomeV29|prepareHomeV29|v28-fallback|setProceduralHeroVisible/);
+  assert.doesNotMatch(renderer, /homeV29|createHomeV29/);
+  assert.match(setup, /loadHomeV30/);
+  assert.match(renderer, /homeV30/i);
 });

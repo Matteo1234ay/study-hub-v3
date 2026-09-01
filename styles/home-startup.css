@@ -1,3 +1,32 @@
+.home-v30-poster {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 50%;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: none;
+  transition: opacity 420ms ease, visibility 420ms ease;
+}
+
+.study-room-canvas {
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 420ms ease;
+}
+
+.home-journey[data-home-renderer="webgl-v30"] .study-room-canvas {
+  opacity: 1;
+}
+
+.home-journey[data-home-renderer="webgl-v30"] .home-v30-poster {
+  opacity: 0;
+  visibility: hidden;
+}
+
 .home-preload {
   position: absolute;
   inset: 0;
@@ -6,10 +35,10 @@
   place-content: center;
   gap: .8rem;
   min-height: 100svh;
-  color: rgba(237, 243, 249, .78);
+  color: rgba(247, 241, 232, .86);
   background:
-    radial-gradient(circle at 50% 42%, rgba(85, 104, 128, .18), transparent 29%),
-    linear-gradient(145deg, #10151b, #090d12 58%, #06090d);
+    radial-gradient(circle at 50% 42%, rgba(255, 218, 173, .10), transparent 30%),
+    linear-gradient(145deg, rgba(18, 19, 20, .28), rgba(11, 13, 15, .44) 58%, rgba(7, 9, 11, .55));
   transition: opacity 260ms ease, visibility 260ms ease;
 }
 
@@ -18,6 +47,7 @@
   font-weight: 780;
   letter-spacing: .24em;
   text-align: center;
+  text-shadow: 0 1px 18px rgba(0, 0, 0, .45);
 }
 
 .home-preload-line {
@@ -25,14 +55,14 @@
   width: min(12rem, 46vw);
   height: 1px;
   overflow: hidden;
-  background: rgba(255, 255, 255, .11);
+  background: rgba(255, 255, 255, .16);
 }
 
 .home-preload-line::after {
   display: block;
   width: 42%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(122, 184, 255, .9), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 202, 139, .92), transparent);
   content: "";
   animation: home-preload-sweep 1.25s ease-in-out infinite;
 }
@@ -63,6 +93,10 @@
 }
 
 @media (max-width: 760px) {
+  .home-v30-poster {
+    object-position: 52% 50%;
+  }
+
   body:has(.home-journey[data-home-state="loading"]) .site-header,
   body:has(.home-journey[data-home-state="loading"]) .site-footer,
   body:has(.home-journey[data-home-state="preparing"]) .site-header,
@@ -84,7 +118,9 @@
     transform: translateX(70%);
   }
 
-  .home-preload {
+  .home-preload,
+  .home-v30-poster,
+  .study-room-canvas {
     transition: none;
   }
 }

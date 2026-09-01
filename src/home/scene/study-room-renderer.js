@@ -1,8 +1,5 @@
 import { createCameraTimeline } from "./camera-timeline.js?v=20260901-29";
-import { createHomeV29CameraTimeline } from "./home-v29-camera-timeline.js?v=20260901-29";
-import { createHomeV29Controller } from "./home-v29-controller.js?v=20260901-29";
-import { createHomeV29Disassembly } from "./home-v29-disassembly.js?v=20260901-29";
-import { createHomeV29Lighting } from "./home-v29-lighting.js?v=20260901-29";
+import { createHomeV30Controller } from "./home-v30-controller.js?v=20260901-29";
 import { createDirectorController } from "./director-controller.js?v=20260901-29";
 import { createLightingController } from "./lighting-controller.js?v=20260901-29";
 import { createParallaxRig } from "./parallax-rig.js?v=20260901-29";
@@ -22,57 +19,37 @@ const ZERO_PARALLAX = Object.freeze({ x: 0, y: 0 });
 const clamp01 = value => Math.min(1, Math.max(0, Number(value) || 0));
 const clampVelocity = value => Math.min(6, Math.abs(Number(value) || 0));
 
-function objectScatter(name = "") {
-  let hash = 2166136261;
-  for (const char of name) {
-    hash ^= char.charCodeAt(0);
-    hash = Math.imul(hash, 16777619);
-  }
-  return {
-    x: ((hash & 255) / 255 - .5) * 2,
-    y: (((hash >>> 8) & 255) / 255 - .5) * 2,
-    z: (((hash >>> 16) & 255) / 255 - .5) * 2
-  };
-}
-
-function archiveMass(name = "") {
-  if (/book|keyboard|mouse|mug|notebook/i.test(name)) return .34;
-  if (/monitor/i.test(name)) return .72;
-  if (/chair/i.test(name)) return .86;
-  return 1;
-}
-
 export async function createStudyRoomRenderer({ canvas, stations, reducedMotion = false, onActivate = () => {}, onFailure = () => {} }) {
   if (!canvas?.getContext) throw new Error("Canvas della stanza non disponibile");
   const THREE = await import("../../../vendor/three/three.module.min.js?v=20260901-29");
   const {
     renderer, room, interaction, quality, scene, camera, lightRig, environmentTarget,
-    assetRegistry, heroAssetPromise, heroState, keyLight, fillLight
+    assetRegistry, heroAssetPromise, heroState
   } = initializeStudyRoom({ THREE, canvas, stations, reducedMotion, onActivate });
 
   const heroResolution = await heroAssetPromise;
-  const homeV29 = heroResolution?.homeV29 ?? heroState.homeV29 ?? null;
-  const homeV29Controller = homeV29
-    ? createHomeV29Controller({ THREE, root: homeV29.root, animations: homeV29.animations })
-    : null;
-  const homeV29Disassembly = homeV29
-    ? createHomeV29Disassembly({ THREE, root: homeV29.root, reducedMotion })
-    : null;
-  const homeV29Lighting = homeV29
-    ? createHomeV29Lighting({ THREE, scene, renderer, root: homeV29.root, keyLight, fillLight })
-    : null;
+  const heroMode = heroResolution?.heroMode ?? heroState.heroMode;
+  const homeV30 = heroResolution?.homeV30 ?? heroState.homeV30 ?? null;
+  if (heroMode !== "v30" || !homeV30) {
+    const error = heroResolution?.error ?? heroState.error ?? new Error("La scena V30 non è disponibile");
+    interaction.dispose();
+    assetRegistry?.dispose();
+    room.dispose();
+    environmentTarget?.dispose?.();
+    renderer.dispose();
+    renderer.forceContextLoss?.();
+    throw error;
+  }
 
+  const homeV30Controller = createHomeV30Controller({ THREE, root: homeV30.root, animations: homeV30.animations });
   const parallaxRig = createParallaxRig({ layers: createRoomParallaxLayers(room), maxLayers: 12 });
-  const fallbackLighting = createLightingController(lightRig);
+  const lighting = createLightingController(lightRig);
   const archiveField = createArchiveField({ THREE, quality, mobile: false });
-  if (homeV29Controller) archiveField.setOrigins(homeV29Controller.getArchiveOrigins());
+  archiveField.setOrigins(homeV30Controller.getArchiveOrigins());
   scene.add(archiveField.group);
 
   let cameraLayout = "desktop";
-  const createTimeline = layout => homeV29
-    ? createHomeV29CameraTimeline({ layout })
-    : createCameraTimeline({ layout });
-  let timeline = createTimeline(cameraLayout);
+  let timeline = createCameraTimeline({ layout: cameraLayout });
   let director = createDirectorController({ timeline, layout: cameraLayout });
   let journey = 0;
   let scrollVelocity = 0;
@@ -117,44 +94,6 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     }
   }
 
-  function syncFallbackHeroArchive(state) {
-    if (homeV29) return;
-    const hero = room.heroAsset;
-    if (!hero) return;
-    const intensity = reducedMotion
-      ? state.archive * .24
-      : state.knowledge * .06 + state.fragment * .46 + state.archive * .82;
-    hero.traverse(child => {
-      if (!child.isMesh || child.name === "studio-monitor-screen") return;
-      if (!child.userData.archiveBasePosition) {
-        child.userData.archiveBasePosition = child.position.clone();
-        child.userData.archiveBaseRotation = child.rotation.clone();
-        child.userData.archiveBaseScale = child.scale.clone();
-        child.userData.archiveScatter = objectScatter(child.name);
-        child.userData.archiveMass = archiveMass(child.name);
-      }
-      const basePosition = child.userData.archiveBasePosition;
-      const baseRotation = child.userData.archiveBaseRotation;
-      const baseScale = child.userData.archiveBaseScale;
-      const scatter = child.userData.archiveScatter;
-      const mass = child.userData.archiveMass;
-      const mobility = 1.22 - mass * .62;
-      const travel = intensity * mobility;
-      child.position.copy(basePosition).add(new THREE.Vector3(
-        scatter.x * travel * 1.65,
-        (.18 + Math.abs(scatter.y)) * travel * 1.2,
-        scatter.z * travel * 1.35
-      ));
-      child.rotation.set(
-        baseRotation.x + scatter.z * travel * .34,
-        baseRotation.y + scatter.x * travel * .5,
-        baseRotation.z + scatter.y * travel * .28
-      );
-      const shrink = Math.max(.24, 1 - state.archive * (.42 + mobility * .22));
-      child.scale.copy(baseScale).multiplyScalar(shrink);
-    });
-  }
-
   function syncArchiveBudget() {
     archiveField.setBudget(resolveArchiveBudget({
       profile: quality.profile,
@@ -170,7 +109,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     const nextLayout = resolveCameraLayout(width, height);
     if (nextLayout !== cameraLayout) {
       cameraLayout = nextLayout;
-      timeline = createTimeline(cameraLayout);
+      timeline = createCameraTimeline({ layout: cameraLayout });
       director = createDirectorController({ timeline, layout: cameraLayout });
       syncArchiveBudget();
     }
@@ -191,14 +130,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     const archiveState = resolveArchivePhase(journey);
 
     room.setJourney(journey);
-    if (homeV29Controller) {
-      homeV29Disassembly?.reset();
-      homeV29Controller.update(journey);
-      homeV29Disassembly?.apply(journey, archiveState);
-      homeV29Lighting?.apply(journey, archiveState);
-    } else {
-      syncFallbackHeroArchive(archiveState);
-    }
+    homeV30Controller.update(journey);
     archiveField.update(journey, archiveState);
     syncActiveScreen(shot.stationId);
     syncScreenPresentation(shot.stationId, direction);
@@ -208,7 +140,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     camera.updateProjectionMatrix();
     camera.lookAt(new THREE.Vector3(...shot.target));
 
-    const parallaxEnabled = !homeV29 && !reducedMotion && cameraLayout !== "mobile" && exitProgress === 0;
+    const parallaxEnabled = !reducedMotion && cameraLayout !== "mobile" && exitProgress === 0 && journey < .6;
     let cameraParallax = ZERO_PARALLAX;
     if (parallaxEnabled) {
       parallaxRig.setAmplitude(direction.parallaxScale);
@@ -219,24 +151,22 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       interaction.reset();
       parallaxRig.restoreImmediately();
     }
-    camera.rotation.y += cameraParallax.x * .35;
-    camera.rotation.x += cameraParallax.y * .35;
+    camera.rotation.y += cameraParallax.x * .20;
+    camera.rotation.x += cameraParallax.y * .20;
 
-    if (!homeV29Lighting) {
-      fallbackLighting.apply(journey, {
-        focusStation: direction.stationId,
-        target: shot.target,
-        cameraPosition: shot.position,
-        exitProgress,
-        readStrength: direction.readStrength,
-        lightingScale: direction.lightingScale
-      });
-    }
+    lighting.apply(journey, {
+      focusStation: direction.stationId,
+      target: shot.target,
+      cameraPosition: shot.position,
+      exitProgress,
+      readStrength: direction.readStrength,
+      lightingScale: direction.lightingScale
+    });
     renderer.render(scene, camera);
 
     if (!readySettled) {
       readySettled = true;
-      resolveReady();
+      resolveReady({ heroMode: "v30" });
     }
     if (quality.recordFrame(now - lastFrame) && quality.profile !== lastProfile) {
       lastProfile = quality.profile;
@@ -271,11 +201,9 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
   syncArchiveBudget();
   resize();
   room.setJourney(0);
-  homeV29Disassembly?.reset();
-  homeV29Controller?.update(0);
-  homeV29Lighting?.apply(0, resolveArchivePhase(0));
+  homeV30Controller.update(0);
   archiveField.update(0, resolveArchivePhase(0));
-  if (!homeV29Lighting) fallbackLighting.apply(0);
+  lighting.apply(0);
   if (reducedMotion) draw(performance.now());
   else frameId = requestAnimationFrame(draw);
 
@@ -297,11 +225,9 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       return director.sample(clamp01(value), { scrollVelocity: clampVelocity(nextVelocity) });
     },
     getPathsProjection() {
-      if (homeV29Controller) {
-        const pathsOrigin = homeV29Controller.getNode("ArchiveOrigin_Paths");
-        const projected = projectObjectToCss({ THREE, canvas, camera, object: pathsOrigin, minimumSize: 96 });
-        if (projected) return projected;
-      }
+      const pathsOrigin = homeV30Controller.getNode("ArchiveOrigin_Paths");
+      const projected = projectObjectToCss({ THREE, canvas, camera, object: pathsOrigin, minimumSize: 96 });
+      if (projected) return projected;
       return projectStationScreenToCss({ THREE, canvas, camera, stations: room.stations, stationId: "future-paths" });
     },
     resize,
@@ -343,9 +269,8 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
         profile: quality.profile,
         dpr: quality.getDprCap(),
         cameraLayout,
-        heroMode: heroResolution?.heroMode ?? heroState.heroMode,
-        homeV29: homeV29Controller?.audit() ?? null,
-        disassembly: homeV29Disassembly?.audit() ?? null,
+        heroMode,
+        homeV30: homeV30Controller.audit(),
         archivePhase: resolveArchivePhase(journey).phase,
         archiveBudget: resolveArchiveBudget({ profile: quality.profile, mobile: cameraLayout === "mobile" }),
         toneMappingExposure: renderer.toneMappingExposure,
@@ -365,7 +290,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       canvas.removeEventListener("webglcontextlost", onContextLost);
       interaction.dispose();
       parallaxRig.restoreImmediately();
-      homeV29Controller?.dispose();
+      homeV30Controller.dispose();
       archiveField.dispose();
       scene.remove(archiveField.group);
       assetRegistry?.dispose();
@@ -375,7 +300,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       renderer.forceContextLoss?.();
       if (!readySettled) {
         readySettled = true;
-        rejectReady(new Error("Renderer chiuso prima del primo frame"));
+        rejectReady(new Error("Renderer chiuso prima del primo frame V30"));
       }
     }
   };

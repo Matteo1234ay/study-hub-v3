@@ -59,12 +59,21 @@ export function resolveHomeMotionMode({ preference, mediaReduced, width, webgl }
   return "cinematic";
 }
 
+function rendererErrorCode(error) {
+  const message = String(error?.message ?? error ?? "").toLowerCase();
+  if (message.includes("timeout")) return "timeout";
+  if (message.includes("webgl") || message.includes("contesto")) return "webgl";
+  return "load";
+}
+
 export async function mountHomeExperience(root, { stations = [], navigate } = {}) {
   if (!root?.isConnected || !Array.isArray(stations) || stations.length === 0) {
     return () => {};
   }
 
   root.dataset.homeState = "preparing";
+  root.dataset.homeRenderer = "poster";
+  delete root.dataset.homeRendererError;
   root.dataset.journeyStarted = "false";
   root.dataset.homeExit = "false";
   const routeState = createCinematicRouteState();
@@ -88,6 +97,8 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
 
   if (mode === "dom") {
     root.dataset.homeState = "dom";
+    root.dataset.homeRenderer = "poster";
+    root.dataset.homeRendererError = "webgl";
     delete document.body.dataset.homeImmersive;
     document.body.querySelector?.(".paths-shared-portal")?.remove?.();
     return () => {};
@@ -133,12 +144,14 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
   function useDomFallback(error) {
     if (disposed) return;
     root.dataset.homeState = "dom";
+    root.dataset.homeRenderer = "poster";
+    root.dataset.homeRendererError = rendererErrorCode(error);
     delete document.body.dataset.homeImmersive;
     sharedTransition.finishReverse?.();
     renderer?.dispose();
     if (!warned) {
       warned = true;
-      console.warn("La stanza 3D non è disponibile; la navigazione resta completa.", error);
+      console.warn("La scena V30 non è disponibile; il poster e la navigazione restano completi.", error);
     }
   }
   try {
@@ -165,6 +178,10 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
       cleanup();
       return cleanup;
     }
+    const audit = renderer.getAudit?.();
+    if (audit?.heroMode !== "v30") throw new Error("Renderer V30 non verificato al primo frame");
+    root.dataset.homeRenderer = "webgl-v30";
+    delete root.dataset.homeRendererError;
   } catch (error) {
     if (disposed || !root.isConnected) {
       cleanup();
