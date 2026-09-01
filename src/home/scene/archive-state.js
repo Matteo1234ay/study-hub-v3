@@ -26,6 +26,15 @@ export function resolveArchivePhase(progress) {
   });
 }
 
+export function resolveArchiveReveal(state = {}) {
+  return clamp01(
+    clamp01(state.knowledge) * .14
+    + clamp01(state.destabilize) * .24
+    + clamp01(state.fragment) * .58
+    + clamp01(state.archive)
+  );
+}
+
 const ARCHIVE_BUDGETS = Object.freeze({
   high: Object.freeze({ particles: 420, fragments: 96, connections: 10 }),
   balanced: Object.freeze({ particles: 260, fragments: 64, connections: 8 }),
