@@ -1,8 +1,9 @@
-import { GLTFLoader } from "../../../vendor/three/examples/jsm/loaders/GLTFLoader.js?v=20260901-26";
+import { GLTFLoader } from "../../../vendor/three/examples/jsm/loaders/GLTFLoader.js?v=20260901-29";
 
 const DESK_LAMP_MODEL = new URL("../../../assets/3d/desk-lamp-arm-01/desk_lamp_arm_01_1k.gltf", import.meta.url).href;
 const STUDIO_CORE_MODEL = new URL("../../../assets/3d/studio-core/studio-core.glb", import.meta.url).href;
-const DEFAULT_TIMEOUT_MS = 6000;
+const HOME_V29_MODEL = new URL("../../../assets/3d/home-v29/study-hub-home-v29.glb", import.meta.url).href;
+const DEFAULT_TIMEOUT_MS = 12000;
 
 function disposeMaterial(material) {
   if (!material) return;
@@ -26,9 +27,9 @@ export function createAssetRegistry({ THREE, timeoutMs = DEFAULT_TIMEOUT_MS } = 
   const tracked = new Set();
   let disposed = false;
 
-  async function loadModel(url) {
+  async function loadGltf(url) {
     if (disposed) return null;
-    const finiteTimeout = Math.min(6000, Math.max(500, Number(timeoutMs) || DEFAULT_TIMEOUT_MS));
+    const finiteTimeout = Math.min(15000, Math.max(1000, Number(timeoutMs) || DEFAULT_TIMEOUT_MS));
     let timer = 0;
     try {
       const loadPromise = loader.loadAsync(url).catch(() => null);
@@ -43,12 +44,17 @@ export function createAssetRegistry({ THREE, timeoutMs = DEFAULT_TIMEOUT_MS } = 
         return null;
       }
       tracked.add(object);
-      return object;
+      return result;
     } catch {
       return null;
     } finally {
       if (timer) globalThis.clearTimeout(timer);
     }
+  }
+
+  async function loadModel(url) {
+    const result = await loadGltf(url);
+    return result?.scene ?? null;
   }
 
   function loadDeskLamp() {
@@ -59,6 +65,15 @@ export function createAssetRegistry({ THREE, timeoutMs = DEFAULT_TIMEOUT_MS } = 
     return loadModel(STUDIO_CORE_MODEL);
   }
 
+  async function loadHomeV29() {
+    const result = await loadGltf(HOME_V29_MODEL);
+    if (!result?.scene) return null;
+    return {
+      scene: result.scene,
+      animations: Array.isArray(result.animations) ? result.animations : []
+    };
+  }
+
   function dispose() {
     if (disposed) return;
     disposed = true;
@@ -66,5 +81,5 @@ export function createAssetRegistry({ THREE, timeoutMs = DEFAULT_TIMEOUT_MS } = 
     tracked.clear();
   }
 
-  return { loadDeskLamp, loadStudioCore, dispose };
+  return { loadDeskLamp, loadStudioCore, loadHomeV29, dispose };
 }
