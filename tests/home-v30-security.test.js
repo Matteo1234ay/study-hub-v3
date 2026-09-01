@@ -3,10 +3,10 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 function parseCsp(html) {
-  const match = html.match(/<meta\s+http-equiv=["']Content-Security-Policy["']\s+content=["']([^"']+)["']/i);
+  const match = html.match(/<meta\s+http-equiv=(["'])Content-Security-Policy\1\s+content=(["'])(.*?)\2/i);
   assert.ok(match, "index.html must define a Content-Security-Policy meta tag");
   const directives = new Map();
-  for (const raw of match[1].split(";")) {
+  for (const raw of match[3].split(";")) {
     const tokens = raw.trim().split(/\s+/).filter(Boolean);
     if (!tokens.length) continue;
     directives.set(tokens[0], tokens.slice(1));
