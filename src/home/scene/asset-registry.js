@@ -1,4 +1,4 @@
-import { GLTFLoader } from "../../../vendor/three/examples/jsm/loaders/GLTFLoader.js?v=20260901-29";
+import { GLTFLoader } from "../../../vendor/three/examples/jsm/loaders/GLTFLoader.js?v=20260901-30";
 
 const DESK_LAMP_MODEL = new URL("../../../assets/3d/desk-lamp-arm-01/desk_lamp_arm_01_1k.gltf", import.meta.url).href;
 const STUDIO_CORE_MODEL = new URL("../../../assets/3d/studio-core/studio-core.glb", import.meta.url).href;

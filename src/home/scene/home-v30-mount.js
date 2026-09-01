@@ -1,4 +1,4 @@
-import { HOME_V30_NODES } from "./home-v30-contract.js?v=20260901-29";
+import { HOME_V30_NODES } from "./home-v30-contract.js?v=20260901-30";
 
 function finiteVector(vector) {
   return vector && [vector.x, vector.y, vector.z].every(Number.isFinite);

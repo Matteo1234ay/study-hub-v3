@@ -1,16 +1,16 @@
-import { createHomeV30CameraTimeline } from "./home-v30-camera-timeline.js?v=20260901-29";
-import { createHomeV30Controller } from "./home-v30-controller.js?v=20260901-29";
-import { createHomeV30Dematerialization } from "./home-v30-dematerialization.js?v=20260901-29";
-import { createDirectorController } from "./director-controller.js?v=20260901-29";
-import { createLightingController } from "./lighting-controller.js?v=20260901-29";
-import { createParallaxRig } from "./parallax-rig.js?v=20260901-29";
+import { createHomeV30CameraTimeline } from "./home-v30-camera-timeline.js?v=20260901-30";
+import { createHomeV30Controller } from "./home-v30-controller.js?v=20260901-30";
+import { createHomeV30Dematerialization } from "./home-v30-dematerialization.js?v=20260901-30";
+import { createDirectorController } from "./director-controller.js?v=20260901-30";
+import { createLightingController } from "./lighting-controller.js?v=20260901-30";
+import { createParallaxRig } from "./parallax-rig.js?v=20260901-30";
 import {
   configureStudyRenderer,
   createRoomParallaxLayers,
   initializeStudyRoom,
   resolveCameraLayout
-} from "./renderer-setup.js?v=20260901-29";
-import { projectObjectToCss, projectStationScreenToCss } from "./renderer-projection.js?v=20260901-29";
+} from "./renderer-setup.js?v=20260901-30";
+import { projectObjectToCss, projectStationScreenToCss } from "./renderer-projection.js?v=20260901-30";
 
 export { configureStudyRenderer };
 
@@ -20,7 +20,7 @@ const clampVelocity = value => Math.min(6, Math.abs(Number(value) || 0));
 
 export async function createStudyRoomRenderer({ canvas, stations, reducedMotion = false, onActivate = () => {}, onFailure = () => {} }) {
   if (!canvas?.getContext) throw new Error("Canvas della stanza non disponibile");
-  const THREE = await import("../../../vendor/three/three.module.min.js?v=20260901-29");
+  const THREE = await import("../../../vendor/three/three.module.min.js?v=20260901-30");
   const {
     renderer, room, interaction, quality, scene, camera, lightRig, environmentTarget,
     assetRegistry, heroAssetPromise, heroState

@@ -1,4 +1,4 @@
-import { HOME_V30_CLIPS, HOME_V30_NODES, HOME_V30_WINDOWS } from "./home-v30-contract.js?v=20260901-29";
+import { HOME_V30_CLIPS, HOME_V30_NODES, HOME_V30_WINDOWS } from "./home-v30-contract.js?v=20260901-30";
 
 const clamp01 = value => Math.min(1, Math.max(0, Number(value) || 0));
 

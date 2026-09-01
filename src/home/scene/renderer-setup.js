@@ -1,10 +1,10 @@
-import { createAssetRegistry } from "./asset-registry.js?v=20260901-29";
-import { createRoomMaterials } from "./materials.js?v=20260901-29";
-import { buildStudyRoom } from "./build-room.js?v=20260901-29";
-import { createInteractionController } from "./interaction-controller.js?v=20260901-29";
-import { createQualityController } from "./quality-controller.js?v=20260901-29";
-import { prepareHomeV30 } from "./home-v30-mount.js?v=20260901-29";
-import { RoomEnvironment } from "../../../vendor/three/examples/jsm/environments/RoomEnvironment.js?v=20260901-29";
+import { createAssetRegistry } from "./asset-registry.js?v=20260901-30";
+import { createRoomMaterials } from "./materials.js?v=20260901-30";
+import { buildStudyRoom } from "./build-room.js?v=20260901-30";
+import { createInteractionController } from "./interaction-controller.js?v=20260901-30";
+import { createQualityController } from "./quality-controller.js?v=20260901-30";
+import { prepareHomeV30 } from "./home-v30-mount.js?v=20260901-30";
+import { RoomEnvironment } from "../../../vendor/three/examples/jsm/environments/RoomEnvironment.js?v=20260901-30";
 
 export function configureStudyRenderer(THREE, renderer, quality) {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
