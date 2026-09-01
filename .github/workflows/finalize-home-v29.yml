@@ -1,0 +1,46 @@
+name: Finalize Home V29 Release
+
+on:
+  push:
+    branches: [feat/home-blender-first-v29]
+    paths:
+      - .github/workflows/finalize-home-v29.yml
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Bump the changed Home graph to V29
+        run: |
+          set -euo pipefail
+          files=(
+            index.html
+            src/app.js
+            src/views/home-view.js
+            src/views/paths-view.js
+            src/home/home-experience.js
+            tests/home-deployment.test.js
+          )
+          for file in "${files[@]}"; do
+            sed -i 's/20260901-28/20260901-29/g' "$file"
+          done
+          sed -i 's/Safari-safe v28 token/Safari-safe v29 token/g' tests/home-deployment.test.js
+          if grep -R "20260901-28" index.html src/app.js src/views/home-view.js src/views/paths-view.js src/home/home-experience.js tests/home-deployment.test.js; then
+            echo "Old V28 token remains in the changed deployment graph" >&2
+            exit 1
+          fi
+      - name: Commit release bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html src/app.js src/views/home-view.js src/views/paths-view.js src/home/home-experience.js tests/home-deployment.test.js
+          git diff --cached --quiet && exit 0
+          git commit -m "chore: publish Home V29 cache graph"
+          git push origin HEAD:feat/home-blender-first-v29
