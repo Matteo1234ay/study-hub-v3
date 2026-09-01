@@ -72,17 +72,19 @@ test("knowledge phase already produces a visible archive signal before halfway",
   assert.ok(archiveState.resolveArchiveReveal(resolveArchivePhase(.35)) >= .08);
 });
 
-test("renderer drives semantic archive from the same reversible journey", () => {
-  const renderer = readFileSync("src/home/scene/study-room-renderer.js", "utf8");
-  const archive = readFileSync("src/home/scene/archive-field.js", "utf8");
-  assert.match(renderer, /createArchiveField/);
-  assert.match(renderer, /resolveArchivePhase/);
-  assert.match(renderer, /archiveField\.update/);
-  assert.match(renderer, /room\.setJourney\(journey\)/);
-  assert.match(archive, /future-paths/);
-  assert.match(archive, /THREE\.Points/);
-  assert.match(archive, /THREE\.LineSegments/);
-  assert.doesNotMatch(executableSource(archive), /https?:\/\//i);
+test("V30 production replaces the historical synthetic archive with reversible physical motion", () => {
+  const renderer = executableSource(readFileSync("src/home/scene/study-room-renderer.js", "utf8"));
+  const dematerialization = executableSource(readFileSync("src/home/scene/home-v30-dematerialization.js", "utf8"));
+  const historicalArchive = executableSource(readFileSync("src/home/scene/archive-field.js", "utf8"));
+  assert.match(renderer, /createHomeV30Dematerialization/);
+  assert.match(renderer, /dematerialization\.update\(journey\)/);
+  assert.doesNotMatch(renderer, /createArchiveField|archiveField/);
+  assert.match(dematerialization, /PathsHandoff_Master/);
+  assert.match(dematerialization, /basePosition/);
+  assert.doesNotMatch(dematerialization, /Math\.random/);
+  assert.match(historicalArchive, /THREE\.Points/);
+  assert.match(historicalArchive, /THREE\.LineSegments/);
+  assert.doesNotMatch(historicalArchive, /https?:\/\//i);
 });
 
 test("existing final paths handoff remains the route owner", () => {

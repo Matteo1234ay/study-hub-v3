@@ -1,10 +1,9 @@
-import { createCameraTimeline } from "./camera-timeline.js?v=20260901-29";
+import { createHomeV30CameraTimeline } from "./home-v30-camera-timeline.js?v=20260901-29";
 import { createHomeV30Controller } from "./home-v30-controller.js?v=20260901-29";
+import { createHomeV30Dematerialization } from "./home-v30-dematerialization.js?v=20260901-29";
 import { createDirectorController } from "./director-controller.js?v=20260901-29";
 import { createLightingController } from "./lighting-controller.js?v=20260901-29";
 import { createParallaxRig } from "./parallax-rig.js?v=20260901-29";
-import { createArchiveField } from "./archive-field.js?v=20260901-29";
-import { resolveArchiveBudget, resolveArchivePhase } from "./archive-state.js?v=20260901-29";
 import {
   configureStudyRenderer,
   createRoomParallaxLayers,
@@ -42,14 +41,12 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
   }
 
   const homeV30Controller = createHomeV30Controller({ THREE, root: homeV30.root, animations: homeV30.animations });
+  const dematerialization = createHomeV30Dematerialization({ THREE, root: homeV30.root });
   const parallaxRig = createParallaxRig({ layers: createRoomParallaxLayers(room), maxLayers: 12 });
   const lighting = createLightingController(lightRig);
-  const archiveField = createArchiveField({ THREE, quality, mobile: false });
-  archiveField.setOrigins(homeV30Controller.getArchiveOrigins());
-  scene.add(archiveField.group);
 
   let cameraLayout = "desktop";
-  let timeline = createCameraTimeline({ layout: cameraLayout });
+  let timeline = createHomeV30CameraTimeline({ layout: cameraLayout });
   let director = createDirectorController({ timeline, layout: cameraLayout });
   let journey = 0;
   let scrollVelocity = 0;
@@ -94,13 +91,6 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     }
   }
 
-  function syncArchiveBudget() {
-    archiveField.setBudget(resolveArchiveBudget({
-      profile: quality.profile,
-      mobile: cameraLayout === "mobile"
-    }));
-  }
-
   function resize() {
     if (disposed) return;
     const rect = canvas.getBoundingClientRect();
@@ -109,9 +99,8 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     const nextLayout = resolveCameraLayout(width, height);
     if (nextLayout !== cameraLayout) {
       cameraLayout = nextLayout;
-      timeline = createCameraTimeline({ layout: cameraLayout });
+      timeline = createHomeV30CameraTimeline({ layout: cameraLayout });
       director = createDirectorController({ timeline, layout: cameraLayout });
-      syncArchiveBudget();
     }
     renderer.setPixelRatio(quality.getDprCap());
     renderer.setSize(width, height, false);
@@ -127,11 +116,10 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     const frameSeconds = Math.min(.05, Math.max(0, (now - lastFrame) / 1000));
     const direction = director.sample(journey, { scrollVelocity });
     const shot = exitProgress > 0 ? timeline.exit(exitProgress) : timeline.sample(journey);
-    const archiveState = resolveArchivePhase(journey);
 
     room.setJourney(journey);
     homeV30Controller.update(journey);
-    archiveField.update(journey, archiveState);
+    dematerialization.update(journey);
     syncActiveScreen(shot.stationId);
     syncScreenPresentation(shot.stationId, direction);
 
@@ -140,7 +128,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     camera.updateProjectionMatrix();
     camera.lookAt(new THREE.Vector3(...shot.target));
 
-    const parallaxEnabled = !reducedMotion && cameraLayout !== "mobile" && exitProgress === 0 && journey < .6;
+    const parallaxEnabled = !reducedMotion && cameraLayout !== "mobile" && exitProgress === 0 && journey < .54;
     let cameraParallax = ZERO_PARALLAX;
     if (parallaxEnabled) {
       parallaxRig.setAmplitude(direction.parallaxScale);
@@ -151,8 +139,8 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       interaction.reset();
       parallaxRig.restoreImmediately();
     }
-    camera.rotation.y += cameraParallax.x * .20;
-    camera.rotation.x += cameraParallax.y * .20;
+    camera.rotation.y += cameraParallax.x * .16;
+    camera.rotation.x += cameraParallax.y * .16;
 
     lighting.apply(journey, {
       focusStation: direction.stationId,
@@ -171,7 +159,6 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     if (quality.recordFrame(now - lastFrame) && quality.profile !== lastProfile) {
       lastProfile = quality.profile;
       renderer.shadowMap.enabled = quality.profile === "high";
-      syncArchiveBudget();
       resize();
     }
     lastFrame = now;
@@ -198,11 +185,10 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
   }
   document.addEventListener("visibilitychange", onVisibilityChange);
   canvas.addEventListener("webglcontextlost", onContextLost, { once: true });
-  syncArchiveBudget();
   resize();
   room.setJourney(0);
   homeV30Controller.update(0);
-  archiveField.update(0, resolveArchivePhase(0));
+  dematerialization.update(0);
   lighting.apply(0);
   if (reducedMotion) draw(performance.now());
   else frameId = requestAnimationFrame(draw);
@@ -271,8 +257,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
         cameraLayout,
         heroMode,
         homeV30: homeV30Controller.audit(),
-        archivePhase: resolveArchivePhase(journey).phase,
-        archiveBudget: resolveArchiveBudget({ profile: quality.profile, mobile: cameraLayout === "mobile" }),
+        dematerialization: dematerialization.audit(),
         toneMappingExposure: renderer.toneMappingExposure,
         environmentReady: Boolean(scene.environment),
         parallax: parallaxRig.audit()
@@ -290,9 +275,8 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       canvas.removeEventListener("webglcontextlost", onContextLost);
       interaction.dispose();
       parallaxRig.restoreImmediately();
+      dematerialization.dispose();
       homeV30Controller.dispose();
-      archiveField.dispose();
-      scene.remove(archiveField.group);
       assetRegistry?.dispose();
       room.dispose();
       environmentTarget?.dispose?.();
