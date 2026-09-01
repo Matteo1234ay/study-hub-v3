@@ -44,7 +44,7 @@ test("V30 CSP keeps script, style, object, base and form restrictions local", as
 
 test("V30 cinematic captions do not require CSP-blocked inline styles", async () => {
   const experience = await readFile(new URL("../src/home/home-experience.js", import.meta.url), "utf8");
-  const css = await readFile(new URL("../styles/home-immersive.css", import.meta.url), "utf8");
+  const css = await readFile(new URL("../styles/home-v30-polish.css", import.meta.url), "utf8");
 
   assert.doesNotMatch(experience, /\.style\.setProperty\s*\(/);
   assert.match(experience, /dataset\.homePhase\s*=\s*presentation\.phase/);
