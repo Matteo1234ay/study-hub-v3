@@ -9,9 +9,14 @@
   --home-ink: var(--v30-ink);
   --home-muted: var(--v30-muted);
   --home-blue: var(--v30-accent);
+  --home-caption-strength: .9;
   background:
     radial-gradient(circle at 68% 18%, rgba(255, 244, 224, .05), transparent 28%),
     linear-gradient(145deg, #171717, #0d0e10 68%, #090a0c);
+}
+
+.home-journey[data-home-phase="read"] {
+  --home-caption-strength: .45;
 }
 
 .home-stage-shade {
