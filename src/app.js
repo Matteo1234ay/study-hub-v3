@@ -1,9 +1,9 @@
 import { findLesson, findPath } from "./config/paths.js?v=20260901-27";
 import { navigateToHash, startRouter } from "./router.js?v=20260901-27";
 import { element, pageHeader } from "./ui/components.js?v=20260901-27";
-import { renderHomeView } from "./views/home-view.js?v=20260901-28";
+import { renderHomeView } from "./views/home-view.js?v=20260901-29";
 import { renderPathView } from "./views/path-view.js?v=20260901-27";
-import { renderPathsView } from "./views/paths-view.js?v=20260901-28";
+import { renderPathsView } from "./views/paths-view.js?v=20260901-29";
 import { renderLessonView } from "./views/lesson-view.js?v=20260901-27";
 import { renderProgressView } from "./views/progress-view.js?v=20260901-27";
 import { renderSearchView } from "./views/search-view.js?v=20260901-27";
@@ -11,7 +11,7 @@ import { renderReviewView } from "./views/review-view.js?v=20260901-27";
 import { renderAssessmentView } from "./views/assessment-view.js?v=20260901-27";
 import { renderPathAssessmentView } from "./views/path-assessment-view.js?v=20260901-27";
 import { createPreferencesStore } from "./study/preferences.js?v=20260901-27";
-import { shouldPreserveCinematicScroll } from "./home/home-shared-transition.js?v=20260901-28";
+import { shouldPreserveCinematicScroll } from "./home/home-shared-transition.js?v=20260901-29";
 
 const app = document.querySelector("#app");
 const preferences = createPreferencesStore();

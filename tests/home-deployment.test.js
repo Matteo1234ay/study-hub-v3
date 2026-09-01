@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const RELEASE_TOKEN = "20260901-28";
+const RELEASE_TOKEN = "20260901-29";
 
 test("Three.js is pinned and vendored locally with its license", async () => {
   const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url)));
@@ -35,7 +35,7 @@ test("vendored Three wrapper imports an immutable versioned core filename", asyn
   assert.ok(core.length > 100_000);
 });
 
-test("the changed homepage chain uses the Safari-safe v28 token", async () => {
+test("the changed homepage chain uses the Safari-safe v29 token", async () => {
   const files = [
     "index.html",
     "src/app.js",

@@ -7,8 +7,8 @@ import { createReviewConceptsStore } from "../study/review-concepts-store.js?v=2
 import {
   createHomeQuickActions,
   createHomeStations
-} from "../home/home-stations.js?v=20260901-28";
-import { mountHomeExperience } from "../home/home-experience.js?v=20260901-28";
+} from "../home/home-stations.js?v=20260901-29";
+import { mountHomeExperience } from "../home/home-experience.js?v=20260901-29";
 
 function stationCaption(station, index) {
   return element("a", {
