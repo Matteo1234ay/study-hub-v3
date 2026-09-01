@@ -20,6 +20,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Install Blender
         run: |
           sudo apt-get update
@@ -54,4 +56,5 @@ jobs:
             exit 0
           fi
           git commit -m "feat: build verified v29 blender assets"
+          git pull --rebase origin feat/home-blender-first-v29
           git push origin HEAD:feat/home-blender-first-v29
