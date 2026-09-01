@@ -1,4 +1,4 @@
-import { resolveArchiveBudget, resolveArchiveReveal } from "./archive-state.js?v=20260901-27";
+import { resolveArchiveBudget, resolveArchiveReveal } from "./archive-state.js?v=20260901-28";
 
 const NUCLEI = Object.freeze([
   { id: "future-paths", label: "Percorsi", href: "#/paths", position: [0.3, 2.0, -2.35], color: 0x5e9cff, scale: 1.26 },
