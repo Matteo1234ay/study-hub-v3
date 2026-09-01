@@ -2,6 +2,13 @@ import { test, expect } from "@playwright/test";
 
 const checkpoints = [0.03, 0.24, 0.48, 0.72, 0.88];
 
+async function visualOpacity(page, selector) {
+  return page.evaluate(target => {
+    const element = document.querySelector(target);
+    return element ? Number(getComputedStyle(element).opacity) : -1;
+  }, selector);
+}
+
 async function moveJourney(page, progress) {
   await page.evaluate(value => {
     const root = document.querySelector(".home-journey");
@@ -10,7 +17,7 @@ async function moveJourney(page, progress) {
     const distance = Math.max(1, root.offsetHeight - innerHeight);
     window.scrollTo({ top: top + distance * value, behavior: "auto" });
   }, progress);
-  await page.waitForTimeout(450);
+  await page.waitForTimeout(550);
 }
 
 test("V30 renders a stable cinematic journey and captures visual checkpoints", async ({ page }, testInfo) => {
@@ -30,18 +37,14 @@ test("V30 renders a stable cinematic journey and captures visual checkpoints", a
   await expect(root).toHaveAttribute("data-home-renderer", "webgl-v30", { timeout: 60_000 });
   await expect(root).not.toHaveAttribute("data-home-renderer-error", /.+/);
 
-  const visualState = await page.evaluate(() => {
-    const canvas = document.querySelector(".study-room-canvas");
-    const poster = document.querySelector(".home-v30-poster");
-    return {
-      canvasOpacity: Number(getComputedStyle(canvas).opacity),
-      posterOpacity: Number(getComputedStyle(poster).opacity),
-      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth
-    };
-  });
-  expect(visualState.canvasOpacity).toBeGreaterThan(.9);
-  expect(visualState.posterOpacity).toBeLessThan(.1);
-  expect(visualState.overflow).toBeLessThanOrEqual(1);
+  // The poster/canvas dissolve is deliberately animated for ~360ms. WebKit can
+  // report the new ready state before that transition has painted its first frame,
+  // so wait for the visual state instead of sampling it in the same task.
+  await expect.poll(() => visualOpacity(page, ".study-room-canvas"), { timeout: 5_000 }).toBeGreaterThan(.9);
+  await expect.poll(() => visualOpacity(page, ".home-v30-poster"), { timeout: 5_000 }).toBeLessThan(.1);
+
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(1);
 
   for (const progress of checkpoints) {
     await moveJourney(page, progress);
@@ -49,8 +52,7 @@ test("V30 renders a stable cinematic journey and captures visual checkpoints", a
     const pct = String(Math.round(progress * 100)).padStart(2, "0");
     await page.screenshot({
       path: testInfo.outputPath(`v30-${testInfo.project.name}-${pct}.png`),
-      fullPage: false,
-      animations: "disabled"
+      fullPage: false
     });
   }
 
