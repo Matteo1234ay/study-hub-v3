@@ -1,14 +1,14 @@
-import { PATHS, findLesson } from "../config/paths.js?v=20260901-26";
-import { element } from "../ui/components.js?v=20260901-26";
-import { createStudyStore } from "../study/study-store.js?v=20260901-26";
-import { createProgressStore } from "../progress/local-progress.js?v=20260901-26";
-import { createNotesStore } from "../study/notes-store.js?v=20260901-26";
-import { createReviewConceptsStore } from "../study/review-concepts-store.js?v=20260901-26";
+import { PATHS, findLesson } from "../config/paths.js?v=20260901-27";
+import { element } from "../ui/components.js?v=20260901-27";
+import { createStudyStore } from "../study/study-store.js?v=20260901-27";
+import { createProgressStore } from "../progress/local-progress.js?v=20260901-27";
+import { createNotesStore } from "../study/notes-store.js?v=20260901-27";
+import { createReviewConceptsStore } from "../study/review-concepts-store.js?v=20260901-27";
 import {
   createHomeQuickActions,
   createHomeStations
-} from "../home/home-stations.js?v=20260901-26";
-import { mountHomeExperience } from "../home/home-experience.js?v=20260901-26";
+} from "../home/home-stations.js?v=20260901-27";
+import { mountHomeExperience } from "../home/home-experience.js?v=20260901-27";
 
 function stationCaption(station, index) {
   return element("a", {
