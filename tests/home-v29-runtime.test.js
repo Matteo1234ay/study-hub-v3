@@ -14,10 +14,11 @@ test("V29 controller exists and scrubs Blender clips with AnimationMixer", () =>
   assert.ok(existsSync(path), "missing V29 runtime controller");
   const source = executableSource(readFileSync(path, "utf8"));
   assert.match(source, /new\s+THREE\.AnimationMixer\s*\(/);
-  assert.match(source, /paused\s*=\s*true/);
+  assert.match(source, /action\.play\(\)[\s\S]*action\.paused\s*=\s*true/,
+    "V29 may activate Three.js actions only when they are immediately paused for scroll scrubbing");
   assert.match(source, /action\.time\s*=/);
   assert.match(source, /HOME_V29_WINDOWS/);
-  assert.doesNotMatch(source, /\.play\s*\(/, "V29 choreography must not autoplay");
+  assert.match(source, /mixer\.update\(0\)/);
   for (const clip of HOME_V29_CLIPS) assert.match(source, new RegExp(clip));
 });
 
