@@ -1,0 +1,63 @@
+name: Vendor Home V30 CC0 Assets
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/home-v30-realistic-cc0]
+    paths:
+      - scripts/home-v30/vendor-polyhaven.mjs
+      - .github/workflows/vendor-home-v30-assets.yml
+      - tests/home-v30-assets.test.js
+      - assets/3d/ATTRIBUTION.md
+
+permissions:
+  contents: write
+
+concurrency:
+  group: home-v30-asset-vendor
+  cancel-in-progress: false
+
+jobs:
+  vendor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: feat/home-v30-realistic-cc0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Vendor approved CC0 sources
+        run: node scripts/home-v30/vendor-polyhaven.mjs
+      - name: Validate provenance and exact local bytes
+        run: node --test tests/home-v30-assets.test.js
+      - name: Check committed-source safety
+        run: node scripts/check-secrets.mjs
+      - name: Inspect bounded vendor payload
+        run: |
+          du -sh assets/3d/home-v30/vendor
+          find assets/3d/home-v30/vendor -type f -printf '%s %p\n' | sort -n
+          test "$(du -sm assets/3d/home-v30/vendor | cut -f1)" -le 80
+      - uses: actions/upload-artifact@v4
+        with:
+          name: study-hub-home-v30-cc0-sources
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            assets/3d/home-v30/manifest.json
+            assets/3d/home-v30/vendor/
+      - name: Commit verified local vendor
+        if: github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/3d/home-v30/manifest.json assets/3d/home-v30/vendor/
+          if git diff --cached --quiet; then
+            echo "V30 CC0 vendor already matches the verified local files."
+            exit 0
+          fi
+          git commit -m "feat: vendor verified v30 CC0 sources"
+          git pull --rebase origin feat/home-v30-realistic-cc0
+          git push origin HEAD:feat/home-v30-realistic-cc0
