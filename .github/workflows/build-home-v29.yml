@@ -1,0 +1,44 @@
+name: Build Home V29 Blender Asset
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/home-blender-first-v29]
+    paths:
+      - scripts/blender/build-home-v29.py
+      - .github/workflows/build-home-v29.yml
+      - tests/home-v29-assets.test.js
+      - tests/home-v29-visual-contract.test.js
+      - src/home/scene/home-v29-contract.js
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Blender
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y blender
+          blender --version
+      - name: Build V29 scene
+        run: blender --background --python scripts/blender/build-home-v29.py
+      - name: Inspect generated files
+        run: |
+          ls -lh assets/3d/home-v29/
+          test -s assets/3d/home-v29/study-hub-home-v29.blend
+          test -s assets/3d/home-v29/study-hub-home-v29.glb
+      - name: Validate V29 asset and visual contract
+        run: node --test tests/home-v29-assets.test.js tests/home-v29-visual-contract.test.js tests/home-v29-contract.test.js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: study-hub-home-v29
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            assets/3d/home-v29/study-hub-home-v29.blend
+            assets/3d/home-v29/study-hub-home-v29.glb
