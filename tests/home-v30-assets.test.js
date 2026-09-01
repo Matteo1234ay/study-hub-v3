@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 
 const MANIFEST = "assets/3d/home-v30/manifest.json";
@@ -20,6 +21,10 @@ function loadManifest() {
   return JSON.parse(readFileSync(MANIFEST, "utf8"));
 }
 
+function sha256(path) {
+  return createHash("sha256").update(readFileSync(path)).digest("hex");
+}
+
 test("V30 manifest pins the approved CC0 Poly Haven asset set", () => {
   const manifest = loadManifest();
   assert.equal(manifest.schemaVersion, 1);
@@ -38,15 +43,18 @@ test("V30 manifest pins the approved CC0 Poly Haven asset set", () => {
   }
 });
 
-test("every vendored V30 asset records local filenames, source hash and transformation notes", () => {
+test("every vendored V30 asset exists locally and matches its recorded SHA-256", () => {
   const manifest = loadManifest();
   for (const asset of manifest.assets) {
     assert.match(asset.local.root, /^assets\/3d\/(?:home-v30\/vendor|desk-lamp-arm-01)\//);
     assert.ok(Array.isArray(asset.local.files) && asset.local.files.length > 0, `${asset.id} needs local files`);
     for (const file of asset.local.files) {
       assert.match(file.path, /^assets\/3d\//);
+      assert.ok(existsSync(file.path), `${asset.id} missing local file ${file.path}`);
       assert.match(file.sha256, /^[a-f0-9]{64}$/);
-      assert.ok(Number.isInteger(file.bytes) && file.bytes > 0);
+      assert.equal(sha256(file.path), file.sha256, `${asset.id} hash mismatch for ${file.path}`);
+      assert.equal(readFileSync(file.path).byteLength, file.bytes, `${asset.id} byte count mismatch for ${file.path}`);
+      assert.ok(file.bytes > 0);
     }
     assert.ok(Array.isArray(asset.transformations) && asset.transformations.length > 0, `${asset.id} needs optimization notes`);
   }
