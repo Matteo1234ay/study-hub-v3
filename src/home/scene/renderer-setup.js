@@ -80,6 +80,42 @@ function mountLoadedLamp({ THREE, room, loadedLamp }) {
   return true;
 }
 
+const STUDIO_FALLBACK_NAMES = Object.freeze([
+  "desk-top", "desk-leg-left", "desk-leg-right", "desk-crossbar",
+  "keyboard", "mouse", "ceramic-mug", "mug-base", "mug-handle",
+  "chair-seat", "chair-back", "chair-column", "chair-hub",
+  "monitor-frame", "monitor-neck", "monitor-foot"
+]);
+
+function mountStudioCore({ room, loadedStudio }) {
+  if (!loadedStudio) return false;
+  loadedStudio.name = "studio-core-asset";
+  loadedStudio.userData.sourceAsset = "studio-core";
+  loadedStudio.userData.archiveBase = {
+    position: loadedStudio.position.clone(),
+    rotation: loadedStudio.rotation.clone(),
+    scale: loadedStudio.scale.clone()
+  };
+  loadedStudio.traverse(child => {
+    if (!child.isMesh) return;
+    child.castShadow = true;
+    child.receiveShadow = true;
+    if (child.name === "studio-monitor-screen") child.visible = false;
+  });
+
+  const hiddenFallback = [];
+  for (const name of STUDIO_FALLBACK_NAMES) {
+    const object = room.group.getObjectByName(name);
+    if (!object || object.name === "main-monitor-screen") continue;
+    object.visible = false;
+    hiddenFallback.push(object);
+  }
+  loadedStudio.userData.hiddenFallback = hiddenFallback;
+  room.heroAsset = loadedStudio;
+  room.group.add(loadedStudio);
+  return true;
+}
+
 function createLightRig(THREE, room) {
   const ambient = new THREE.HemisphereLight(0xb9d8ff, 0x06112f, .58);
   const roomLight = new THREE.PointLight(0xddeaff, 0, 20, 1.35);
@@ -126,10 +162,15 @@ export function initializeStudyRoom({ THREE, canvas, stations, reducedMotion, on
     scene.add(room.group);
 
     assetRegistry = createAssetRegistry({ THREE });
-    const heroAssetPromise = assetRegistry.loadDeskLamp().then(loadedLamp => {
+    const lampPromise = assetRegistry.loadDeskLamp().then(loadedLamp => {
       if (loadedLamp) mountLoadedLamp({ THREE, room, loadedLamp });
       return loadedLamp;
     });
+    const studioCorePromise = assetRegistry.loadStudioCore().then(loadedStudio => {
+      if (loadedStudio) mountStudioCore({ room, loadedStudio });
+      return loadedStudio;
+    });
+    const heroAssetPromise = Promise.allSettled([lampPromise, studioCorePromise]);
 
     const lightRig = createLightRig(THREE, room);
     scene.add(lightRig.ambient, lightRig.room, lightRig.guide.light, lightRig.guide.target);
