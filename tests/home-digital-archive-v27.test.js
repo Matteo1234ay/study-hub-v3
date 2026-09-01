@@ -63,7 +63,7 @@ test("renderer drives semantic archive from the same reversible journey", () => 
 
 test("existing final paths handoff remains the route owner", () => {
   const home = readFileSync("src/home/home-experience.js", "utf8");
-  assert.match(home, /station\.id === "future-paths"/);
+  assert.match(home, /find\(item => item\.id === "future-paths"\)/);
   assert.match(home, /href:\s*"#\/paths"/);
   assert.match(home, /sharedTransition/);
 });
