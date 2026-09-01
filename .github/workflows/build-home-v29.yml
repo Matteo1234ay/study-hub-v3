@@ -12,7 +12,7 @@ on:
       - src/home/scene/home-v29-contract.js
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -43,3 +43,15 @@ jobs:
           path: |
             assets/3d/home-v29/study-hub-home-v29.blend
             assets/3d/home-v29/study-hub-home-v29.glb
+      - name: Commit verified Blender outputs
+        if: github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/3d/home-v29/study-hub-home-v29.blend assets/3d/home-v29/study-hub-home-v29.glb
+          if git diff --cached --quiet; then
+            echo "V29 Blender outputs already match the committed files."
+            exit 0
+          fi
+          git commit -m "feat: build verified v29 blender assets"
+          git push origin HEAD:feat/home-blender-first-v29
