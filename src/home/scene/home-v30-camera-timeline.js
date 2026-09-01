@@ -40,34 +40,38 @@ function blendShot(from, to, amount, stationId = null, phase = null) {
   };
 }
 
+// V30 is intentionally photographed from *inside* the authored Blender room.
+// The previous high exterior coordinates exposed the floor/wall cutaway and made
+// the scene read like a dollhouse. These shots stay at human eye height and use
+// nearby foreground objects to create the close, tactile editorial feel.
 const DESKTOP_SHOTS = Object.freeze([
-  Object.freeze({ stationId: "desk", settleStart: 0, settleEnd: .105, position: [7.7, 6.15, 9.4], target: [0, 1.25, -.1], fov: 39, chairClearance: 1.08 }),
-  Object.freeze({ stationId: "memory", settleStart: .205, settleEnd: .29, position: [-4.65, 3.45, 5.75], target: [-2.05, 1.52, -1.15], fov: 37, chairClearance: 1.06 }),
-  Object.freeze({ stationId: "social", settleStart: .37, settleEnd: .455, position: [4.8, 3.35, 5.5], target: [2.1, 1.5, -1.2], fov: 37, chairClearance: 1.06 }),
-  Object.freeze({ stationId: "assessment", settleStart: .53, settleEnd: .615, position: [3.75, 3.05, 4.35], target: [1.62, 1.25, -1.7], fov: 36, chairClearance: 1.04 }),
-  Object.freeze({ stationId: "progress", settleStart: .685, settleEnd: .765, position: [-3.25, 3.25, 4.75], target: [-.72, 1.55, -1.95], fov: 37, chairClearance: 1.04 }),
-  Object.freeze({ stationId: "future-paths", settleStart: .845, settleEnd: 1, position: [2.9, 4.05, 5.8], target: [0, 1.95, -2.62], fov: 34, chairClearance: 1.02 })
+  Object.freeze({ stationId: "desk", settleStart: 0, settleEnd: .105, position: [3.55, 2.45, 4.45], target: [0.0, 1.45, -.15], fov: 42, chairClearance: 1.08 }),
+  Object.freeze({ stationId: "memory", settleStart: .205, settleEnd: .29, position: [-1.20, 2.12, 2.45], target: [-2.58, 1.34, -1.72], fov: 40, chairClearance: 1.06 }),
+  Object.freeze({ stationId: "social", settleStart: .37, settleEnd: .455, position: [2.85, 2.18, 2.25], target: [1.05, 1.58, -1.72], fov: 40, chairClearance: 1.06 }),
+  Object.freeze({ stationId: "assessment", settleStart: .53, settleEnd: .615, position: [2.25, 1.82, 1.70], target: [1.02, .92, -.30], fov: 39, chairClearance: 1.04 }),
+  Object.freeze({ stationId: "progress", settleStart: .685, settleEnd: .765, position: [-.95, 2.20, 1.98], target: [-.55, 2.18, -2.55], fov: 39, chairClearance: 1.04 }),
+  Object.freeze({ stationId: "future-paths", settleStart: .845, settleEnd: 1, position: [1.42, 2.28, 2.05], target: [.35, 2.25, -2.72], fov: 37, chairClearance: 1.02 })
 ]);
 
 const MOBILE_SHOTS = Object.freeze([
-  Object.freeze({ stationId: "desk", settleStart: 0, settleEnd: .105, position: [7.4, 6.45, 11.2], target: [0, 1.4, -.15], fov: 52, chairClearance: 1.12 }),
-  Object.freeze({ stationId: "memory", settleStart: .205, settleEnd: .29, position: [-5.25, 3.75, 6.65], target: [-1.95, 1.62, -1.2], fov: 50, chairClearance: 1.1 }),
-  Object.freeze({ stationId: "social", settleStart: .37, settleEnd: .455, position: [5.35, 3.7, 6.4], target: [2.0, 1.58, -1.25], fov: 50, chairClearance: 1.1 }),
-  Object.freeze({ stationId: "assessment", settleStart: .53, settleEnd: .615, position: [4.5, 3.45, 5.85], target: [1.55, 1.35, -1.65], fov: 50, chairClearance: 1.08 }),
-  Object.freeze({ stationId: "progress", settleStart: .685, settleEnd: .765, position: [-4.05, 3.6, 5.9], target: [-.7, 1.6, -1.95], fov: 50, chairClearance: 1.08 }),
-  Object.freeze({ stationId: "future-paths", settleStart: .845, settleEnd: 1, position: [2.4, 4.25, 7.2], target: [0, 2.0, -2.62], fov: 48, chairClearance: 1.06 })
+  Object.freeze({ stationId: "desk", settleStart: 0, settleEnd: .105, position: [3.90, 2.75, 5.55], target: [0.0, 1.48, -.18], fov: 55, chairClearance: 1.12 }),
+  Object.freeze({ stationId: "memory", settleStart: .205, settleEnd: .29, position: [-1.32, 2.48, 3.42], target: [-2.52, 1.42, -1.70], fov: 53, chairClearance: 1.10 }),
+  Object.freeze({ stationId: "social", settleStart: .37, settleEnd: .455, position: [3.15, 2.55, 3.25], target: [1.10, 1.62, -1.72], fov: 53, chairClearance: 1.10 }),
+  Object.freeze({ stationId: "assessment", settleStart: .53, settleEnd: .615, position: [2.60, 2.22, 2.82], target: [1.05, 1.02, -.34], fov: 52, chairClearance: 1.08 }),
+  Object.freeze({ stationId: "progress", settleStart: .685, settleEnd: .765, position: [-1.15, 2.58, 2.95], target: [-.55, 2.18, -2.55], fov: 52, chairClearance: 1.08 }),
+  Object.freeze({ stationId: "future-paths", settleStart: .845, settleEnd: 1, position: [1.55, 2.68, 3.25], target: [.35, 2.28, -2.72], fov: 50, chairClearance: 1.06 })
 ]);
 
 const DESKTOP_EXIT = Object.freeze([
-  Object.freeze({ position: [2.9, 4.05, 5.8], target: [0, 1.95, -2.62], fov: 34 }),
-  Object.freeze({ position: [1.9, 3.55, 3.45], target: [0, 1.95, -2.72], fov: 31 }),
-  Object.freeze({ position: [.72, 2.95, 1.45], target: [0, 1.98, -2.86], fov: 28 })
+  Object.freeze({ position: [1.42, 2.28, 2.05], target: [.35, 2.25, -2.72], fov: 37 }),
+  Object.freeze({ position: [1.02, 2.20, .65], target: [.35, 2.28, -2.82], fov: 34 }),
+  Object.freeze({ position: [.48, 2.18, -1.05], target: [.35, 2.30, -2.92], fov: 31 })
 ]);
 
 const MOBILE_EXIT = Object.freeze([
-  Object.freeze({ position: [2.4, 4.25, 7.2], target: [0, 2.0, -2.62], fov: 48 }),
-  Object.freeze({ position: [1.6, 3.75, 4.4], target: [0, 2.0, -2.74], fov: 45 }),
-  Object.freeze({ position: [.55, 3.2, 2.1], target: [0, 2.0, -2.88], fov: 42 })
+  Object.freeze({ position: [1.55, 2.68, 3.25], target: [.35, 2.28, -2.72], fov: 50 }),
+  Object.freeze({ position: [1.05, 2.48, 1.35], target: [.35, 2.30, -2.82], fov: 47 }),
+  Object.freeze({ position: [.52, 2.35, -.55], target: [.35, 2.32, -2.92], fov: 44 })
 ]);
 
 export function createHomeV30CameraTimeline({ layout = "desktop" } = {}) {
