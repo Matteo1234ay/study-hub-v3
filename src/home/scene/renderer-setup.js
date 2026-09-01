@@ -87,8 +87,20 @@ const STUDIO_FALLBACK_NAMES = Object.freeze([
   "monitor-frame", "monitor-neck", "monitor-foot"
 ]);
 
+export function applyStudioCoreAxisCorrection(loadedStudio) {
+  if (!loadedStudio?.rotation) return loadedStudio;
+  loadedStudio.rotation.x += Math.PI / 2;
+  loadedStudio.userData = {
+    ...(loadedStudio.userData ?? {}),
+    axisCorrection: "blender-z-up-to-authored-three-y-up"
+  };
+  loadedStudio.updateMatrixWorld?.(true);
+  return loadedStudio;
+}
+
 function mountStudioCore({ room, loadedStudio }) {
   if (!loadedStudio) return false;
+  applyStudioCoreAxisCorrection(loadedStudio);
   loadedStudio.name = "studio-core-asset";
   loadedStudio.userData.sourceAsset = "studio-core";
   loadedStudio.userData.archiveBase = {
