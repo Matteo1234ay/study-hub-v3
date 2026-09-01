@@ -1,6 +1,7 @@
 import { GLTFLoader } from "../../../vendor/three/examples/jsm/loaders/GLTFLoader.js?v=20260901-26";
 
 const DESK_LAMP_MODEL = new URL("../../../assets/3d/desk-lamp-arm-01/desk_lamp_arm_01_1k.gltf", import.meta.url).href;
+const STUDIO_CORE_MODEL = new URL("../../../assets/3d/studio-core/studio-core.glb", import.meta.url).href;
 const DEFAULT_TIMEOUT_MS = 6000;
 
 function disposeMaterial(material) {
@@ -25,12 +26,12 @@ export function createAssetRegistry({ THREE, timeoutMs = DEFAULT_TIMEOUT_MS } = 
   const tracked = new Set();
   let disposed = false;
 
-  async function loadDeskLamp() {
+  async function loadModel(url) {
     if (disposed) return null;
     const finiteTimeout = Math.min(6000, Math.max(500, Number(timeoutMs) || DEFAULT_TIMEOUT_MS));
     let timer = 0;
     try {
-      const loadPromise = loader.loadAsync(DESK_LAMP_MODEL).catch(() => null);
+      const loadPromise = loader.loadAsync(url).catch(() => null);
       const timeoutPromise = new Promise(resolve => {
         timer = globalThis.setTimeout(() => resolve(null), finiteTimeout);
       });
@@ -50,6 +51,14 @@ export function createAssetRegistry({ THREE, timeoutMs = DEFAULT_TIMEOUT_MS } = 
     }
   }
 
+  function loadDeskLamp() {
+    return loadModel(DESK_LAMP_MODEL);
+  }
+
+  function loadStudioCore() {
+    return loadModel(STUDIO_CORE_MODEL);
+  }
+
   function dispose() {
     if (disposed) return;
     disposed = true;
@@ -57,5 +66,5 @@ export function createAssetRegistry({ THREE, timeoutMs = DEFAULT_TIMEOUT_MS } = 
     tracked.clear();
   }
 
-  return { loadDeskLamp, dispose };
+  return { loadDeskLamp, loadStudioCore, dispose };
 }
