@@ -1,4 +1,4 @@
-import { resolveArchiveBudget, resolveArchiveReveal } from "./archive-state.js?v=20260901-28";
+import { resolveArchiveBudget, resolveArchiveReveal } from "./archive-state.js?v=20260901-29";
 
 const NUCLEI = Object.freeze([
   { id: "future-paths", label: "Percorsi", href: "#/paths", position: [0.3, 2.0, -2.35], color: 0x5e9cff, scale: 1.26 },
@@ -7,6 +7,14 @@ const NUCLEI = Object.freeze([
   { id: "assessment", label: "Verifiche", href: "#/assessment", position: [2.0, 1.5, -1.2], color: 0xa4c8ff, scale: .9 },
   { id: "search", label: "Cerca", href: "#/search", position: [2.15, 2.75, -2.25], color: 0xd5e6ff, scale: .78 }
 ]);
+
+const ORIGIN_TO_STATION = Object.freeze({
+  ArchiveOrigin_Paths: "future-paths",
+  ArchiveOrigin_Review: "memory",
+  ArchiveOrigin_Progress: "progress",
+  ArchiveOrigin_Assessment: "assessment",
+  ArchiveOrigin_Search: "search"
+});
 
 function clamp01(value) {
   return Math.min(1, Math.max(0, Number(value) || 0));
@@ -38,11 +46,13 @@ function particleGeometry(THREE, count) {
   return geometry;
 }
 
-function connectionGeometry(THREE, count) {
+function connectionGeometry(THREE, count, positionsById) {
   const positions = [];
   for (let index = 0; index < count; index += 1) {
-    const from = NUCLEI[index % NUCLEI.length].position;
-    const to = NUCLEI[(index + 1 + Math.floor(index / NUCLEI.length)) % NUCLEI.length].position;
+    const fromDefinition = NUCLEI[index % NUCLEI.length];
+    const toDefinition = NUCLEI[(index + 1 + Math.floor(index / NUCLEI.length)) % NUCLEI.length];
+    const from = positionsById.get(fromDefinition.id) ?? fromDefinition.position;
+    const to = positionsById.get(toDefinition.id) ?? toDefinition.position;
     positions.push(...from, ...to);
   }
   const geometry = new THREE.BufferGeometry();
@@ -55,6 +65,7 @@ export function createArchiveField({ THREE, quality, mobile = false } = {}) {
   const group = new THREE.Group();
   group.name = "digital-archive";
   group.visible = false;
+  const positionsById = new Map(NUCLEI.map(item => [item.id, item.position.slice()]));
 
   const nucleiGroup = new THREE.Group();
   nucleiGroup.name = "archive-nuclei";
@@ -104,13 +115,33 @@ export function createArchiveField({ THREE, quality, mobile = false } = {}) {
   });
 
   let budget = resolveArchiveBudget({ profile: quality?.profile, mobile });
-  let particles = new THREE.Points(particleGeometry(THREE, budget.particles), particleMaterial);
-  let connections = new THREE.LineSegments(connectionGeometry(THREE, budget.connections), lineMaterial);
+  const particles = new THREE.Points(particleGeometry(THREE, budget.particles), particleMaterial);
+  const connections = new THREE.LineSegments(connectionGeometry(THREE, budget.connections, positionsById), lineMaterial);
   particles.name = "archive-particles";
   connections.name = "archive-connections";
   particles.renderOrder = 3;
   connections.renderOrder = 2;
   group.add(connections, particles);
+
+  function rebuildConnections() {
+    connections.geometry.dispose();
+    connections.geometry = connectionGeometry(THREE, budget.connections, positionsById);
+  }
+
+  function setOrigins(origins = []) {
+    let changed = false;
+    for (const { name, object } of origins) {
+      const stationId = ORIGIN_TO_STATION[name];
+      if (!stationId || !object?.getWorldPosition) continue;
+      const world = object.getWorldPosition(new THREE.Vector3());
+      const position = [world.x, world.y, world.z];
+      positionsById.set(stationId, position);
+      const entry = nucleusEntries.find(item => item.definition.id === stationId);
+      if (entry) entry.nucleus.userData.basePosition = position;
+      changed = true;
+    }
+    if (changed) rebuildConnections();
+  }
 
   function setBudget(nextBudget) {
     if (!nextBudget) return;
@@ -124,10 +155,9 @@ export function createArchiveField({ THREE, quality, mobile = false } = {}) {
       return;
     }
     particles.geometry.dispose();
-    connections.geometry.dispose();
     particles.geometry = particleGeometry(THREE, next.particles);
-    connections.geometry = connectionGeometry(THREE, next.connections);
     budget = next;
+    rebuildConnections();
   }
 
   function update(progress, state) {
@@ -147,12 +177,13 @@ export function createArchiveField({ THREE, quality, mobile = false } = {}) {
     connections.scale.setScalar(.84 + archive * .16);
 
     nucleusEntries.forEach(({ nucleus, material, definition, index }) => {
+      const base = nucleus.userData.basePosition ?? definition.position;
       const orbit = archive * (.035 + index * .004);
       const phase = time * 2.4 + index * 1.27;
       nucleus.position.set(
-        definition.position[0] + Math.cos(phase) * orbit,
-        definition.position[1] + Math.sin(phase * .8) * orbit * .7,
-        definition.position[2] + Math.sin(phase) * orbit * .45
+        base[0] + Math.cos(phase) * orbit,
+        base[1] + Math.sin(phase * .8) * orbit * .7,
+        base[2] + Math.sin(phase) * orbit * .45
       );
       const importance = definition.id === "future-paths" ? 1 + handoff * .92 : 1 - handoff * .34;
       const scale = definition.scale * (.14 + archive * .86) * importance;
@@ -173,5 +204,5 @@ export function createArchiveField({ THREE, quality, mobile = false } = {}) {
     nucleusEntries.forEach(({ material }) => material.dispose());
   }
 
-  return { group, update, setBudget, dispose };
+  return { group, update, setBudget, setOrigins, dispose };
 }
