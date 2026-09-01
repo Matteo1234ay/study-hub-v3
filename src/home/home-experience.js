@@ -284,10 +284,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     setActive(phases.sceneProgress, phases.rawProgress, presentation);
     renderer.setJourney(phases.sceneProgress, { scrollVelocity });
     renderer.setExitProgress?.(phases.exitProgress);
-    if (presentation) {
-      root.dataset.homePhase = presentation.phase;
-      root.style.setProperty("--home-caption-strength", String(presentation.captionStrength));
-    }
+    if (presentation) root.dataset.homePhase = presentation.phase;
     updateSharedHandoff(phases);
     root.dataset.homeExit = phases.exitProgress > .01 ? "true" : "false";
     root.dataset.homeExitPhase = phases.choreography.handoff > 0
