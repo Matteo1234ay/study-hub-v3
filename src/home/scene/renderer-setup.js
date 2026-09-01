@@ -1,4 +1,4 @@
-import { createAssetRegistry } from "./asset-registry.js?v=20260901-27";
+import { createAssetRegistry } from "./asset-registry.js?v=20260901-28";
 import { createRoomMaterials } from "./materials.js?v=20260901-26";
 import { buildStudyRoom } from "./build-room.js?v=20260901-26";
 import { createInteractionController } from "./interaction-controller.js?v=20260901-26";
