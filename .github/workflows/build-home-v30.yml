@@ -35,17 +35,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install Blender and WebP tools
+      - name: Install Blender and software-rendering tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y blender python3-numpy webp
+          sudo apt-get install -y blender python3-numpy webp libegl1 libgl1-mesa-dri xvfb
           blender --version
           cwebp -version
       - name: Build V30 scene
         run: blender --background --python scripts/blender/build-home-v30.py
       - name: Render exact-scene V30 poster
+        env:
+          LIBGL_ALWAYS_SOFTWARE: "1"
         run: |
-          blender assets/3d/home-v30/study-hub-home-v30.blend --background --python scripts/blender/render-home-v30-poster.py
+          xvfb-run -a blender assets/3d/home-v30/study-hub-home-v30.blend --background --python scripts/blender/render-home-v30-poster.py
           cwebp -quiet -q 84 assets/3d/home-v30/home-v30-poster.png -o assets/3d/home-v30/home-v30-poster.webp
           rm assets/3d/home-v30/home-v30-poster.png
       - name: Inspect generated files

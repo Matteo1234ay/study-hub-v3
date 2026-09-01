@@ -59,11 +59,14 @@ test("Three GLTFLoader is vendored reproducibly without a runtime CDN", () => {
   assert.doesNotMatch(loader, /\bfetch\s*\(\s*["']https?:\/\//i);
 });
 
-test("renderer preserves the procedural lamp unless the local hero asset loads", () => {
-  const setup = readFileSync("src/home/scene/renderer-setup.js", "utf8");
-  const room = readFileSync("src/home/scene/build-room.js", "utf8");
-  assert.match(setup, /loadDeskLamp/);
-  assert.match(setup, /articulated-desk-lamp/);
+test("historical V25 desk lamp stays local but V30 owns the production hero", () => {
+  const registry = executableSource(readFileSync("src/home/scene/asset-registry.js", "utf8"));
+  const setup = executableSource(readFileSync("src/home/scene/renderer-setup.js", "utf8"));
+  const room = executableSource(readFileSync("src/home/scene/build-room.js", "utf8"));
+  assert.match(registry, /loadDeskLamp/);
+  assert.match(registry, /desk-lamp-arm-01/);
+  assert.doesNotMatch(registry, /https?:\/\//i);
   assert.match(room, /articulated-desk-lamp/);
-  assert.match(setup, /if\s*\(loadedLamp\)/);
+  assert.match(setup, /loadHomeV30/);
+  assert.doesNotMatch(setup, /loadDeskLamp|articulated-desk-lamp/);
 });

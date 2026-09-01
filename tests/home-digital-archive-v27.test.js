@@ -41,7 +41,7 @@ test("studio core is local, documented and inside runtime budget", () => {
   assert.ok(existsSync("scripts/blender/build-studio-core.py"));
 });
 
-test("asset registry loads the studio core locally with finite fallback", () => {
+test("asset registry keeps the historical studio core local with finite fallback", () => {
   const registry = executableSource(readFileSync("src/home/scene/asset-registry.js", "utf8"));
   assert.match(registry, /studio-core\/studio-core\.glb/);
   assert.match(registry, /loadStudioCore/);
@@ -50,17 +50,19 @@ test("asset registry loads the studio core locally with finite fallback", () => 
   assert.doesNotMatch(registry, /https?:\/\//i);
 });
 
-test("renderer waits for the local hero assets before declaring the first frame ready", () => {
+test("renderer waits for the V30 hero asset before declaring the first frame ready", () => {
   const renderer = executableSource(readFileSync("src/home/scene/study-room-renderer.js", "utf8"));
   assert.match(renderer, /heroAssetPromise/);
   assert.match(renderer, /await\s+heroAssetPromise/);
+  assert.match(renderer, /renderer\.render\(scene, camera\)[\s\S]*resolveReady/);
 });
 
-test("studio core receives the Blender-to-Three axis correction before mounting", () => {
+test("V30 production mount does not inherit the historical Blender-to-Three axis correction", () => {
   const setup = executableSource(readFileSync("src/home/scene/renderer-setup.js", "utf8"));
-  assert.match(setup, /applyStudioCoreAxisCorrection/);
-  assert.match(setup, /Math\.PI\s*\/\s*2/);
-  assert.match(setup, /mountStudioCore[\s\S]*applyStudioCoreAxisCorrection\(loadedStudio\)/);
+  const mount = executableSource(readFileSync("src/home/scene/home-v30-mount.js", "utf8"));
+  assert.doesNotMatch(setup, /applyStudioCoreAxisCorrection|Math\.PI\s*\/\s*2/);
+  assert.match(setup, /prepareHomeV30/);
+  assert.match(mount, /nativeAxis:\s*"gltf-y-up"/);
 });
 
 test("knowledge phase already produces a visible archive signal before halfway", () => {
