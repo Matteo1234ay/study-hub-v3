@@ -1,4 +1,4 @@
-import { resolveArchiveBudget } from "./archive-state.js?v=20260901-26";
+import { resolveArchiveBudget, resolveArchiveReveal } from "./archive-state.js?v=20260901-27";
 
 const NUCLEI = Object.freeze([
   { id: "future-paths", label: "Percorsi", href: "#/paths", position: [0.3, 2.0, -2.35], color: 0x5e9cff, scale: 1.26 },
@@ -131,16 +131,15 @@ export function createArchiveField({ THREE, quality, mobile = false } = {}) {
   }
 
   function update(progress, state) {
+    const knowledge = clamp01(state?.knowledge);
     const archive = clamp01(state?.archive);
-    const destabilize = clamp01(state?.destabilize);
-    const fragment = clamp01(state?.fragment);
     const handoff = clamp01(state?.handoff);
-    const reveal = clamp01(destabilize * .2 + fragment * .58 + archive);
+    const reveal = resolveArchiveReveal(state);
     group.visible = reveal > .008;
     if (!group.visible) return;
 
     const time = clamp01(progress);
-    particles.material.opacity = Math.min(.76, reveal * (.34 + archive * .52));
+    particles.material.opacity = Math.min(.82, reveal * (.48 + knowledge * .34 + archive * .42));
     particles.rotation.y = time * .24;
     particles.rotation.x = -.06 + archive * .035;
     particles.scale.setScalar(.76 + reveal * .24);
