@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
-import { HOME_V29_CLIPS } from "../src/home/scene/home-v29-contract.js";
+import { HOME_V29_CLIPS, HOME_V29_WINDOWS } from "../src/home/scene/home-v29-contract.js";
 
 function executableSource(source) {
   return source
@@ -9,17 +9,22 @@ function executableSource(source) {
     .replace(/^\s*\/\/.*$/gm, "");
 }
 
-test("V29 controller exists and scrubs Blender clips with AnimationMixer", () => {
+test("V29 controller exists and scrubs centralized Blender clips with AnimationMixer", () => {
   const path = "src/home/scene/home-v29-controller.js";
   assert.ok(existsSync(path), "missing V29 runtime controller");
   const source = executableSource(readFileSync(path, "utf8"));
+  assert.match(source, /HOME_V29_CLIPS/);
+  assert.match(source, /HOME_V29_WINDOWS/);
   assert.match(source, /new\s+THREE\.AnimationMixer\s*\(/);
+  assert.match(source, /for\s*\(const name of HOME_V29_CLIPS\)/);
   assert.match(source, /action\.play\(\)[\s\S]*action\.paused\s*=\s*true/,
     "V29 may activate Three.js actions only when they are immediately paused for scroll scrubbing");
-  assert.match(source, /action\.time\s*=/);
-  assert.match(source, /HOME_V29_WINDOWS/);
+  assert.match(source, /entry\.action\.time\s*=/);
+  assert.match(source, /HOME_V29_WINDOWS\[name\]/);
   assert.match(source, /mixer\.update\(0\)/);
-  for (const clip of HOME_V29_CLIPS) assert.match(source, new RegExp(clip));
+  for (const clip of HOME_V29_CLIPS) {
+    assert.ok(Array.isArray(HOME_V29_WINDOWS[clip]), `missing scroll window for ${clip}`);
+  }
 });
 
 test("V29 asset registry loads only the local GLB with a finite fallback", () => {
