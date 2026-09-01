@@ -99,7 +99,7 @@ export function createRoomMaterials(THREE) {
     repeat: [4, 3],
     sample: (u, v, x, y) => {
       const variation = layeredNoise(x, y) * 7 + Math.sin((u - v) * 23) * 1.5;
-      return [46 + variation, 49 + variation, 52 + variation];
+      return [18 + variation * .45, 31 + variation * .72, 72 + variation * 1.05];
     }
   });
   const wallNormal = proceduralTexture(THREE, {
@@ -126,8 +126,8 @@ export function createRoomMaterials(THREE) {
       envMapIntensity: .72
     }),
     metal: new THREE.MeshPhysicalMaterial({
-      name: "satin-metal",
-      color: 0x343a40,
+      name: "satin-blue-metal",
+      color: 0x2d5d9f,
       roughness: .29,
       metalness: .84,
       clearcoat: .06,
@@ -135,8 +135,8 @@ export function createRoomMaterials(THREE) {
       envMapIntensity: .86
     }),
     paintedMetal: new THREE.MeshPhysicalMaterial({
-      name: "powder-coated-metal",
-      color: 0x252a30,
+      name: "powder-coated-blue",
+      color: 0x18386f,
       roughness: .49,
       metalness: .43,
       clearcoat: .05,
@@ -154,8 +154,8 @@ export function createRoomMaterials(THREE) {
       envMapIntensity: .7
     }),
     fabric: new THREE.MeshPhysicalMaterial({
-      name: "woven-fabric",
-      color: 0x292e34,
+      name: "woven-blue-fabric",
+      color: 0x172e62,
       roughness: .91,
       roughnessMap: fabricRoughness,
       normalMap: fabricNormal,
@@ -163,12 +163,12 @@ export function createRoomMaterials(THREE) {
       metalness: 0,
       sheen: .18,
       sheenRoughness: .8,
-      sheenColor: new THREE.Color(0x6f7680),
+      sheenColor: new THREE.Color(0x729ee8),
       envMapIntensity: .38
     }),
     glassOff: new THREE.MeshPhysicalMaterial({
       name: "screen-glass-off",
-      color: 0x090d12,
+      color: 0x06132f,
       roughness: .15,
       metalness: .06,
       clearcoat: .7,
@@ -190,8 +190,8 @@ export function createRoomMaterials(THREE) {
       envMapIntensity: .22
     }),
     floor: new THREE.MeshStandardMaterial({
-      name: "dark-floor",
-      color: 0x292722,
+      name: "deep-blue-floor",
+      color: 0x0d214b,
       roughness: .8,
       roughnessMap: floorRoughness,
       normalMap: floorNormal,

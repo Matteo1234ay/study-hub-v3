@@ -45,3 +45,25 @@ test("procedural PBR detail stays bounded while allowing richer hero surfaces", 
   assert.ok(materials.wood.map.image.width >= 256);
   assert.ok(materials.fabric.normalMap.image.width >= 192);
 });
+
+test("dominant room surfaces use one luminous Study Hub blue family", () => {
+  const materials = createRoomMaterials(THREE);
+  const blueSurfaces = [materials.metal, materials.paintedMetal, materials.fabric, materials.floor];
+
+  for (const material of blueSurfaces) {
+    assert.ok(material.color.b > material.color.r * 1.35, `${material.name} must read blue rather than neutral black`);
+    assert.ok(material.color.b > material.color.g * 1.05, `${material.name} must retain a blue hue`);
+  }
+
+  const wallPixels = materials.wall.map.image.data;
+  let red = 0;
+  let green = 0;
+  let blue = 0;
+  for (let index = 0; index < wallPixels.length; index += 4) {
+    red += wallPixels[index];
+    green += wallPixels[index + 1];
+    blue += wallPixels[index + 2];
+  }
+  assert.ok(blue > red * 1.45, "walls must be visibly blue rather than charcoal");
+  assert.ok(blue > green * 1.12, "walls must stay in the Study Hub blue range");
+});

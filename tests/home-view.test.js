@@ -59,8 +59,9 @@ test("cinematic shading keeps the 3D room visible instead of crushing it to blac
   const css = await readProjectFile("styles/home-immersive.css");
   assert.match(css, /--home-scene-shade:\s*\.34/);
   assert.match(css, /--home-mobile-scene-shade:\s*\.28/);
-  assert.match(css, /rgba\(4,\s*7,\s*11,\s*var\(--home-scene-shade\)\)/);
-  assert.match(css, /rgba\(4,\s*7,\s*11,\s*var\(--home-mobile-scene-shade\)\)/);
+  assert.match(css, /--home-shadow-rgb:\s*3,\s*10,\s*35/);
+  assert.match(css, /rgba\(var\(--home-shadow-rgb\),\s*var\(--home-scene-shade\)\)/);
+  assert.match(css, /rgba\(var\(--home-shadow-rgb\),\s*var\(--home-mobile-scene-shade\)\)/);
 });
 
 test("mobile cinematic mode keeps captions readable and touch-safe", async () => {

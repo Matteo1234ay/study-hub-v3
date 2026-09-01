@@ -1,4 +1,4 @@
-import { GLTFLoader } from "../../../vendor/three/examples/jsm/loaders/GLTFLoader.js?v=20260829-24";
+import { GLTFLoader } from "../../../vendor/three/examples/jsm/loaders/GLTFLoader.js?v=20260901-26";
 
 const DESK_LAMP_MODEL = new URL("../../../assets/3d/desk-lamp-arm-01/desk_lamp_arm_01_1k.gltf", import.meta.url).href;
 const DEFAULT_TIMEOUT_MS = 6000;

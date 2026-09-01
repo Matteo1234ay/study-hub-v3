@@ -29,3 +29,21 @@ test("chair and mug expose physically modeled detail while semantic names remain
   assert.deepEqual(Object.keys(room.stations).sort(), ["assessment", "desk", "future-paths", "memory", "progress", "social"]);
   room.dispose();
 });
+
+test("the room shell includes layered studio architecture instead of flat dark boxes", () => {
+  const materials = createRoomMaterials(THREE);
+  const room = buildStudyRoom({ THREE, materials });
+
+  for (const name of [
+    "back-wall-inset",
+    "left-wall-inset",
+    "right-wall-inset",
+    "blue-cove-left",
+    "blue-cove-right",
+    "floor-edge-trim"
+  ]) {
+    assert.ok(room.group.getObjectByName(name), `${name} should add visible architectural depth`);
+  }
+
+  room.dispose();
+});

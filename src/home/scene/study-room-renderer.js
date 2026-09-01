@@ -1,14 +1,14 @@
-import { createCameraTimeline } from "./camera-timeline.js?v=20260829-24";
-import { createDirectorController } from "./director-controller.js?v=20260829-24";
-import { createLightingController } from "./lighting-controller.js?v=20260829-24";
-import { createParallaxRig } from "./parallax-rig.js?v=20260829-24";
+import { createCameraTimeline } from "./camera-timeline.js?v=20260901-26";
+import { createDirectorController } from "./director-controller.js?v=20260901-26";
+import { createLightingController } from "./lighting-controller.js?v=20260901-26";
+import { createParallaxRig } from "./parallax-rig.js?v=20260901-26";
 import {
   configureStudyRenderer,
   createRoomParallaxLayers,
   initializeStudyRoom,
   resolveCameraLayout
-} from "./renderer-setup.js?v=20260829-24";
-import { projectStationScreenToCss } from "./renderer-projection.js?v=20260829-24";
+} from "./renderer-setup.js?v=20260901-26";
+import { projectStationScreenToCss } from "./renderer-projection.js?v=20260901-26";
 
 export { configureStudyRenderer };
 
@@ -18,7 +18,7 @@ const clampVelocity = value => Math.min(6, Math.abs(Number(value) || 0));
 
 export async function createStudyRoomRenderer({ canvas, stations, reducedMotion = false, onActivate = () => {}, onFailure = () => {} }) {
   if (!canvas?.getContext) throw new Error("Canvas della stanza non disponibile");
-  const THREE = await import("../../../vendor/three/three.module.min.js?v=20260829-24");
+  const THREE = await import("../../../vendor/three/three.module.min.js?v=20260901-26");
   const { renderer, room, interaction, quality, scene, camera, lightRig, environmentTarget, assetRegistry } = initializeStudyRoom({
     THREE, canvas, stations, reducedMotion, onActivate
   });

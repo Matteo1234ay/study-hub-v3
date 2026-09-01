@@ -1,5 +1,5 @@
-import { createStationScreen } from "./screen-ui.js?v=20260829-24";
-import { RoundedBoxGeometry } from "../../../vendor/three/examples/jsm/geometries/RoundedBoxGeometry.js?v=20260829-24";
+import { createStationScreen } from "./screen-ui.js?v=20260901-26";
+import { RoundedBoxGeometry } from "../../../vendor/three/examples/jsm/geometries/RoundedBoxGeometry.js?v=20260901-26";
 
 const OPENING_CAMERA = Object.freeze({
   position: [-5.6, 3.05, 5.75],
@@ -286,7 +286,13 @@ export function buildStudyRoom({ THREE, materials }) {
     box(THREE, [10, .16, 8], materials.floor, "floor", [0, -.48, 0]),
     box(THREE, [10, 5.5, .18], materials.wall, "back-wall", [0, 2.2, -3.1]),
     box(THREE, [.18, 5.5, 8], materials.wall, "left-wall", [-5, 2.2, 0]),
-    box(THREE, [.18, 5.5, 8], materials.wall, "right-wall", [5, 2.2, 0])
+    box(THREE, [.18, 5.5, 8], materials.wall, "right-wall", [5, 2.2, 0]),
+    roundedBox(THREE, [9.62, 5.12, .055], materials.paintedMetal, "back-wall-inset", [0, 2.2, -2.975], [0, 0, 0], .08, 3),
+    roundedBox(THREE, [.055, 5.12, 7.62], materials.paintedMetal, "left-wall-inset", [-4.875, 2.2, 0], [0, 0, 0], .08, 3),
+    roundedBox(THREE, [.055, 5.12, 7.62], materials.paintedMetal, "right-wall-inset", [4.875, 2.2, 0], [0, 0, 0], .08, 3),
+    roundedBox(THREE, [.075, 4.92, .085], materials.metal, "blue-cove-left", [-4.72, 2.2, -2.83], [0, 0, 0], .028, 3),
+    roundedBox(THREE, [.075, 4.92, .085], materials.metal, "blue-cove-right", [4.72, 2.2, -2.83], [0, 0, 0], .028, 3),
+    roundedBox(THREE, [9.48, .09, .11], materials.metal, "floor-edge-trim", [0, -.34, -2.82], [0, 0, 0], .03, 3)
   );
 
   const desk = buildDesk(THREE, materials);

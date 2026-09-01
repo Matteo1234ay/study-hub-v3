@@ -1,5 +1,5 @@
-import { createCinematicRouteState } from "./home-route-state.js?v=20260829-24";
-import { createSharedPathsTransition } from "./home-shared-transition.js?v=20260829-24";
+import { createCinematicRouteState } from "./home-route-state.js?v=20260901-26";
+import { createSharedPathsTransition } from "./home-shared-transition.js?v=20260901-26";
 
 function clamp01(value) {
   return Math.min(1, Math.max(0, Number(value) || 0));
@@ -114,12 +114,12 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     if (!root.isConnected) cleanup();
   });
   removalObserver.observe(document.documentElement, { childList: true, subtree: true });
-  const { createStudyRoomRenderer } = await import("./scene/study-room-renderer.js?v=20260829-24");
+  const { createStudyRoomRenderer } = await import("./scene/study-room-renderer.js?v=20260901-26");
   if (disposed || !root.isConnected) {
     cleanup();
     return cleanup;
   }
-  const { createHomeTransitionManager } = await import("./home-transition-manager.js?v=20260829-24");
+  const { createHomeTransitionManager } = await import("./home-transition-manager.js?v=20260901-26");
   if (disposed || !root.isConnected) {
     cleanup();
     return cleanup;
