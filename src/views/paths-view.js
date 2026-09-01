@@ -1,8 +1,8 @@
-import { PATHS } from "../config/paths.js?v=20260901-26";
-import { element, pageHeader } from "../ui/components.js?v=20260901-26";
-import { createCinematicRouteState } from "../home/home-route-state.js?v=20260901-26";
-import { createPathsReturnController } from "../home/paths-return-controller.js?v=20260901-26";
-import { createSharedPathsTransition } from "../home/home-shared-transition.js?v=20260901-26";
+import { PATHS } from "../config/paths.js?v=20260901-27";
+import { element, pageHeader } from "../ui/components.js?v=20260901-27";
+import { createCinematicRouteState } from "../home/home-route-state.js?v=20260901-27";
+import { createPathsReturnController } from "../home/paths-return-controller.js?v=20260901-27";
+import { createSharedPathsTransition } from "../home/home-shared-transition.js?v=20260901-27";
 
 export function renderPathsView({ navigate } = {}) {
   const root = element("section", { className: "content-page" }, [
