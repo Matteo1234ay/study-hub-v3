@@ -25,4 +25,13 @@
 - Texture generation: deterministic and offline inside Blender; no texture CDN or runtime asset host
 - Production network dependency: none
 
+## Study Hub Home V30
+- Direction: realistic CC0/local physical studio rebuilt as a semantic digital archive.
+- CC0 sources: Poly Haven `desk_lamp_arm_01`, `office_notepads`, `stationery_supplies`, `drawer_cabinet`, `poly_haven_studio`, `natural_walnut_veneer`, and `white_plaster_02`.
+- License: source assets are CC0 1.0 Universal/public-domain dedication.
+- Provenance ledger: `assets/3d/home-v30/manifest.json` records source pages, authors, local filenames, byte counts, SHA-256 hashes, and build transformations.
+- Reproducible vendor: `scripts/home-v30/vendor-polyhaven.mjs` uses Poly Haven's public API only during development and verifies downloaded files before they are committed.
+- Runtime policy: the production application consumes committed local derivatives only; no asset API, CDN, analytics, or remote render service is required.
+- Production network dependency: none
+
 The runtime application reads committed local copies only. Poly Haven and other external services are not contacted by the published Study Hub.
