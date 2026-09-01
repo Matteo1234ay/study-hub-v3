@@ -1,0 +1,151 @@
+name: Debug Home V29 Browser
+
+on:
+  push:
+    branches:
+      - debug/home-v29-browser
+
+jobs:
+  browser-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Playwright browsers
+        run: |
+          npm install --no-save --no-package-lock playwright@1.55.0
+          npx playwright install --with-deps chromium webkit
+
+      - name: Start static server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/studyhub-server.log 2>&1 &
+          echo $! > /tmp/studyhub-server.pid
+          for i in {1..20}; do
+            curl -fsS http://127.0.0.1:4173/ >/dev/null && exit 0
+            sleep 0.5
+          done
+          exit 1
+
+      - name: Audit Chromium and WebKit
+        run: |
+          cat > /tmp/home-v29-audit.mjs <<'EOF'
+          import fs from 'node:fs';
+          import { chromium, webkit } from 'playwright';
+
+          const engines = { chromium, webkit };
+          const results = {};
+
+          for (const [name, engine] of Object.entries(engines)) {
+            const browser = await engine.launch({ headless: true });
+            const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
+            const consoleMessages = [];
+            const pageErrors = [];
+            const requestFailures = [];
+            const v29Responses = [];
+
+            page.on('console', message => consoleMessages.push(`${message.type()}: ${message.text()}`));
+            page.on('pageerror', error => pageErrors.push(String(error?.stack || error)));
+            page.on('requestfailed', request => requestFailures.push({
+              url: request.url(),
+              failure: request.failure()?.errorText || 'unknown'
+            }));
+            page.on('response', response => {
+              if (response.url().includes('study-hub-home-v29.glb')) {
+                v29Responses.push({ url: response.url(), status: response.status(), ok: response.ok() });
+              }
+            });
+
+            let navigationError = null;
+            try {
+              await page.goto('http://127.0.0.1:4173/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+              await page.waitForFunction(() => {
+                const state = document.querySelector('.home-journey')?.dataset.homeState;
+                return state === 'ready' || state === 'dom';
+              }, { timeout: 30000 });
+              await page.waitForTimeout(1500);
+            } catch (error) {
+              navigationError = String(error?.stack || error);
+            }
+
+            const state = await page.evaluate(() => {
+              const root = document.querySelector('.home-journey');
+              const canvas = document.querySelector('.study-room-canvas');
+              let webgl = false;
+              try {
+                webgl = Boolean(canvas?.getContext('webgl2') || canvas?.getContext('webgl'));
+              } catch {}
+              return {
+                url: location.href,
+                releaseApp: document.querySelector('script[src*="src/app.js"]')?.getAttribute('src') || null,
+                releaseHomeCss: document.querySelector('link[href*="home-immersive.css"]')?.getAttribute('href') || null,
+                homeState: root?.dataset.homeState || null,
+                homePhase: root?.dataset.homePhase || null,
+                activeStation: root?.dataset.activeStation || null,
+                journeyStarted: root?.dataset.journeyStarted || null,
+                webgl,
+                canvas: canvas ? {
+                  width: canvas.width,
+                  height: canvas.height,
+                  clientWidth: canvas.clientWidth,
+                  clientHeight: canvas.clientHeight
+                } : null,
+                bodyText: document.body.innerText.slice(0, 800)
+              };
+            });
+
+            await page.screenshot({ path: `/tmp/${name}-home-start.png`, fullPage: false });
+            await page.evaluate(() => {
+              const root = document.querySelector('.home-journey');
+              if (!root) return;
+              const distance = Math.max(1, root.offsetHeight - innerHeight);
+              scrollTo(0, root.offsetTop + distance * 0.58);
+            });
+            await page.waitForTimeout(1000);
+            const midState = await page.evaluate(() => {
+              const root = document.querySelector('.home-journey');
+              return {
+                homeState: root?.dataset.homeState || null,
+                homePhase: root?.dataset.homePhase || null,
+                activeStation: root?.dataset.activeStation || null,
+                journeyStarted: root?.dataset.journeyStarted || null,
+                scrollY
+              };
+            });
+            await page.screenshot({ path: `/tmp/${name}-home-mid.png`, fullPage: false });
+
+            results[name] = {
+              navigationError,
+              state,
+              midState,
+              v29Responses,
+              requestFailures,
+              pageErrors,
+              consoleMessages
+            };
+            await browser.close();
+          }
+
+          fs.writeFileSync('/tmp/home-v29-audit.json', JSON.stringify(results, null, 2));
+          console.log(JSON.stringify(results, null, 2));
+          EOF
+          node /tmp/home-v29-audit.mjs
+
+      - name: Upload browser diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: home-v29-browser-diagnostics
+          path: |
+            /tmp/home-v29-audit.json
+            /tmp/chromium-home-start.png
+            /tmp/chromium-home-mid.png
+            /tmp/webkit-home-start.png
+            /tmp/webkit-home-mid.png
+            /tmp/studyhub-server.log
+          if-no-files-found: warn
+          retention-days: 1
