@@ -1,0 +1,4 @@
+# Private/personal Study Hub: do not crawl or index.
+# This does not affect the app itself or direct access through its URL.
+User-agent: *
+Disallow: /
