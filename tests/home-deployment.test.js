@@ -65,7 +65,7 @@ test("the changed homepage chain uses the Safari-safe v29 token", async () => {
   for (const imported of ["home-route-state.js", "home-shared-transition.js", "scene/study-room-renderer.js", "home-transition-manager.js"]) {
     assert.match(sources["src/home/home-experience.js"], new RegExp(`${imported.replaceAll(".", "\\.")}\\?v=${RELEASE_TOKEN}`));
   }
-  for (const imported of ["archive-field.js", "archive-state.js", "renderer-setup.js"]) {
+  for (const imported of ["home-v30-camera-timeline.js", "home-v30-controller.js", "home-v30-dematerialization.js", "renderer-setup.js"]) {
     assert.match(sources["src/home/scene/study-room-renderer.js"], new RegExp(`${imported.replaceAll(".", "\\.")}\\?v=${RELEASE_TOKEN}`));
   }
   assert.match(sources["src/home/scene/renderer-setup.js"], new RegExp(`asset-registry\\.js\\?v=${RELEASE_TOKEN}`));
