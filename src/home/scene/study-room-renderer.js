@@ -40,9 +40,10 @@ function archiveMass(name = "") {
 export async function createStudyRoomRenderer({ canvas, stations, reducedMotion = false, onActivate = () => {}, onFailure = () => {} }) {
   if (!canvas?.getContext) throw new Error("Canvas della stanza non disponibile");
   const THREE = await import("../../../vendor/three/three.module.min.js?v=20260901-26");
-  const { renderer, room, interaction, quality, scene, camera, lightRig, environmentTarget, assetRegistry } = initializeStudyRoom({
+  const { renderer, room, interaction, quality, scene, camera, lightRig, environmentTarget, assetRegistry, heroAssetPromise } = initializeStudyRoom({
     THREE, canvas, stations, reducedMotion, onActivate
   });
+  await heroAssetPromise;
   const parallaxRig = createParallaxRig({ layers: createRoomParallaxLayers(room), maxLayers: 12 });
   const lighting = createLightingController(lightRig);
   const archiveField = createArchiveField({ THREE, quality, mobile: false });
@@ -97,7 +98,9 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
   function syncHeroArchive(state) {
     const hero = room.heroAsset;
     if (!hero) return;
-    const intensity = reducedMotion ? state.archive * .24 : state.fragment * .46 + state.archive * .82;
+    const intensity = reducedMotion
+      ? state.archive * .24
+      : state.knowledge * .06 + state.fragment * .46 + state.archive * .82;
     hero.traverse(child => {
       if (!child.isMesh || child.name === "studio-monitor-screen") return;
       if (!child.userData.archiveBasePosition) {
