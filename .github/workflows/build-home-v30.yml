@@ -14,6 +14,7 @@ on:
       - tests/home-v30-runtime.test.js
       - tests/home-v30-composition.test.js
       - src/home/scene/home-v30-contract.js
+      - src/home/scene/home-v30-camera-timeline.js
       - assets/3d/home-v30/manifest.json
       - assets/3d/home-v30/vendor/**
       - assets/3d/desk-lamp-arm-01/**
