@@ -23,7 +23,11 @@ function disposeObject(object) {
   });
 }
 
-export function createAssetRegistry({ THREE, timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
+export function createAssetRegistry({
+  THREE,
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+  v30TimeoutMs = V30_TIMEOUT_MS
+} = {}) {
   if (!THREE) throw new Error("Three.js non disponibile per il registro asset");
   const loader = new GLTFLoader();
   const tracked = new Set();
@@ -78,7 +82,7 @@ export function createAssetRegistry({ THREE, timeoutMs = DEFAULT_TIMEOUT_MS } = 
 
   async function loadHomeV30() {
     if (disposed) return { status: "error", error: new Error("Registro asset chiuso") };
-    const finiteTimeout = Math.min(30000, Math.max(3000, Number(timeoutMs) || V30_TIMEOUT_MS));
+    const finiteTimeout = Math.min(30000, Math.max(15000, Number(v30TimeoutMs) || V30_TIMEOUT_MS));
     let timer = 0;
     const timeoutError = new Error("Timeout durante il caricamento della scena V30");
     try {
