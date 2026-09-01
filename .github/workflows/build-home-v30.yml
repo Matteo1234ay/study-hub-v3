@@ -6,11 +6,13 @@ on:
     branches: [feat/home-v30-realistic-cc0]
     paths:
       - scripts/blender/build-home-v30.py
+      - scripts/blender/polish-home-v30.py
       - scripts/blender/render-home-v30-poster.py
       - .github/workflows/build-home-v30.yml
       - tests/home-v30-blender-assets.test.js
       - tests/home-v30-blender-source.test.js
       - tests/home-v30-runtime.test.js
+      - tests/home-v30-composition.test.js
       - src/home/scene/home-v30-contract.js
       - assets/3d/home-v30/manifest.json
       - assets/3d/home-v30/vendor/**
@@ -41,8 +43,10 @@ jobs:
           sudo apt-get install -y blender python3-numpy webp libegl1 libgl1-mesa-dri xvfb
           blender --version
           cwebp -version
-      - name: Build V30 scene
+      - name: Build V30 base scene
         run: blender --background --python scripts/blender/build-home-v30.py
+      - name: Apply V30 Blender realism polish
+        run: blender --background --python scripts/blender/polish-home-v30.py
       - name: Render exact-scene V30 poster
         env:
           LIBGL_ALWAYS_SOFTWARE: "1"
@@ -60,7 +64,7 @@ jobs:
           test "$(stat -c%s assets/3d/home-v30/home-v30-poster.webp)" -gt 32768
           test "$(stat -c%s assets/3d/home-v30/home-v30-poster.webp)" -lt 3145728
       - name: Validate V30 Blender contract
-        run: node --test tests/home-v30-contract.test.js tests/home-v30-blender-source.test.js tests/home-v30-blender-assets.test.js tests/home-v30-assets.test.js tests/home-v30-runtime.test.js
+        run: node --test tests/home-v30-contract.test.js tests/home-v30-blender-source.test.js tests/home-v30-blender-assets.test.js tests/home-v30-assets.test.js tests/home-v30-runtime.test.js tests/home-v30-composition.test.js
       - name: Check committed-source safety
         run: node scripts/check-secrets.mjs
       - uses: actions/upload-artifact@v4
