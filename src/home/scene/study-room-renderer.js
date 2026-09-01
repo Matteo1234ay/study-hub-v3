@@ -2,14 +2,14 @@ import { createCameraTimeline } from "./camera-timeline.js?v=20260901-26";
 import { createDirectorController } from "./director-controller.js?v=20260901-26";
 import { createLightingController } from "./lighting-controller.js?v=20260901-26";
 import { createParallaxRig } from "./parallax-rig.js?v=20260901-26";
-import { createArchiveField } from "./archive-field.js?v=20260901-26";
-import { resolveArchiveBudget, resolveArchivePhase } from "./archive-state.js?v=20260901-26";
+import { createArchiveField } from "./archive-field.js?v=20260901-27";
+import { resolveArchiveBudget, resolveArchivePhase } from "./archive-state.js?v=20260901-27";
 import {
   configureStudyRenderer,
   createRoomParallaxLayers,
   initializeStudyRoom,
   resolveCameraLayout
-} from "./renderer-setup.js?v=20260901-26";
+} from "./renderer-setup.js?v=20260901-27";
 import { projectStationScreenToCss } from "./renderer-projection.js?v=20260901-26";
 
 export { configureStudyRenderer };
