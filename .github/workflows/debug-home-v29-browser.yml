@@ -33,7 +33,7 @@ jobs:
 
       - name: Audit Chromium and WebKit
         run: |
-          cat > /tmp/home-v29-audit.mjs <<'EOF'
+          cat > ./home-v29-audit.mjs <<'EOF'
           import fs from 'node:fs';
           import { chromium, webkit } from 'playwright';
 
@@ -75,10 +75,6 @@ jobs:
             const state = await page.evaluate(() => {
               const root = document.querySelector('.home-journey');
               const canvas = document.querySelector('.study-room-canvas');
-              let webgl = false;
-              try {
-                webgl = Boolean(canvas?.getContext('webgl2') || canvas?.getContext('webgl'));
-              } catch {}
               return {
                 url: location.href,
                 releaseApp: document.querySelector('script[src*="src/app.js"]')?.getAttribute('src') || null,
@@ -87,7 +83,6 @@ jobs:
                 homePhase: root?.dataset.homePhase || null,
                 activeStation: root?.dataset.activeStation || null,
                 journeyStarted: root?.dataset.journeyStarted || null,
-                webgl,
                 canvas: canvas ? {
                   width: canvas.width,
                   height: canvas.height,
@@ -105,7 +100,7 @@ jobs:
               const distance = Math.max(1, root.offsetHeight - innerHeight);
               scrollTo(0, root.offsetTop + distance * 0.58);
             });
-            await page.waitForTimeout(1000);
+            await page.waitForTimeout(1200);
             const midState = await page.evaluate(() => {
               const root = document.querySelector('.home-journey');
               return {
@@ -133,7 +128,7 @@ jobs:
           fs.writeFileSync('/tmp/home-v29-audit.json', JSON.stringify(results, null, 2));
           console.log(JSON.stringify(results, null, 2));
           EOF
-          node /tmp/home-v29-audit.mjs
+          node ./home-v29-audit.mjs
 
       - name: Upload browser diagnostics
         if: always()
