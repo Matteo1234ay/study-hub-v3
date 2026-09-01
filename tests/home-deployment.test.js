@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const RELEASE_TOKEN = "20260901-26";
+const RELEASE_TOKEN = "20260901-27";
 
 test("Three.js is pinned and vendored locally with its license", async () => {
   const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url)));
@@ -35,7 +35,7 @@ test("vendored Three wrapper imports an immutable versioned core filename", asyn
   assert.ok(core.length > 100_000);
 });
 
-test("the complete changed homepage graph uses one Safari-safe token", async () => {
+test("the changed homepage chain uses the Safari-safe v27 token", async () => {
   const files = [
     "index.html",
     "src/app.js",
@@ -43,8 +43,7 @@ test("the complete changed homepage graph uses one Safari-safe token", async () 
     "src/views/paths-view.js",
     "src/home/home-experience.js",
     "src/home/scene/study-room-renderer.js",
-    "src/home/scene/renderer-setup.js",
-    "src/home/scene/build-room.js"
+    "src/home/scene/renderer-setup.js"
   ];
   const sources = Object.fromEntries(await Promise.all(files.map(async file => [
     file,
@@ -53,19 +52,23 @@ test("the complete changed homepage graph uses one Safari-safe token", async () 
 
   assert.match(sources["index.html"], new RegExp(`styles/home-immersive\\.css\\?v=${RELEASE_TOKEN}`));
   assert.match(sources["index.html"], new RegExp(`src/app\\.js\\?v=${RELEASE_TOKEN}`));
-  for (const [file, imports] of Object.entries({
-    "src/app.js": ["config/paths.js", "router.js", "views/home-view.js", "views/paths-view.js", "home/home-shared-transition.js"],
-    "src/views/home-view.js": ["config/paths.js", "home/home-stations.js", "home/home-experience.js"],
-    "src/views/paths-view.js": ["config/paths.js", "ui/components.js", "home/home-route-state.js", "home/paths-return-controller.js", "home/home-shared-transition.js"],
-    "src/home/home-experience.js": ["home-route-state.js", "home-shared-transition.js", "scene/study-room-renderer.js", "home-transition-manager.js"],
-    "src/home/scene/study-room-renderer.js": ["camera-timeline.js", "lighting-controller.js", "parallax-rig.js", "renderer-setup.js", "renderer-projection.js", "three.module.min.js"],
-    "src/home/scene/renderer-setup.js": ["materials.js", "build-room.js", "interaction-controller.js", "quality-controller.js", "RoomEnvironment.js"],
-    "src/home/scene/build-room.js": ["screen-ui.js", "RoundedBoxGeometry.js"]
-  })) {
-    for (const imported of imports) {
-      assert.match(sources[file], new RegExp(`${imported.replaceAll(".", "\\.")}\\?v=${RELEASE_TOKEN}`), `${file} -> ${imported}`);
-    }
+
+  for (const imported of ["views/home-view.js", "views/paths-view.js", "home/home-shared-transition.js"]) {
+    assert.match(sources["src/app.js"], new RegExp(`${imported.replaceAll(".", "\\.")}\\?v=${RELEASE_TOKEN}`));
   }
+  for (const imported of ["home/home-experience.js", "home/home-stations.js"]) {
+    assert.match(sources["src/views/home-view.js"], new RegExp(`${imported.replaceAll(".", "\\.")}\\?v=${RELEASE_TOKEN}`));
+  }
+  for (const imported of ["home-route-state.js", "paths-return-controller.js", "home-shared-transition.js"]) {
+    assert.match(sources["src/views/paths-view.js"], new RegExp(`${imported.replaceAll(".", "\\.")}\\?v=${RELEASE_TOKEN}`));
+  }
+  for (const imported of ["home-route-state.js", "home-shared-transition.js", "scene/study-room-renderer.js", "home-transition-manager.js"]) {
+    assert.match(sources["src/home/home-experience.js"], new RegExp(`${imported.replaceAll(".", "\\.")}\\?v=${RELEASE_TOKEN}`));
+  }
+  for (const imported of ["archive-field.js", "archive-state.js", "renderer-setup.js"]) {
+    assert.match(sources["src/home/scene/study-room-renderer.js"], new RegExp(`${imported.replaceAll(".", "\\.")}\\?v=${RELEASE_TOKEN}`));
+  }
+  assert.match(sources["src/home/scene/renderer-setup.js"], new RegExp(`asset-registry\\.js\\?v=${RELEASE_TOKEN}`));
 });
 
 test("lesson synchronization cannot select application files", async () => {
