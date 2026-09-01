@@ -1,0 +1,58 @@
+name: Visual Home V30
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/home-v30-realistic-cc0]
+    paths:
+      - "src/home/**"
+      - "src/views/home-view.js"
+      - "styles/home-*.css"
+      - "assets/3d/home-v30/**"
+      - "tests/browser/**"
+      - "playwright.config.js"
+      - ".github/workflows/visual-home-v30.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: visual-home-v30
+  cancel-in-progress: true
+
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright test runner
+        run: npm install --no-save --ignore-scripts @playwright/test@1.55.0
+      - name: Install Chromium and WebKit
+        run: npx playwright install --with-deps chromium webkit
+      - name: Start local static server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/studyhub-http.log 2>&1 &
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:4173/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/studyhub-http.log
+          exit 1
+      - name: Run V30 Chromium and WebKit visual smoke
+        run: npx playwright test tests/browser/home-v30-smoke.spec.js
+      - name: Upload V30 screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: home-v30-visuals-${{ github.sha }}
+          if-no-files-found: warn
+          retention-days: 7
+          path: |
+            test-results/**
+            playwright-report/**
