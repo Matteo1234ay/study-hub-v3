@@ -2,7 +2,10 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./tests/browser",
-  timeout: 90_000,
+  // GitHub's software WebGL path can take tens of seconds to read a 1440×900
+  // framebuffer. This budget covers five deliberate visual checkpoints without
+  // weakening the per-expect readiness deadlines below.
+  timeout: 240_000,
   expect: { timeout: 45_000 },
   fullyParallel: false,
   retries: 0,
