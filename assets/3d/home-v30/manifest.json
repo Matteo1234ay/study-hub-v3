@@ -1,0 +1,319 @@
+{
+  "schemaVersion": 1,
+  "generatedBy": "scripts/home-v30/vendor-polyhaven.mjs",
+  "developmentSource": "Poly Haven public API",
+  "runtimeNetworkDependency": "none",
+  "assets": [
+    {
+      "id": "desk_lamp_arm_01",
+      "role": "articulated practical desk lamp",
+      "kind": "model",
+      "source": {
+        "site": "Poly Haven",
+        "page": "https://polyhaven.com/a/desk_lamp_arm_01",
+        "filesHash": "e15dd68e575e78092f99c7179cd031525428bbc1"
+      },
+      "license": "CC0 1.0 Universal",
+      "authors": [
+        "Kuutti Siitonen",
+        "Yann Kervran"
+      ],
+      "downloadedSourceFilename": "desk_lamp_arm_01_1k.gltf",
+      "optimizedLocalFilename": "assets/3d/desk-lamp-arm-01/desk_lamp_arm_01_1k.gltf",
+      "local": {
+        "root": "assets/3d/desk-lamp-arm-01/",
+        "files": [
+          {
+            "path": "assets/3d/desk-lamp-arm-01/desk_lamp_arm_01_1k.gltf",
+            "sha256": "2ac8389afc1519449a9cfdf7efd9fa36780a2177bb47ab58f7a7dda7d247dc8c",
+            "bytes": 4453
+          },
+          {
+            "path": "assets/3d/desk-lamp-arm-01/desk_lamp_arm_01.bin",
+            "sha256": "07f34e32abecbaa63d28b9d12d6a0eb82b775a0f50c92327655909d72ff8489b",
+            "bytes": 736804
+          },
+          {
+            "path": "assets/3d/desk-lamp-arm-01/textures/desk_lamp_arm_01_arm_1k.jpg",
+            "sha256": "206404c79fb7dcf8e2c4558c13544342f87d2190526231a1750c3c9adc256fbc",
+            "bytes": 780379
+          },
+          {
+            "path": "assets/3d/desk-lamp-arm-01/textures/desk_lamp_arm_01_diff_1k.jpg",
+            "sha256": "159eb178aba3271bd555cbe07ca36431d8af9a006f0b8e9d8c67030cbdc9e4d3",
+            "bytes": 702522
+          },
+          {
+            "path": "assets/3d/desk-lamp-arm-01/textures/desk_lamp_arm_01_nor_gl_1k.jpg",
+            "sha256": "feefedc3835ecef3634e97a24977451671f8f57747a023f48cd14c84bc73513a",
+            "bytes": 651826
+          }
+        ]
+      },
+      "transformations": [
+        "Reuse the previously vendored optimized 1K glTF copy.",
+        "V30 Blender rebuild may re-parent lamp parts around Study Hub-specific mechanical pivots."
+      ]
+    },
+    {
+      "id": "office_notepads",
+      "role": "paper and note props",
+      "kind": "model",
+      "source": {
+        "site": "Poly Haven",
+        "page": "https://polyhaven.com/a/office_notepads",
+        "filesHash": "41a4f25b547807cd4c1dea9ec782319f8c996a8a"
+      },
+      "license": "CC0 1.0 Universal",
+      "authors": [
+        "Ulan Cabanilla"
+      ],
+      "downloadedSourceFilename": "office_notepads_1k.gltf",
+      "optimizedLocalFilename": "assets/3d/home-v30/vendor/office_notepads/office_notepads_1k.gltf",
+      "local": {
+        "root": "assets/3d/home-v30/vendor/office_notepads/",
+        "files": [
+          {
+            "path": "assets/3d/home-v30/vendor/office_notepads/office_notepads_1k.gltf",
+            "sha256": "dec1bd1f656e21bbda8957bcd19a715b1d1fbc5f9f153ada7ccdaf8407d97411",
+            "bytes": 15568
+          },
+          {
+            "path": "assets/3d/home-v30/vendor/office_notepads/office_notepads.bin",
+            "sha256": "4095356347a19a2e64ee2f5cee46d50d9bdf7c52f617573bca94cfe6e494842c",
+            "bytes": 17740
+          },
+          {
+            "path": "assets/3d/home-v30/vendor/office_notepads/textures/office_notepads_arm_1k.jpg",
+            "sha256": "a4a1c7356075ab0de890ae7de0397a0b4c35f6dd7feacafe3a32e773b76c7e68",
+            "bytes": 445320
+          },
+          {
+            "path": "assets/3d/home-v30/vendor/office_notepads/textures/office_notepads_diff_1k.jpg",
+            "sha256": "6cce5f76748a73954a9158904b6d26319f028f796166c140b3cbf0bbb7c62727",
+            "bytes": 460873
+          },
+          {
+            "path": "assets/3d/home-v30/vendor/office_notepads/textures/office_notepads_nor_gl_1k.jpg",
+            "sha256": "d6be173e3c16755e3c163724b205114f0dc93ff2d6a746b819815f4100432018",
+            "bytes": 393394
+          }
+        ]
+      },
+      "transformations": [
+        "Select the smallest available 1K glTF delivery and its declared dependencies.",
+        "Imported into Blender as a build-time source; final runtime delivery is the consolidated V30 GLB."
+      ]
+    },
+    {
+      "id": "stationery_supplies",
+      "role": "lived-in editorial desk props",
+      "kind": "model",
+      "source": {
+        "site": "Poly Haven",
+        "page": "https://polyhaven.com/a/stationery_supplies",
+        "filesHash": "4dbacd04f75f1ccd853db5f56a6a891359c5fa31"
+      },
+      "license": "CC0 1.0 Universal",
+      "authors": [
+        "Mateusz Sadek"
+      ],
+      "downloadedSourceFilename": "stationery_supplies_1k.gltf",
+      "optimizedLocalFilename": "assets/3d/home-v30/vendor/stationery_supplies/stationery_supplies_1k.gltf",
+      "local": {
+        "root": "assets/3d/home-v30/vendor/stationery_supplies/",
+        "files": [
+          {
+            "path": "assets/3d/home-v30/vendor/stationery_supplies/stationery_supplies_1k.gltf",
+            "sha256": "9f5ef7799af1193e5d794cc02eb6add2d2eb7e80bc1974930fae76b3cd7ce9a9",
+            "bytes": 15220
+          },
+          {
+            "path": "assets/3d/home-v30/vendor/stationery_supplies/stationery_supplies.bin",
+            "sha256": "475d839c3569551710607cfc71416aa50a3715cd02d56da8c86271982feacb6e",
+            "bytes": 128940
+          },
+          {
+            "path": "assets/3d/home-v30/vendor/stationery_supplies/textures/stationery_supplies_arm_1k.jpg",
+            "sha256": "b7b00e07f043d9928aa4b6dc6a3feede9c870e6e810ae75b54692171cfba6052",
+            "bytes": 720443
+          },
+          {
+            "path": "assets/3d/home-v30/vendor/stationery_supplies/textures/stationery_supplies_diff_1k.jpg",
+            "sha256": "a70e92052b2da3457a6059aec0fa83bc01bf0d376be814661cee0b49e4abb9ad",
+            "bytes": 646389
+          },
+          {
+            "path": "assets/3d/home-v30/vendor/stationery_supplies/textures/stationery_supplies_nor_gl_1k.jpg",
+            "sha256": "23c332f95ca9cafc24f51a1ad54ca81548d3ab60559401e793fdec00cbe7952c",
+            "bytes": 475821
+          }
+        ]
+      },
+      "transformations": [
+        "Select the smallest available 1K glTF delivery and its declared dependencies.",
+        "Only a restrained subset is composed into the final Study Hub scene."
+      ]
+    },
+    {
+      "id": "drawer_cabinet",
+      "role": "realistic storage reference and secondary furniture",
+      "kind": "model",
+      "source": {
+        "site": "Poly Haven",
+        "page": "https://polyhaven.com/a/drawer_cabinet",
+        "filesHash": "dda532faa842f6046d05e7ffcfddaea897152f78"
+      },
+      "license": "CC0 1.0 Universal",
+      "authors": [
+        "Ulan Cabanilla"
+      ],
+      "downloadedSourceFilename": "drawer_cabinet_1k.gltf",
+      "optimizedLocalFilename": "assets/3d/home-v30/vendor/drawer_cabinet/drawer_cabinet_1k.gltf",
+      "local": {
+        "root": "assets/3d/home-v30/vendor/drawer_cabinet/",
+        "files": [
+          {
+            "path": "assets/3d/home-v30/vendor/drawer_cabinet/drawer_cabinet_1k.gltf",
+            "sha256": "899581e6a041644139a138f909c6ba001684cc55b5d1702e08f01094e20d0617",
+            "bytes": 8031
+          },
+          {
+            "path": "assets/3d/home-v30/vendor/drawer_cabinet/drawer_cabinet.bin",
+            "sha256": "3460b9fe00ffbe779b7f7f2de3b159c214cfec275c06194add0eebd951ee14e9",
+            "bytes": 798852
+          },
+          {
+            "path": "assets/3d/home-v30/vendor/drawer_cabinet/textures/drawer_cabinet_arm_1k.jpg",
+            "sha256": "8f8eefaaadcee247204c5658c2f4d9cac598222336918b01eb48e4190317788c",
+            "bytes": 124942
+          },
+          {
+            "path": "assets/3d/home-v30/vendor/drawer_cabinet/textures/drawer_cabinet_diff_1k.jpg",
+            "sha256": "0fe270409b54a5609662dda14afaa94af4bd3267dcd83dd824e05fa880d96efb",
+            "bytes": 150011
+          },
+          {
+            "path": "assets/3d/home-v30/vendor/drawer_cabinet/textures/drawer_cabinet_nor_gl_1k.jpg",
+            "sha256": "26d0904ad341353e095ef619d157a5f416be014500475976f1144827cc849faa",
+            "bytes": 61593
+          }
+        ]
+      },
+      "transformations": [
+        "Select the smallest available 1K glTF delivery and its declared dependencies.",
+        "Used as build-time art/reference; mechanically animated Study Hub drawers remain custom-controlled."
+      ]
+    },
+    {
+      "id": "poly_haven_studio",
+      "role": "neutral office image-based lighting reference",
+      "kind": "hdri",
+      "source": {
+        "site": "Poly Haven",
+        "page": "https://polyhaven.com/a/poly_haven_studio",
+        "filesHash": "0ff8ab9e5f1ceb8b5b1d6f39d4730e0525da4330"
+      },
+      "license": "CC0 1.0 Universal",
+      "authors": [
+        "Greg Zaal"
+      ],
+      "downloadedSourceFilename": "poly_haven_studio_2k.hdr",
+      "optimizedLocalFilename": "assets/3d/home-v30/vendor/poly_haven_studio/poly_haven_studio_2k.hdr",
+      "local": {
+        "root": "assets/3d/home-v30/vendor/poly_haven_studio/",
+        "files": [
+          {
+            "path": "assets/3d/home-v30/vendor/poly_haven_studio/poly_haven_studio_2k.hdr",
+            "sha256": "65ffbd4ffdce0914d61e5c28e078a14491a973cdbebbd82fc3c47b30153955b5",
+            "bytes": 6602301
+          }
+        ]
+      },
+      "transformations": [
+        "Select a 2K HDR delivery where available to cap repository and GPU cost.",
+        "Used for image-based lighting, not as the visible room background."
+      ]
+    },
+    {
+      "id": "natural_walnut_veneer",
+      "role": "walnut desk and cabinetry material",
+      "kind": "texture",
+      "source": {
+        "site": "Poly Haven",
+        "page": "https://polyhaven.com/a/natural_walnut_veneer",
+        "filesHash": "9b528e5f85707c2a16175fd12eb930ee862b2c36"
+      },
+      "license": "CC0 1.0 Universal",
+      "authors": [
+        "Jenelle van Heerden"
+      ],
+      "downloadedSourceFilename": "natural_walnut_veneer_diff_1k.jpg",
+      "optimizedLocalFilename": "assets/3d/home-v30/vendor/natural_walnut_veneer/natural_walnut_veneer_diff_1k.jpg",
+      "local": {
+        "root": "assets/3d/home-v30/vendor/natural_walnut_veneer/",
+        "files": [
+          {
+            "path": "assets/3d/home-v30/vendor/natural_walnut_veneer/natural_walnut_veneer_diff_1k.jpg",
+            "sha256": "41fe45f6457bddd4d97627bc610d2980d91683bc521c9692a6c4f2a6a3b05efd",
+            "bytes": 633330
+          },
+          {
+            "path": "assets/3d/home-v30/vendor/natural_walnut_veneer/natural_walnut_veneer_nor_gl_1k.jpg",
+            "sha256": "da621d3c7e96740313b459a034a30f46271d91a9dcad0c0c657a1485e32d336b",
+            "bytes": 441987
+          },
+          {
+            "path": "assets/3d/home-v30/vendor/natural_walnut_veneer/natural_walnut_veneer_rough_1k.jpg",
+            "sha256": "a5c7353aa7886a383b04506145548f9d2ffb9753c3d0b6cf52d972c18e5578d9",
+            "bytes": 568696
+          }
+        ]
+      },
+      "transformations": [
+        "Vendor 1K diffuse, OpenGL normal and roughness maps only.",
+        "Texture scale and color response are calibrated in the V30 Blender scene."
+      ]
+    },
+    {
+      "id": "white_plaster_02",
+      "role": "warm neutral plaster wall material",
+      "kind": "texture",
+      "source": {
+        "site": "Poly Haven",
+        "page": "https://polyhaven.com/a/white_plaster_02",
+        "filesHash": "508068441dd24eb06ef6d269a43f6ea7c8bade6b"
+      },
+      "license": "CC0 1.0 Universal",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "downloadedSourceFilename": "white_plaster_02_diff_1k.jpg",
+      "optimizedLocalFilename": "assets/3d/home-v30/vendor/white_plaster_02/white_plaster_02_diff_1k.jpg",
+      "local": {
+        "root": "assets/3d/home-v30/vendor/white_plaster_02/",
+        "files": [
+          {
+            "path": "assets/3d/home-v30/vendor/white_plaster_02/white_plaster_02_diff_1k.jpg",
+            "sha256": "a1ebbe091bd1ae93d2abd5de8d69f9003a8d0ee6532bcf9a87c2492c97051f23",
+            "bytes": 527219
+          },
+          {
+            "path": "assets/3d/home-v30/vendor/white_plaster_02/white_plaster_02_nor_gl_1k.jpg",
+            "sha256": "eb572ca3630d5bfde72e2601b1f02412da23ca005cd19384dced8690be4cb783",
+            "bytes": 652310
+          },
+          {
+            "path": "assets/3d/home-v30/vendor/white_plaster_02/white_plaster_02_rough_1k.jpg",
+            "sha256": "4ff1fe957cd161b07f721fe6c28a9459c8c2e8ec65627a26c16e483a07c80d85",
+            "bytes": 295900
+          }
+        ]
+      },
+      "transformations": [
+        "Vendor 1K diffuse, OpenGL normal and roughness maps only.",
+        "Texture scale and tonal warmth are calibrated in the V30 Blender scene."
+      ]
+    }
+  ]
+}
