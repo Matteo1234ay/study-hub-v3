@@ -32,11 +32,22 @@ test("V30 CSP permits only the local blob/data mechanisms needed by glTF", async
   assertNoExternalSources(directives.get("img-src") ?? [], "img-src");
 });
 
-test("V30 CSP keeps script, object, base and form restrictions local", async () => {
+test("V30 CSP keeps script, style, object, base and form restrictions local", async () => {
   const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
   const directives = parseCsp(html);
   assert.deepEqual(directives.get("script-src"), ["'self'"]);
+  assert.deepEqual(directives.get("style-src"), ["'self'"]);
   assert.deepEqual(directives.get("object-src"), ["'none'"]);
   assert.deepEqual(directives.get("base-uri"), ["'self'"]);
   assert.deepEqual(directives.get("form-action"), ["'self'"]);
+});
+
+test("V30 cinematic captions do not require CSP-blocked inline styles", async () => {
+  const experience = await readFile(new URL("../src/home/home-experience.js", import.meta.url), "utf8");
+  const css = await readFile(new URL("../styles/home-immersive.css", import.meta.url), "utf8");
+
+  assert.doesNotMatch(experience, /\.style\.setProperty\s*\(/);
+  assert.match(experience, /dataset\.homePhase\s*=\s*presentation\.phase/);
+  assert.match(css, /data-home-phase=["']read["'][^}]*--home-caption-strength:\s*\.45/s);
+  assert.match(css, /--home-caption-strength:\s*\.9/);
 });
