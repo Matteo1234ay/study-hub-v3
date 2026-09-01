@@ -2,6 +2,8 @@ import { createCameraTimeline } from "./camera-timeline.js?v=20260901-26";
 import { createDirectorController } from "./director-controller.js?v=20260901-26";
 import { createLightingController } from "./lighting-controller.js?v=20260901-26";
 import { createParallaxRig } from "./parallax-rig.js?v=20260901-26";
+import { createArchiveField } from "./archive-field.js?v=20260901-26";
+import { resolveArchiveBudget, resolveArchivePhase } from "./archive-state.js?v=20260901-26";
 import {
   configureStudyRenderer,
   createRoomParallaxLayers,
@@ -16,6 +18,25 @@ const ZERO_PARALLAX = Object.freeze({ x: 0, y: 0 });
 const clamp01 = value => Math.min(1, Math.max(0, Number(value) || 0));
 const clampVelocity = value => Math.min(6, Math.abs(Number(value) || 0));
 
+function objectScatter(name = "") {
+  let hash = 2166136261;
+  for (const char of name) {
+    hash ^= char.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+  const x = ((hash & 255) / 255 - .5) * 2;
+  const y = (((hash >>> 8) & 255) / 255 - .5) * 2;
+  const z = (((hash >>> 16) & 255) / 255 - .5) * 2;
+  return { x, y, z };
+}
+
+function archiveMass(name = "") {
+  if (/book|keyboard|mouse|mug|notebook/i.test(name)) return .34;
+  if (/monitor/i.test(name)) return .72;
+  if (/chair/i.test(name)) return .86;
+  return 1;
+}
+
 export async function createStudyRoomRenderer({ canvas, stations, reducedMotion = false, onActivate = () => {}, onFailure = () => {} }) {
   if (!canvas?.getContext) throw new Error("Canvas della stanza non disponibile");
   const THREE = await import("../../../vendor/three/three.module.min.js?v=20260901-26");
@@ -24,6 +45,8 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
   });
   const parallaxRig = createParallaxRig({ layers: createRoomParallaxLayers(room), maxLayers: 12 });
   const lighting = createLightingController(lightRig);
+  const archiveField = createArchiveField({ THREE, quality, mobile: false });
+  scene.add(archiveField.group);
 
   let cameraLayout = "desktop";
   let timeline = createCameraTimeline({ layout: cameraLayout });
@@ -71,6 +94,48 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     }
   }
 
+  function syncHeroArchive(state) {
+    const hero = room.heroAsset;
+    if (!hero) return;
+    const intensity = reducedMotion ? state.archive * .24 : state.fragment * .46 + state.archive * .82;
+    hero.traverse(child => {
+      if (!child.isMesh || child.name === "studio-monitor-screen") return;
+      if (!child.userData.archiveBasePosition) {
+        child.userData.archiveBasePosition = child.position.clone();
+        child.userData.archiveBaseRotation = child.rotation.clone();
+        child.userData.archiveBaseScale = child.scale.clone();
+        child.userData.archiveScatter = objectScatter(child.name);
+        child.userData.archiveMass = archiveMass(child.name);
+      }
+      const basePosition = child.userData.archiveBasePosition;
+      const baseRotation = child.userData.archiveBaseRotation;
+      const baseScale = child.userData.archiveBaseScale;
+      const scatter = child.userData.archiveScatter;
+      const mass = child.userData.archiveMass;
+      const mobility = 1.22 - mass * .62;
+      const travel = intensity * mobility;
+      child.position.copy(basePosition).add(new THREE.Vector3(
+        scatter.x * travel * 1.65,
+        (.18 + Math.abs(scatter.y)) * travel * 1.2,
+        scatter.z * travel * 1.35
+      ));
+      child.rotation.set(
+        baseRotation.x + scatter.z * travel * .34,
+        baseRotation.y + scatter.x * travel * .5,
+        baseRotation.z + scatter.y * travel * .28
+      );
+      const shrink = Math.max(.24, 1 - state.archive * (.42 + mobility * .22));
+      child.scale.copy(baseScale).multiplyScalar(shrink);
+    });
+  }
+
+  function syncArchiveBudget() {
+    archiveField.setBudget(resolveArchiveBudget({
+      profile: quality.profile,
+      mobile: cameraLayout === "mobile"
+    }));
+  }
+
   function resize() {
     if (disposed) return;
     const rect = canvas.getBoundingClientRect();
@@ -81,6 +146,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       cameraLayout = nextLayout;
       timeline = createCameraTimeline({ layout: cameraLayout });
       director = createDirectorController({ timeline, layout: cameraLayout });
+      syncArchiveBudget();
     }
     renderer.setPixelRatio(quality.getDprCap());
     renderer.setSize(width, height, false);
@@ -96,7 +162,10 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     const frameSeconds = Math.min(.05, Math.max(0, (now - lastFrame) / 1000));
     const direction = director.sample(journey, { scrollVelocity });
     const shot = exitProgress > 0 ? timeline.exit(exitProgress) : timeline.sample(journey);
+    const archiveState = resolveArchivePhase(journey);
     room.setJourney(journey);
+    archiveField.update(journey, archiveState);
+    syncHeroArchive(archiveState);
     syncActiveScreen(shot.stationId);
     syncScreenPresentation(shot.stationId, direction);
     camera.position.set(...shot.position);
@@ -107,7 +176,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     const parallaxEnabled = !reducedMotion && cameraLayout !== "mobile" && exitProgress === 0;
     let cameraParallax = ZERO_PARALLAX;
     if (parallaxEnabled) {
-      parallaxRig.setAmplitude(direction.parallaxScale);
+      parallaxRig.setAmplitude(direction.parallaxScale * (1 - archiveState.archive * .9));
       parallaxRig.setTarget(interaction.getParallaxTarget());
       parallaxRig.update(frameSeconds);
       cameraParallax = interaction.update();
@@ -134,6 +203,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     if (quality.recordFrame(now - lastFrame) && quality.profile !== lastProfile) {
       lastProfile = quality.profile;
       renderer.shadowMap.enabled = quality.profile === "high";
+      syncArchiveBudget();
       resize();
     }
     lastFrame = now;
@@ -160,8 +230,10 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
   }
   document.addEventListener("visibilitychange", onVisibilityChange);
   canvas.addEventListener("webglcontextlost", onContextLost, { once: true });
+  syncArchiveBudget();
   resize();
   room.setJourney(0);
+  archiveField.update(0, resolveArchivePhase(0));
   lighting.apply(0);
   if (reducedMotion) draw(performance.now());
   else frameId = requestAnimationFrame(draw);
@@ -225,6 +297,8 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
         profile: quality.profile,
         dpr: quality.getDprCap(),
         cameraLayout,
+        archivePhase: resolveArchivePhase(journey).phase,
+        archiveBudget: resolveArchiveBudget({ profile: quality.profile, mobile: cameraLayout === "mobile" }),
         toneMappingExposure: renderer.toneMappingExposure,
         environmentReady: Boolean(scene.environment),
         parallax: parallaxRig.audit()
@@ -242,6 +316,8 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       canvas.removeEventListener("webglcontextlost", onContextLost);
       interaction.dispose();
       parallaxRig.restoreImmediately();
+      archiveField.dispose();
+      scene.remove(archiveField.group);
       assetRegistry?.dispose();
       room.dispose();
       environmentTarget?.dispose?.();
