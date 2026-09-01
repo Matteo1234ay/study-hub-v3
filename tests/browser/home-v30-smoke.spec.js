@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 const checkpoints = [0.03, 0.24, 0.48, 0.72, 0.88];
+const visualTransitionTimeout = 15_000;
 
 async function visualOpacity(page, selector) {
   return page.evaluate(target => {
@@ -37,11 +38,11 @@ test("V30 renders a stable cinematic journey and captures visual checkpoints", a
   await expect(root).toHaveAttribute("data-home-renderer", "webgl-v30", { timeout: 60_000 });
   await expect(root).not.toHaveAttribute("data-home-renderer-error", /.+/);
 
-  // The poster/canvas dissolve is deliberately animated for ~360ms. WebKit can
-  // report the new ready state before that transition has painted its first frame,
-  // so wait for the visual state instead of sampling it in the same task.
-  await expect.poll(() => visualOpacity(page, ".study-room-canvas"), { timeout: 5_000 }).toBeGreaterThan(.9);
-  await expect.poll(() => visualOpacity(page, ".home-v30-poster"), { timeout: 5_000 }).toBeLessThan(.1);
+  // The poster/canvas dissolve is deliberately animated for ~360ms. Software
+  // WebGL in CI can make a computed-style roundtrip take several seconds, so
+  // keep the same visual assertions but allow enough time for that readback.
+  await expect.poll(() => visualOpacity(page, ".study-room-canvas"), { timeout: visualTransitionTimeout }).toBeGreaterThan(.9);
+  await expect.poll(() => visualOpacity(page, ".home-v30-poster"), { timeout: visualTransitionTimeout }).toBeLessThan(.1);
 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
