@@ -39,7 +39,11 @@ test("asset registry is local-only, finite and fail-safe", () => {
   const source = readFileSync("src/home/scene/asset-registry.js", "utf8");
   assert.doesNotMatch(source, /https?:\/\//i);
   assert.match(source, /GLTFLoader/);
-  assert.match(source, /6000/);
+  const timeout = source.match(/DEFAULT_TIMEOUT_MS\s*=\s*(\d+)/);
+  assert.ok(timeout, "asset registry must expose a finite default timeout");
+  const timeoutMs = Number(timeout[1]);
+  assert.ok(timeoutMs >= 1000 && timeoutMs <= 15000, `unsafe asset timeout ${timeoutMs}ms`);
+  assert.match(source, /Math\.min\(15000/);
   assert.match(source, /Promise\.race/);
   assert.match(source, /desk-lamp-arm-01/);
   assert.match(source, /return null/);
