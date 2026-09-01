@@ -1,7 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, statSync } from "node:fs";
-import { resolveArchivePhase, resolveArchiveBudget } from "../src/home/scene/archive-state.js";
+import * as archiveState from "../src/home/scene/archive-state.js";
+
+const { resolveArchivePhase, resolveArchiveBudget } = archiveState;
 
 function executableSource(source) {
   return source
@@ -46,6 +48,26 @@ test("asset registry loads the studio core locally with finite fallback", () => 
   assert.match(registry, /Promise\.race/);
   assert.match(registry, /return null/);
   assert.doesNotMatch(registry, /https?:\/\//i);
+});
+
+test("renderer waits for the local hero assets before declaring the first frame ready", () => {
+  const renderer = executableSource(readFileSync("src/home/scene/study-room-renderer.js", "utf8"));
+  assert.match(renderer, /heroAssetPromise/);
+  assert.match(renderer, /await\s+heroAssetPromise/);
+});
+
+test("studio core receives the Blender-to-Three axis correction before mounting", () => {
+  const setup = executableSource(readFileSync("src/home/scene/renderer-setup.js", "utf8"));
+  assert.match(setup, /applyStudioCoreAxisCorrection/);
+  assert.match(setup, /Math\.PI\s*\/\s*2/);
+  assert.match(setup, /mountStudioCore[\s\S]*applyStudioCoreAxisCorrection\(loadedStudio\)/);
+});
+
+test("knowledge phase already produces a visible archive signal before halfway", () => {
+  assert.equal(typeof archiveState.resolveArchiveReveal, "function");
+  if (typeof archiveState.resolveArchiveReveal !== "function") return;
+  assert.equal(archiveState.resolveArchiveReveal(resolveArchivePhase(.05)), 0);
+  assert.ok(archiveState.resolveArchiveReveal(resolveArchivePhase(.35)) >= .08);
 });
 
 test("renderer drives semantic archive from the same reversible journey", () => {
