@@ -15,6 +15,11 @@
     linear-gradient(145deg, #171717, #0d0e10 68%, #090a0c);
 }
 
+body:has(.home-journey) .site-header,
+body:has(.home-journey) .site-footer {
+  display: none;
+}
+
 .home-journey[data-home-phase="read"] {
   --home-caption-strength: .45;
 }
