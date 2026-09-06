@@ -77,7 +77,7 @@ test("V30 production replaces the historical synthetic archive with reversible p
   const dematerialization = executableSource(readFileSync("src/home/scene/home-v30-dematerialization.js", "utf8"));
   const historicalArchive = executableSource(readFileSync("src/home/scene/archive-field.js", "utf8"));
   assert.match(renderer, /createHomeV30Dematerialization/);
-  assert.match(renderer, /dematerialization\.update\(exitProgress\)/);
+  assert.match(renderer, /dematerialization\.update\(exitProgress,\s*\{/);
   assert.doesNotMatch(renderer, /createArchiveField|archiveField/);
   assert.match(dematerialization, /Desk_Root/);
   assert.match(dematerialization, /basePosition/);

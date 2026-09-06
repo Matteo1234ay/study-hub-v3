@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const RELEASE_TOKEN = "20260906-33";
+const motionToken = path => /(?:home-view|home-experience|study-room-renderer|home-v30-dematerialization)\.js$/.test(path) ? "20260906-34" : RELEASE_TOKEN;
 
 test("Three.js is pinned and vendored locally with its license", async () => {
   const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url)));
@@ -53,22 +54,22 @@ test("the changed homepage chain uses the Safari-safe V30 token", async () => {
   assert.match(sources["index.html"], new RegExp(`styles/home-immersive\\.css\\?v=${RELEASE_TOKEN}`));
   assert.match(sources["index.html"], new RegExp(`styles/home-v30-polish\\.css\\?v=${RELEASE_TOKEN}`));
   assert.match(sources["index.html"], new RegExp(`styles/home-startup\\.css\\?v=${RELEASE_TOKEN}`));
-  assert.match(sources["index.html"], new RegExp(`src/app\\.js\\?v=${RELEASE_TOKEN}`));
+  assert.match(sources["index.html"], /src\/app\.js\?v=20260906-34/);
 
   for (const imported of ["views/home-view.js", "views/paths-view.js", "home/home-shared-transition.js"]) {
-    assert.match(sources["src/app.js"], new RegExp(`${imported.replaceAll(".", "\\.")}\\?v=${RELEASE_TOKEN}`));
+    assert.match(sources["src/app.js"], new RegExp(`${imported.replaceAll(".", "\\.")}\\?v=${motionToken(imported)}`));
   }
   for (const imported of ["home/home-experience.js", "home/home-stations.js"]) {
-    assert.match(sources["src/views/home-view.js"], new RegExp(`${imported.replaceAll(".", "\\.")}\\?v=${RELEASE_TOKEN}`));
+    assert.match(sources["src/views/home-view.js"], new RegExp(`${imported.replaceAll(".", "\\.")}\\?v=${motionToken(imported)}`));
   }
   for (const imported of ["home-route-state.js", "paths-return-controller.js", "home-shared-transition.js"]) {
-    assert.match(sources["src/views/paths-view.js"], new RegExp(`${imported.replaceAll(".", "\\.")}\\?v=${RELEASE_TOKEN}`));
+    assert.match(sources["src/views/paths-view.js"], new RegExp(`${imported.replaceAll(".", "\\.")}\\?v=${motionToken(imported)}`));
   }
   for (const imported of ["home-route-state.js", "home-shared-transition.js", "scene/study-room-renderer.js", "home-transition-manager.js"]) {
-    assert.match(sources["src/home/home-experience.js"], new RegExp(`${imported.replaceAll(".", "\\.")}\\?v=${RELEASE_TOKEN}`));
+    assert.match(sources["src/home/home-experience.js"], new RegExp(`${imported.replaceAll(".", "\\.")}\\?v=${motionToken(imported)}`));
   }
   for (const imported of ["home-v30-camera-timeline.js", "home-v30-controller.js", "home-v30-dematerialization.js", "renderer-setup.js"]) {
-    assert.match(sources["src/home/scene/study-room-renderer.js"], new RegExp(`${imported.replaceAll(".", "\\.")}\\?v=${RELEASE_TOKEN}`));
+    assert.match(sources["src/home/scene/study-room-renderer.js"], new RegExp(`${imported.replaceAll(".", "\\.")}\\?v=${motionToken(imported)}`));
   }
   assert.match(sources["src/home/scene/renderer-setup.js"], new RegExp(`asset-registry\\.js\\?v=${RELEASE_TOKEN}`));
 });

@@ -1,5 +1,12 @@
 const clamp01 = value => Math.min(1, Math.max(0, Number(value) || 0));
 const smooth = t => { const x=clamp01(t); return x*x*x*(x*(x*6-15)+10); };
+// Independent periods keep the study objects suspended without moving in unison.
+const FLOATING = {
+  Paper_Stack: [.16, .63, .4],
+  Notebook_Root: [.13, .47, 2.1],
+  Lamp_Root: [.09, .39, 3.7],
+  Monitor_Root: [.07, .32, 5.2]
+};
 // Names are read from the shipped GLB. Animate local coordinates from a captured
 // pose: repeated frames and reverse scrolling must never accumulate transforms.
 const PARTS = [
@@ -23,11 +30,34 @@ export function createHomeV30Dematerialization({THREE,root}={}) {
     return {name,object,drift:new THREE.Vector3(...drift),start,end,rotation:new THREE.Quaternion().setFromEuler(new THREE.Euler(...rotation)),basePosition:object.position.clone(),baseQuaternion:object.quaternion.clone(),baseScale:object.scale.clone()};
   }).filter(Boolean);
   let progress=0;
+  const rotationDelta = new THREE.Quaternion();
+  const floatingEuler = new THREE.Euler();
   function restore(){for(const r of records){r.object.position.copy(r.basePosition);r.object.quaternion.copy(r.baseQuaternion);r.object.scale.copy(r.baseScale);}}
   function capture(){for(const r of records){r.basePosition.copy(r.object.position);r.baseQuaternion.copy(r.object.quaternion);r.baseScale.copy(r.object.scale);}}
-  function update(value){
+  function update(value, { seconds = 0, motion = 0 } = {}){
     progress=clamp01(value);restore();
-    for(const r of records){const t=smooth((progress-r.start)/(r.end-r.start));r.object.position.addScaledVector(r.drift,t);r.object.quaternion.multiply(new THREE.Quaternion().slerp(r.rotation,t));}
+    const strength = clamp01(motion);
+    for(const r of records){
+      const t=smooth((progress-r.start)/(r.end-r.start));
+      r.object.position.addScaledVector(r.drift,t);
+      rotationDelta.identity().slerp(r.rotation,t);
+      r.object.quaternion.multiply(rotationDelta);
+      const floating = FLOATING[r.name];
+      if (!floating) continue;
+      const [amplitude, frequency, phase] = floating;
+      // Arcs vanish at both ends so reverse scrolling returns to the exact pose.
+      const arc = Math.sin(Math.PI*t);
+      r.object.position.y += arc * .55;
+      r.object.position.z += arc * .28 * Math.cos(phase);
+      if (!strength) continue;
+      const wave = seconds * frequency + phase;
+      const weight = strength * (1-smooth(t));
+      r.object.position.y += amplitude * (1.4 + Math.sin(wave)) * weight;
+      r.object.position.x += Math.cos(wave*.73) * amplitude * .3 * weight;
+      floatingEuler.set(Math.sin(wave*.81)*.018*weight, Math.cos(wave*.67)*.025*weight, Math.sin(wave)*.035*weight);
+      rotationDelta.setFromEuler(floatingEuler);
+      r.object.quaternion.multiply(rotationDelta);
+    }
   }
   return {update,restore,capture,dispose:restore,audit:()=>({progress,phase:progress>0?'unbinding':'settled',nodes:records.map(r=>r.name),missingNodes:PARTS.map(p=>p[0]).filter(n=>!records.some(r=>r.name===n))})};
 }

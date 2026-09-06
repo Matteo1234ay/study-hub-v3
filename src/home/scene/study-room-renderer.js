@@ -1,6 +1,6 @@
 import { createHomeV30CameraTimeline } from "./home-v30-camera-timeline.js?v=20260906-33";
 import { createHomeV30Controller } from "./home-v30-controller.js?v=20260906-33";
-import { createHomeV30Dematerialization } from "./home-v30-dematerialization.js?v=20260906-33";
+import { createHomeV30Dematerialization } from "./home-v30-dematerialization.js?v=20260906-34";
 import { createDirectorController } from "./director-controller.js?v=20260906-33";
 import { createLightingController } from "./lighting-controller.js?v=20260906-33";
 import { createParallaxRig } from "./parallax-rig.js?v=20260906-33";
@@ -121,11 +121,18 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     dematerialization.restore();
     homeV30Controller.update(journey);
     dematerialization.capture();
-    dematerialization.update(exitProgress);
+    dematerialization.update(exitProgress, {
+      seconds: now / 1000,
+      motion: reducedMotion ? 0 : (cameraLayout === "mobile" ? .55 : 1) * (journey < .04 ? 1 : 1 - direction.readStrength * .85)
+    });
     syncActiveScreen(shot.stationId);
     syncScreenPresentation(shot.stationId, direction);
 
     camera.position.set(...shot.position);
+    // A slow establishing-shot orbit, faded out before close reading begins.
+    const establishing = reducedMotion ? 0 : Math.max(0, 1 - journey / .08) * (1 - exitProgress);
+    camera.position.x += Math.sin(now / 6800) * .07 * establishing;
+    camera.position.y += Math.cos(now / 8100) * .035 * establishing;
     camera.fov = shot.fov;
     camera.updateProjectionMatrix();
     camera.lookAt(new THREE.Vector3(...shot.target));
