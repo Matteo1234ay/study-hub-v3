@@ -110,6 +110,15 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
   let frameId = 0;
   let transitionManager = null;
   let renderer = null;
+  const sectionAnimations = new Map();
+  function clearSectionAnimations() {
+    for (const entry of sectionAnimations.values()) {
+      entry.main.cancel();
+      entry.rows.forEach(animation => animation.cancel());
+    }
+    sectionAnimations.clear();
+    root.querySelectorAll('.home-station-caption').forEach(caption => caption.removeAttribute('tabindex'));
+  }
   let exitTriggered = false;
   let restoring = Boolean(resume);
   let reentryLocked = Boolean(resume);
@@ -126,7 +135,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     if (!root.isConnected) cleanup();
   });
   removalObserver.observe(document.documentElement, { childList: true, subtree: true });
-  const { createStudyRoomRenderer } = await import("./scene/study-room-renderer.js?v=20260906-34");
+  const { createStudyRoomRenderer } = await import("./scene/showcase-renderer.js?v=20260906-35");
   if (disposed || !root.isConnected) {
     cleanup();
     return cleanup;
@@ -144,6 +153,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
   let warned = false;
   function useDomFallback(error) {
     if (disposed) return;
+    clearSectionAnimations();
     root.dataset.homeState = "dom";
     root.dataset.homeRenderer = "poster";
     root.dataset.homeRendererError = rendererErrorCode(error);
@@ -161,6 +171,31 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
       stations,
       reducedMotion,
       onFailure: useDomFallback,
+      onPresentation(presentation) {
+        if (disposed) return;
+        root.dataset.activeStation = presentation.stationId;
+        root.dataset.homePhase = presentation.phase;
+        captions.forEach(caption => {
+          const active=caption.dataset.stationId === presentation.stationId;
+          caption.classList.toggle('is-active', active);
+          caption.tabIndex=active && presentation.reveal > .8 ? 0 : -1;
+          if (!sectionAnimations.has(caption)) {
+            const main=caption.animate([
+              {opacity:0,transform:'translateY(calc(-50% + 42px)) scale(.82) rotateX(12deg)'},
+              {opacity:1,transform:'translateY(-50%) scale(1) rotateX(0deg)'}
+            ],{duration:1000,fill:'both'});
+            main.pause();
+            const rows=[...caption.querySelectorAll('.showcase-preview-row')].map(row => {
+              const animation=row.animate([{opacity:0,transform:'translateY(18px)'},{opacity:1,transform:'translateY(0)'}],{duration:1000,fill:'both'});
+              animation.pause();return animation;
+            });
+            sectionAnimations.set(caption,{main,rows});
+          }
+          const entry=sectionAnimations.get(caption);
+          entry.main.currentTime=(active ? presentation.reveal : 0)*1000;
+          entry.rows.forEach((animation,index)=>{animation.currentTime=(active ? clamp01((presentation.reveal-index*.08)/.84) : 0)*1000;});
+        });
+      },
       onActivate(id) {
         const station = stations.find(item => item.id === id);
         if (station) transitionManager?.activate(station);
@@ -216,9 +251,9 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
   function setActive(sceneProgress, rawProgress, presentation = null) {
     const activeId = presentation?.stationId ?? renderer.getActiveStation(sceneProgress);
     if (progressMeter) progressMeter.value = Math.round(clamp01(rawProgress) * 100);
-    root.dataset.activeStation = activeId;
+    if (root.dataset.motion !== 'object-showcase') root.dataset.activeStation = activeId;
     root.dataset.journeyStarted = rawProgress > .025 ? "true" : "false";
-    captions.forEach(caption => caption.classList.toggle("is-active", caption.dataset.stationId === activeId));
+    if (root.dataset.motion !== 'object-showcase') captions.forEach(caption => caption.classList.toggle("is-active", caption.dataset.stationId === activeId));
   }
 
   function updateSharedHandoff(phases) {
@@ -285,7 +320,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     setActive(phases.sceneProgress, phases.rawProgress, presentation);
     renderer.setJourney(phases.sceneProgress, { scrollVelocity });
     renderer.setExitProgress?.(phases.exitProgress);
-    if (presentation) root.dataset.homePhase = presentation.phase;
+    if (presentation && root.dataset.motion !== 'object-showcase') root.dataset.homePhase = presentation.phase;
     updateSharedHandoff(phases);
     root.dataset.homeExit = phases.exitProgress > .01 ? "true" : "false";
     root.dataset.homeExitPhase = phases.choreography.handoff > 0
@@ -342,6 +377,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     transitionManager?.dispose();
     sharedTransition.dispose();
     renderer?.dispose();
+    clearSectionAnimations();
     delete document.body.dataset.homeImmersive;
   }
 

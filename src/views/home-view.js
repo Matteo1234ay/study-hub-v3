@@ -8,7 +8,24 @@ import {
   createHomeQuickActions,
   createHomeStations
 } from "../home/home-stations.js?v=20260906-33";
-import { mountHomeExperience } from "../home/home-experience.js?v=20260906-34";
+import { mountHomeExperience } from "../home/home-experience.js?v=20260906-35";
+
+function sectionPreview(station) {
+  const data=station.screenData ?? {};
+  const entries={
+    desk: [['Capitolo',data.chapter ?? 'Lezione introduttiva'],['Completamento',`${data.completion ?? 0}%`]],
+    memory: [['Note salvate',String(data.noteCount ?? 0)],['Concetti da ripassare',String(data.reviewCount ?? 0)]],
+    social: [['Percorso',data.pathTitle ?? 'Social Media Manager'],['Lezioni disponibili',String(data.lessonCount ?? 0)]],
+    assessment: [['01','Rispondi'],['02','Confronta il feedback'],['03','Consolida']],
+    progress: [['Capitoli completati',String(data.completedChapters ?? 0)],['Avanzamento',`${data.completion ?? 0}%`]],
+    'future-paths': [['01','Esplora i percorsi'],['02','Scegli cosa imparare']]
+  };
+  return element('span',{className:'showcase-preview'},(entries[station.id] ?? []).map(([label,value])=>
+    element('span',{className:'showcase-preview-row'},[
+      element('span',{text:label}),element('span',{text:value})
+    ])
+  ));
+}
 
 function stationCaption(station, index) {
   return element("a", {
@@ -23,6 +40,7 @@ function stationCaption(station, index) {
     element("span", { className: "home-station-label", text: station.label }),
     element("strong", { text: station.title }),
     element("small", { text: station.description }),
+    sectionPreview(station),
     station.meta ? element("span", { className: "home-station-meta", text: station.meta }) : null,
     element("b", { text: station.status === "standby" ? "Esplora la struttura →" : "Apri →" })
   ]);
@@ -64,7 +82,7 @@ export function renderHomeView({ mountExperience = mountHomeExperience, navigate
     attrs: {
       "data-home-state": "loading",
       "data-home-renderer": "poster",
-      "data-motion": "semantic-room"
+      "data-motion": "object-showcase"
     }
   });
   const poster = element("img", {
@@ -92,10 +110,10 @@ export function renderHomeView({ mountExperience = mountHomeExperience, navigate
     element("span", { className: "home-preload-line", attrs: { "aria-hidden": "true" } })
   ]);
   const fallback = element("div", { className: "home-fallback" }, [
-    element("p", { className: "home-kicker", text: "Study Hub V3 · Il tuo spazio di studio" }),
+    element("p", { className: "home-kicker", text: "Study Hub · Brainframe" }),
     element("h1", { text: "Fai spazio alla conoscenza." }),
     element("p", {
-      text: "Lezioni, note, verifiche e progressi organizzati come strumenti di un unico ambiente di studio."
+      text: "Lezioni, note, verifiche e progressi: scegli da dove continuare."
     }),
     element("a", {
       className: "button primary",
@@ -116,7 +134,7 @@ export function renderHomeView({ mountExperience = mountHomeExperience, navigate
     ]),
     element("div", { className: "home-intro" }, [
       element("p", { className: "eyebrow", text: "Brainframe · Il tuo spazio di studio" }),
-      element("h1", { text: "Fai spazio alla conoscenza." }),
+      element("h1", { text: "Dai forma a ciò che impari." }),
       element("p", { text: "Scorri per esplorare. Ogni oggetto, un modo di imparare." })
     ]),
     canvas,
