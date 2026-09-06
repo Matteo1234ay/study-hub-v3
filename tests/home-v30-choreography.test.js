@@ -31,14 +31,8 @@ test("V30 archive transition is physical and deterministic, not synthetic geomet
   const demat = source(dematerializationPath);
   assert.match(demat, /createHomeV30Dematerialization/);
   for (const node of [
-    "Chair_Master",
-    "Lamp_Base",
-    "MonitorBank_Master",
-    "SecondaryDisplay_Master",
-    "ArchiveWall_Master",
-    "BinderSet_Master",
-    "BookStack_Master",
-    "PathsHandoff_Master"
+    "Chair_Root", "Lamp_Root", "Monitor_Root", "Desk_Root",
+    "Architecture_BackWall", "Cabinet_Root", "Paper_Stack", "Notebook_Root"
   ]) {
     assert.match(demat, new RegExp(node), `missing physical V30 node ${node}`);
   }

@@ -44,6 +44,7 @@ export function parseRoute(hash = "#/home") {
   if (parts[0] === "review" && parts.length === 1) {
     return { name: "review", params: {} };
   }
+  if (["notes", "settings"].includes(parts[0]) && parts.length === 1) return { name: parts[0], params: {} };
   return { name: "not-found", params: {} };
 }
 

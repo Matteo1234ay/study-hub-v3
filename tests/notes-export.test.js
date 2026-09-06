@@ -33,3 +33,14 @@ test("falls back to copied plain text when DOCX saving fails", async () => {
   assert.equal(result.method, "clipboard");
   assert.match(copied, /Controllare il denominatore/);
 });
+
+test('exports chapter-level and relocated notes without silent omissions',()=>{
+  const entries=[
+    {id:'chapter',chapterId:'c1',sectionId:null,text:'Appunto del quaderno'},
+    {id:'old-section',chapterId:'c1',sectionId:'removed',text:'Nota della sezione precedente'},
+    {id:'old-chapter',chapterId:'removed',sectionId:null,text:'Nota precedente conservata'}
+  ];
+  const model=buildNotesExportModel(lesson,entries);
+  const text=createNotesPlainText(model);
+  for(const note of entries) assert.ok(text.includes(note.text),note.id+' missing');
+});

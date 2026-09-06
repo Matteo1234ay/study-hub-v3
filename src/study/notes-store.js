@@ -1,5 +1,5 @@
-import { resolveLegacyChapterId } from "../lessons/lesson-compatibility.js?v=20260829-23";
-import { createNote, normalizeNote } from "./note-model.js?v=20260829-23";
+import { resolveLegacyChapterId } from "../lessons/lesson-compatibility.js?v=20260906-33";
+import { createNote, normalizeNote, createNoteId } from "./note-model.js?v=20260906-33";
 
 const PREFIX = "study-hub-v3:note:";
 const V2_PREFIX = "study-hub-v3:notes:v2:";
@@ -9,7 +9,7 @@ function v2Key(lessonId) {
   return `${V2_PREFIX}${lessonId}`;
 }
 
-export function createNotesStore(storage = localStorage, now = Date.now, idFactory = () => crypto.randomUUID()) {
+export function createNotesStore(storage = localStorage, now = Date.now, idFactory = createNoteId) {
   function readV2(lessonId) {
     try {
       const value = JSON.parse(storage.getItem(v2Key(lessonId)));

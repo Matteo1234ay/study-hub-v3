@@ -1,3 +1,10 @@
+let noteSequence = 0;
+export function createNoteId() {
+  if (typeof globalThis.crypto?.randomUUID === "function") return globalThis.crypto.randomUUID();
+  // IDs identify local annotations only; no authentication or security role.
+  return `note-${Date.now().toString(36)}-${(++noteSequence).toString(36)}-${Math.random().toString(36).slice(2)}`;
+}
+
 function optionalId(value) {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
@@ -23,7 +30,7 @@ export function normalizeNote(value) {
   };
 }
 
-export function createNote(input, now = Date.now, idFactory = () => crypto.randomUUID()) {
+export function createNote(input, now = Date.now, idFactory = createNoteId) {
   const timestamp = now();
   return normalizeNote({
     ...input,

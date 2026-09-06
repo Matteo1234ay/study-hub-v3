@@ -1,22 +1,56 @@
-import { createNotesDocx } from "./docx-writer.js?v=20260829-23";
+import { createNotesDocx } from "./docx-writer.js?v=20260906-33";
 
 function formatDate(value) {
   return new Intl.DateTimeFormat("it-IT", { timeZone: "UTC", day: "2-digit", month: "2-digit", year: "numeric" }).format(value);
 }
 
 export function buildNotesExportModel(lesson, notes = [], date = new Date()) {
+  const exportedNoteIds = new Set();
+  const chapters = (lesson.chapters ?? []).map(chapter => {
+    const sections = (chapter.sections ?? []).map(section => {
+      const sectionNotes = notes.filter(note => note.chapterId === chapter.id && note.sectionId === section.id);
+      sectionNotes.forEach(note => exportedNoteIds.add(note.id));
+      return {
+        id: section.id,
+        title: section.title,
+        notes: sectionNotes
+      };
+    }).filter(section => section.notes.length);
+
+    const chapterNotes = notes.filter(note => note.chapterId === chapter.id && !exportedNoteIds.has(note.id));
+    if (chapterNotes.length) {
+      chapterNotes.forEach(note => exportedNoteIds.add(note.id));
+      sections.push({
+        id: `${chapter.id}-chapter-notes`,
+        title: "Appunti del capitolo",
+        notes: chapterNotes
+      });
+    }
+
+    return {
+      id: chapter.id,
+      title: chapter.title,
+      sections
+    };
+  }).filter(chapter => chapter.sections.length);
+
+  const previousNotes = notes.filter(note => !exportedNoteIds.has(note.id));
+  if (previousNotes.length) {
+    chapters.push({
+      id: "previous-notes",
+      title: "Appunti precedenti",
+      sections: [{
+        id: "previous-notes-list",
+        title: "Note conservate",
+        notes: previousNotes
+      }]
+    });
+  }
+
   return {
     title: `Note · ${lesson.title}`,
     date: formatDate(date),
-    chapters: (lesson.chapters ?? []).map(chapter => ({
-      id: chapter.id,
-      title: chapter.title,
-      sections: (chapter.sections ?? []).map(section => ({
-        id: section.id,
-        title: section.title,
-        notes: notes.filter(note => note.chapterId === chapter.id && note.sectionId === section.id)
-      })).filter(section => section.notes.length)
-    })).filter(chapter => chapter.sections.length)
+    chapters
   };
 }
 

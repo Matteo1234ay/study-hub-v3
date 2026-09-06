@@ -1,5 +1,5 @@
-import { element, emptyState, pageHeader } from "../ui/components.js?v=20260829-23";
-import { studentVisibleLessons } from "../config/paths.js?v=20260829-23";
+import { element, emptyState, pageHeader } from "../ui/components.js?v=20260906-33";
+import { studentVisibleLessons } from "../config/paths.js?v=20260906-33";
 
 export function renderPathView(path) {
   if (!path) {

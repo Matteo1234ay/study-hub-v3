@@ -1,17 +1,18 @@
-import { renderLesson } from "../lessons/render-lesson.js?v=20260829-23";
-import { createLessonCache } from "../lessons/lesson-cache.js?v=20260829-23";
-import { element } from "../ui/components.js?v=20260829-23";
-import { calculateLessonProgress, createProgressStore } from "../progress/local-progress.js?v=20260829-23";
-import { createStudyStore } from "../study/study-store.js?v=20260829-23";
-import { createNotesStore } from "../study/notes-store.js?v=20260829-23";
-import { buildPublicChapterContext } from "../assistant/study-assistant.js?v=20260829-23";
-import { createChatGptAdapter } from "../assistant/chatgpt-adapter.js?v=20260829-23";
-import { createStudyDialog } from "../ui/study-dialog.js?v=20260829-23";
-import { normalizeLessonExperience } from "../lessons/lesson-model.js?v=20260829-23";
-import { createReviewConceptsStore } from "../study/review-concepts-store.js?v=20260829-23";
-import { resolveRequestedChapter } from "../lessons/lesson-compatibility.js?v=20260829-23";
-import { createLessonNotesPanel } from "../ui/lesson-notes-panel.js?v=20260829-23";
-import { exportNotes } from "../study/notes-export.js?v=20260829-23";
+import { createPreferencesStore } from "../study/preferences.js?v=20260906-33";
+import { renderLesson } from "../lessons/render-lesson.js?v=20260906-33";
+import { createLessonCache } from "../lessons/lesson-cache.js?v=20260906-33";
+import { element } from "../ui/components.js?v=20260906-33";
+import { calculateLessonProgress, createProgressStore } from "../progress/local-progress.js?v=20260906-33";
+import { createStudyStore } from "../study/study-store.js?v=20260906-33";
+import { createNotesStore } from "../study/notes-store.js?v=20260906-33";
+import { buildPublicChapterContext } from "../assistant/study-assistant.js?v=20260906-33";
+import { createChatGptAdapter } from "../assistant/chatgpt-adapter.js?v=20260906-33";
+import { createStudyDialog } from "../ui/study-dialog.js?v=20260906-33";
+import { normalizeLessonExperience } from "../lessons/lesson-model.js?v=20260906-33";
+import { createReviewConceptsStore } from "../study/review-concepts-store.js?v=20260906-33";
+import { resolveRequestedChapter } from "../lessons/lesson-compatibility.js?v=20260906-33";
+import { createLessonNotesPanel } from "../ui/lesson-notes-panel.js?v=20260906-33";
+import { exportNotes } from "../study/notes-export.js?v=20260906-33";
 
 export async function renderLessonView({ lesson, activeChapterId = null, activeSectionId = null, viewMode = "chapter" }) {
   if (!lesson) {
@@ -159,7 +160,28 @@ export async function renderLessonView({ lesson, activeChapterId = null, activeS
       element("span", { text: " Ti mostro il primo capitolo disponibile." })
     ])
     : null;
+  const preferences = createPreferencesStore();
+  const toolbarProgress = element("span", {text:"Il tuo spazio di lettura"});
+  const focusButton = element("button", {text:"Focus",attrs:{type:"button","aria-pressed":String(preferences.get().focus)}});
+  const notesButton = element("button", {text:"Apri note",attrs:{type:"button"}});
+  notesButton.addEventListener("click", () => notesPanel.open());
+  focusButton.addEventListener("click", () => {
+    preferences.update({focus:!preferences.get().focus});preferences.applyTo(document.documentElement);
+    focusButton.setAttribute("aria-pressed",String(preferences.get().focus));
+  });
+  const fontButton = element("button", {text:"A+",attrs:{type:"button","aria-label":"Cambia dimensione del testo"}});
+  fontButton.addEventListener("click",()=>{
+    const sizes=["normal","large","small"]; const next=sizes[(sizes.indexOf(preferences.get().fontSize)+1)%sizes.length];
+    preferences.update({fontSize:next});preferences.applyTo(document.documentElement);
+    fontButton.textContent=next==="large"?"A−":"A+";
+  });
+  const chapterPicker = element("select", {className:"reading-chapter-picker",attrs:{"aria-label":"Vai al capitolo"}}, model.chapters.map((chapter,index)=>element("option",{text:`${index+1}. ${chapter.title}`,attrs:{value:chapter.id}})));
+  chapterPicker.value = initialChapter.id;
+  chapterPicker.addEventListener("change",()=>{location.hash=`/lessons/${lesson.id}/${chapterPicker.value}`;});
+  const toolbar = element("nav",{className:"reading-toolbar",attrs:{"aria-label":"Strumenti di lettura"}},[toolbarProgress,chapterPicker,fontButton,focusButton,notesButton]);
+  view.insertBefore(toolbar,body);
   let sectionObserver = null;
+  view.cleanup = () => {sectionObserver?.disconnect();notesPanel.destroy();};
 
   function observeSections() {
     sectionObserver?.disconnect();
@@ -189,6 +211,7 @@ export async function renderLessonView({ lesson, activeChapterId = null, activeS
     const bookmarks = new Set(studyStore.getState().bookmarks[lesson.id] ?? []);
     const percentage = calculateLessonProgress(model.chapters, completed);
     progressState.textContent = `${percentage}% completato`;
+    toolbarProgress.textContent = `${completed.size} / ${model.chapters.length} capitoli completati · ${percentage}%`;
     progressBar.value = percentage;
     const lessonNode = renderLesson(model, {
       lessonId: lesson.id,

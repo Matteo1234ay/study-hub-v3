@@ -7,9 +7,9 @@ import {
 } from "../src/visualizations/visualization-registry.js";
 import { readFile } from "node:fs/promises";
 
-test("WebGL keeps the user-driven cinematic journey even when reduced motion is requested", () => {
-  assert.equal(resolveHomeMotionMode({ preference: "reduced", mediaReduced: false, width: 1440, webgl: true }), "cinematic");
-  assert.equal(resolveHomeMotionMode({ preference: "normal", mediaReduced: true, width: 1440, webgl: true }), "cinematic");
+test("reduced motion opens the accessible room without cinematic camera motion", () => {
+  assert.equal(resolveHomeMotionMode({ preference: "reduced", mediaReduced: false, width: 1440, webgl: true }), "dom");
+  assert.equal(resolveHomeMotionMode({ preference: "normal", mediaReduced: true, width: 1440, webgl: true }), "dom");
   assert.equal(resolveHomeMotionMode({ preference: "normal", mediaReduced: false, width: 420, webgl: false }), "dom");
   assert.equal(resolveHomeMotionMode({ preference: "normal", mediaReduced: false, width: 1440, webgl: true }), "cinematic");
 });
@@ -19,9 +19,9 @@ test("small screens keep the same scroll-driven 3D journey when WebGL is availab
   assert.equal(resolveHomeMotionMode({ preference: "system", mediaReduced: false, width: 375, webgl: true }), "cinematic");
 });
 
-test("reduced motion no longer collapses the mobile journey to a static frame", () => {
-  assert.equal(resolveHomeMotionMode({ preference: "reduced", mediaReduced: false, width: 420, webgl: true }), "cinematic");
-  assert.equal(resolveHomeMotionMode({ preference: "normal", mediaReduced: true, width: 420, webgl: true }), "cinematic");
+test("reduced motion uses the same accessible home on mobile", () => {
+  assert.equal(resolveHomeMotionMode({ preference: "reduced", mediaReduced: false, width: 420, webgl: true }), "dom");
+  assert.equal(resolveHomeMotionMode({ preference: "normal", mediaReduced: true, width: 420, webgl: true }), "dom");
 });
 
 test("reduced motion preserves the physical scroll runway", async () => {

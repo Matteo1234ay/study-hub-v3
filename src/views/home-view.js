@@ -1,14 +1,14 @@
-import { PATHS, findLesson } from "../config/paths.js?v=20260901-27";
-import { element } from "../ui/components.js?v=20260901-27";
-import { createStudyStore } from "../study/study-store.js?v=20260901-27";
-import { createProgressStore } from "../progress/local-progress.js?v=20260901-27";
-import { createNotesStore } from "../study/notes-store.js?v=20260901-27";
-import { createReviewConceptsStore } from "../study/review-concepts-store.js?v=20260901-27";
+import { PATHS, findLesson } from "../config/paths.js?v=20260906-33";
+import { element } from "../ui/components.js?v=20260906-33";
+import { createStudyStore } from "../study/study-store.js?v=20260906-33";
+import { createProgressStore } from "../progress/local-progress.js?v=20260906-33";
+import { createNotesStore } from "../study/notes-store.js?v=20260906-33";
+import { createReviewConceptsStore } from "../study/review-concepts-store.js?v=20260906-33";
 import {
   createHomeQuickActions,
   createHomeStations
-} from "../home/home-stations.js?v=20260901-32";
-import { mountHomeExperience } from "../home/home-experience.js?v=20260901-32";
+} from "../home/home-stations.js?v=20260906-33";
+import { mountHomeExperience } from "../home/home-experience.js?v=20260906-33";
 
 function stationCaption(station, index) {
   return element("a", {
@@ -88,12 +88,12 @@ export function renderHomeView({ mountExperience = mountHomeExperience, navigate
       "aria-label": "Preparazione Study Hub"
     }
   }, [
-    element("span", { className: "home-preload-mark", text: "STUDY HUB" }),
+    element("span", { className: "home-preload-mark", text: "Preparazione dello spazio…" }),
     element("span", { className: "home-preload-line", attrs: { "aria-hidden": "true" } })
   ]);
   const fallback = element("div", { className: "home-fallback" }, [
     element("p", { className: "home-kicker", text: "Study Hub V3 · Il tuo spazio di studio" }),
-    element("h1", { text: "Riprendi da ciò che stai costruendo." }),
+    element("h1", { text: "Fai spazio alla conoscenza." }),
     element("p", {
       text: "Lezioni, note, verifiche e progressi organizzati come strumenti di un unico ambiente di studio."
     }),
@@ -110,6 +110,15 @@ export function renderHomeView({ mountExperience = mountHomeExperience, navigate
   );
   const stage = element("div", { className: "home-stage" }, [
     poster,
+    element("header", { className: "home-masthead" }, [
+      element("a", { className: "brand", href: "#/home", text: "Study Hub /" }),
+      element("a", { href: "#/paths", text: "Entra nei percorsi ↗" })
+    ]),
+    element("div", { className: "home-intro" }, [
+      element("p", { className: "eyebrow", text: "Brainframe · Il tuo spazio di studio" }),
+      element("h1", { text: "Fai spazio alla conoscenza." }),
+      element("p", { text: "Scorri per esplorare. Ogni oggetto, un modo di imparare." })
+    ]),
     canvas,
     preload,
     element("div", { className: "home-stage-shade", attrs: { "aria-hidden": "true" } }),

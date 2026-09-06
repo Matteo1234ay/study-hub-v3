@@ -1,17 +1,19 @@
-import { findLesson, findPath } from "./config/paths.js?v=20260901-27";
-import { navigateToHash, startRouter } from "./router.js?v=20260901-27";
-import { element, pageHeader } from "./ui/components.js?v=20260901-27";
-import { renderHomeView } from "./views/home-view.js?v=20260901-32";
-import { renderPathView } from "./views/path-view.js?v=20260901-27";
-import { renderPathsView } from "./views/paths-view.js?v=20260901-32";
-import { renderLessonView } from "./views/lesson-view.js?v=20260901-27";
-import { renderProgressView } from "./views/progress-view.js?v=20260901-27";
-import { renderSearchView } from "./views/search-view.js?v=20260901-27";
-import { renderReviewView } from "./views/review-view.js?v=20260901-27";
-import { renderAssessmentView } from "./views/assessment-view.js?v=20260901-27";
-import { renderPathAssessmentView } from "./views/path-assessment-view.js?v=20260901-27";
-import { createPreferencesStore } from "./study/preferences.js?v=20260901-27";
-import { shouldPreserveCinematicScroll } from "./home/home-shared-transition.js?v=20260901-32";
+import { renderNotesView } from "./views/notes-view.js?v=20260906-33";
+import { renderSettingsView } from "./views/settings-view.js?v=20260906-33";
+import { findLesson, findPath } from "./config/paths.js?v=20260906-33";
+import { navigateToHash, startRouter } from "./router.js?v=20260906-33";
+import { element, pageHeader } from "./ui/components.js?v=20260906-33";
+import { renderHomeView } from "./views/home-view.js?v=20260906-33";
+import { renderPathView } from "./views/path-view.js?v=20260906-33";
+import { renderPathsView } from "./views/paths-view.js?v=20260906-33";
+import { renderLessonView } from "./views/lesson-view.js?v=20260906-33";
+import { renderProgressView } from "./views/progress-view.js?v=20260906-33";
+import { renderSearchView } from "./views/search-view.js?v=20260906-33";
+import { renderReviewView } from "./views/review-view.js?v=20260906-33";
+import { renderAssessmentView } from "./views/assessment-view.js?v=20260906-33";
+import { renderPathAssessmentView } from "./views/path-assessment-view.js?v=20260906-33";
+import { createPreferencesStore } from "./study/preferences.js?v=20260906-33";
+import { shouldPreserveCinematicScroll } from "./home/home-shared-transition.js?v=20260906-33";
 
 const app = document.querySelector("#app");
 const preferences = createPreferencesStore();
@@ -21,6 +23,7 @@ const focusExit = document.querySelector(".focus-exit");
 function exitFocusMode() {
   preferences.update({ focus: false });
   preferences.applyTo(document.documentElement);
+  document.querySelector(".reading-toolbar button[aria-pressed]")?.setAttribute("aria-pressed", "false");
   document.querySelector(".site-header a")?.focus();
 }
 focusExit?.addEventListener("click", exitFocusMode);
@@ -39,8 +42,11 @@ let renderSequence = 0;
 
 async function render(route) {
   const sequence = ++renderSequence;
+  app.firstElementChild?.cleanup?.();
   let view;
   if (route.name === "home") view = renderHomeView({ navigate: navigateToHash });
+  else if (route.name === "notes") view = renderNotesView();
+  else if (route.name === "settings") view = renderSettingsView();
   else if (route.name === "paths") view = renderPathsView({ navigate: navigateToHash });
   else if (route.name === "path") view = renderPathView(findPath(route.params.pathId));
   else if (route.name === "path-assessment" || route.name === "path-final-exam") {
@@ -72,7 +78,14 @@ async function render(route) {
   }
   if (sequence !== renderSequence) return;
   app.replaceChildren(view);
-  document.title = `Study Hub V3 · ${route.name}`;
+  const labels = { home:"Il tuo spazio", paths:"Percorsi", path:"Percorso", lesson:"Lezione", chapter:"Lezione", notes:"Note", settings:"Impostazioni", progress:"Progressi", search:"Cerca", review:"Ripasso", assessment:"Esercitazione", "chapter-assessment":"Esercitazione", "path-assessment":"Verifica", "path-final-exam":"Esame finale" };
+  document.title = `Study Hub · ${labels[route.name] ?? "Pagina non trovata"}`;
+  document.body.dataset.route = route.name;
+  const navRoute = ["path", "lesson", "chapter", "assessment", "chapter-assessment", "path-assessment", "path-final-exam"].includes(route.name) ? "paths" : route.name;
+  document.querySelectorAll(".main-nav a").forEach(link => {
+    if (link.getAttribute("href") === `#/${navRoute}`) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
+  });
   app.focus({ preventScroll: true });
   const reducedMotion = preferences.get().motion === "reduced" || matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (!shouldPreserveCinematicScroll(document)) {
