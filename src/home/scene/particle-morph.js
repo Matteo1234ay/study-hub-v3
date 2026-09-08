@@ -1,4 +1,4 @@
-import {snapshotCard} from './card-snapshot.js?v=20260908-42';
+import {snapshotCard} from './card-snapshot.js?v=20260908-43';
 
 const random=i=>{const n=Math.sin(i*127.1+311.7)*43758.5453123;return n-Math.floor(n);};
 

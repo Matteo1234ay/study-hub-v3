@@ -19,8 +19,10 @@ export function sectionFrame(THREE,record,camera,canvas,caption) {
   record.object.position.y+=(.5-(parent.top-viewport.top)/viewport.height)*viewHeight;
   // Reserve the top of the composition for the original semantic illustration.
   // Compensate for the text plane's aspect ratio so models keep their shape.
-  const imageHeight=Math.min(width<=480?112:156,height*.33);
-  const size=Math.min(width*.7,imageHeight*.9)/1.8/width;
+  const mobile=width<=480;
+  const imageHeight=Math.min(mobile?190:156,height*(mobile?.42:.33));
+  const desiredWidth=Math.min(width*(mobile?.88:.7),imageHeight*(mobile?1.35:.9));
+  const size=desiredWidth/1.8/width;
   const imagePosition=new THREE.Vector3(0,.5-imageHeight/height/2,0);
   const imageScale=new THREE.Vector3(size,size*width/height,size);
   record.imageMatrix??=new THREE.Matrix4();

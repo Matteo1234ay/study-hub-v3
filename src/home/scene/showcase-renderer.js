@@ -1,9 +1,9 @@
-import { createShowcaseRuntime } from './showcase-runtime.js?v=20260908-42';
-import { createShowcaseGallery } from './showcase-gallery.js?v=20260908-42';
-import { sampleShowcase, clamp, ease, SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260908-42';
-import { createPointerCamera } from './pointer-camera.js?v=20260908-42';
-import { createParticleMorph } from './particle-morph.js?v=20260908-42';
-import { sectionFrame } from './section-projection.js?v=20260908-42';
+import { createShowcaseRuntime } from './showcase-runtime.js?v=20260908-43';
+import { createShowcaseGallery } from './showcase-gallery.js?v=20260908-43';
+import { sampleShowcase, clamp, ease, SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260908-43';
+import { createPointerCamera } from './pointer-camera.js?v=20260908-43';
+import { createParticleMorph } from './particle-morph.js?v=20260908-43';
+import { sectionFrame } from './section-projection.js?v=20260908-43';
 
 export async function createStudyRoomRenderer({ canvas, stations, reducedMotion = false, onFailure = () => {}, onPresentation = () => {} }) {
   const THREE = await import('../../../vendor/three/three.module.min.js?v=20260906-33');
