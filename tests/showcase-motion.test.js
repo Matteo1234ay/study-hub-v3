@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
 import * as THREE from '../vendor/three/three.module.min.js';
 import {sampleShowcase, SHOWCASE_OBJECTS} from '../src/home/scene/showcase-motion.js';
 import {createShowcaseGallery} from '../src/home/scene/showcase-gallery.js';
+import {createSemanticObjects} from '../src/home/scene/semantic-objects.js';
 
 test('all six stops frame before opening and reveal only after opening starts',()=>{
   for(let i=0;i<6;i++) {
@@ -22,29 +22,9 @@ test('camera position and target are continuous across all station boundaries',(
   }
 });
 
-// Read conservative mesh bounds from the actual shipped GLB. This checks the
-// real hierarchy and transforms offline; it does not claim pixel/render QA.
-function loadBounds() {
-  const bytes=readFileSync(new URL('../assets/3d/home-v30/study-hub-home-v30.glb',import.meta.url));
-  const data=JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)).toString());
-  const nodes=data.nodes.map(def=>{
-    const group=new THREE.Group();group.name=def.name ?? '';
-    if(def.matrix) {new THREE.Matrix4().fromArray(def.matrix).decompose(group.position,group.quaternion,group.scale);}
-    else {if(def.translation)group.position.fromArray(def.translation);if(def.rotation)group.quaternion.fromArray(def.rotation);if(def.scale)group.scale.fromArray(def.scale);}
-    if(def.mesh!=null) for(const primitive of data.meshes[def.mesh].primitives) {
-      const accessor=data.accessors[primitive.attributes.POSITION];
-      const min=new THREE.Vector3(...accessor.min),max=new THREE.Vector3(...accessor.max);
-      const size=max.clone().sub(min),center=min.clone().add(max).multiplyScalar(.5);
-      const geometry=new THREE.BoxGeometry(size.x,size.y,size.z).translate(center.x,center.y,center.z);
-      group.add(new THREE.Mesh(geometry,new THREE.MeshStandardMaterial()));
-    }
-    return group;
-  });
-  data.nodes.forEach((def,i)=>(def.children??[]).forEach(child=>nodes[i].add(nodes[child])));
-  const root=new THREE.Group();data.scenes[data.scene??0].nodes.forEach(i=>root.add(nodes[i]));root.updateMatrixWorld(true);return root;
-}
-test('shipped object bounds stay inside desktop and phone frames and reverse exactly',()=>{
-  const scene=new THREE.Scene(),source=loadBounds();scene.add(source);
+// Check the actual new solid geometry and hierarchy without a WebGL context.
+test('semantic object bounds stay inside desktop and phone frames and reverse exactly',()=>{
+  const scene=new THREE.Scene(),models=createSemanticObjects(THREE),source=models.root;scene.add(source);
   const gallery=createShowcaseGallery({THREE,source,scene});
   assert.equal(gallery.audit().length,6);assert.ok(gallery.audit().every(item=>item.parts>0));
   const stage=scene.getObjectByName('StudyHub_Object_Showcase');
@@ -61,4 +41,24 @@ test('shipped object bounds stay inside desktop and phone frames and reverse exa
     assert.deepEqual(stage.children[index].children.map(mesh=>mesh.position.toArray()),positions);
   }
   gallery.dispose();
+  models.dispose();
+});
+
+test('semantic objects float over time, stay bounded and do not drift between repeated samples',()=>{
+  const scene=new THREE.Scene(),models=createSemanticObjects(THREE);scene.add(models.root);
+  const gallery=createShowcaseGallery({THREE,source:models.root,scene});
+  const stage=scene.getObjectByName('StudyHub_Object_Showcase');
+  for(let index=0;index<6;index++) {
+    const shot=sampleShowcase((index+.24)/6);
+    gallery.update(shot,0,{seconds:1,motion:1});
+    const initial=stage.children[index].matrixWorld.clone();
+    gallery.update(shot,0,{seconds:4,motion:1});
+    assert.notDeepEqual(stage.children[index].matrixWorld.elements,initial.elements);
+    assert.ok(Math.abs(stage.children[index].position.y)<=.05);
+    gallery.update(shot,0,{seconds:1,motion:1});
+    assert.deepEqual(stage.children[index].matrixWorld.elements,initial.elements);
+    gallery.update(shot,0,{seconds:4,motion:0});
+    assert.equal(Math.abs(stage.children[index].position.y),0);
+  }
+  gallery.dispose();models.dispose();
 });

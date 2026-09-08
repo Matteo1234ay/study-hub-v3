@@ -135,7 +135,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     if (!root.isConnected) cleanup();
   });
   removalObserver.observe(document.documentElement, { childList: true, subtree: true });
-  const { createStudyRoomRenderer } = await import("./scene/showcase-renderer.js?v=20260906-35");
+  const { createStudyRoomRenderer } = await import("./scene/showcase-renderer.js?v=20260906-36");
   if (disposed || !root.isConnected) {
     cleanup();
     return cleanup;

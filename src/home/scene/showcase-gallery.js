@@ -1,4 +1,4 @@
-import { SHOWCASE_OBJECTS, ease } from './showcase-motion.js?v=20260906-35';
+import { SHOWCASE_OBJECTS, ease } from './showcase-motion.js?v=20260906-36';
 
 export function createShowcaseGallery({ THREE, source, scene }) {
   source.updateMatrixWorld(true);
@@ -14,7 +14,7 @@ export function createShowcaseGallery({ THREE, source, scene }) {
     const scale = 1.8/Math.max(size.length(), .01);
     const object = new THREE.Group();
     object.position.x = index*6;
-    object.rotation.set(name === 'Notebook_Root' || name === 'Paper_Stack' ? .48 : .03, -.18, -.015);
+    object.rotation.set(.03, -.18, -.015);
     const parts = [];
     original.traverse(node => {
       if (!node.isMesh) return;
@@ -51,7 +51,7 @@ export function createShowcaseGallery({ THREE, source, scene }) {
   scene.add(ambient, key, key.target, rim, rim.target);
   const turn = new THREE.Quaternion();
   const euler = new THREE.Euler();
-  function update(shot, exitProgress = 0) {
+  function update(shot, exitProgress = 0, { seconds = 0, motion = 0 } = {}) {
     originalLights.forEach(light => { light.intensity = 0; });
     key.position.set(shot.target[0]+3, 4, 5);
     key.target.position.set(...shot.target);
@@ -62,11 +62,16 @@ export function createShowcaseGallery({ THREE, source, scene }) {
       record.object.visible = index === shot.index || (index === shot.index+1 && shot.release > 0);
       if (!record.object.visible) continue;
       const opening = index === shot.index ? shot.opening : 0;
+      const weight=Math.max(0,Math.min(1,motion))*(1-opening*.8)*(1-exitProgress);
+      const wave=seconds*(.48-index*.025)+index*1.27;
+      record.object.position.set(index*6+Math.cos(wave*.73)*.018*weight,Math.sin(wave)*.05*weight,0);
+      record.object.rotation.set(.03+Math.sin(wave*.83)*.022*weight,-.18+Math.sin(wave*.61)*.045*weight,-.015+Math.cos(wave)*.025*weight);
       for (let i=0; i<record.parts.length; i++) {
         const part = record.parts[i];
         const amount = ease((opening-(i%4)*.035)/.895);
         part.mesh.position.copy(part.position).addScaledVector(part.drift, amount);
         part.mesh.position.y += Math.sin(Math.PI*amount)*.12;
+        if (record.id === 'memory' || record.id === 'desk') part.mesh.position.z += Math.sin(wave+i*.35)*.007*weight;
         euler.set(0, part.side*amount*.16, part.side*amount*.08);
         part.mesh.quaternion.copy(part.quaternion).multiply(turn.setFromEuler(euler));
         for (const material of part.materials) material.opacity = material.userData.originalOpacity*(1-.92*opening)*(1-exitProgress);

@@ -1,16 +1,17 @@
-import { initializeStudyRoom, resolveCameraLayout } from './renderer-setup.js?v=20260906-33';
-import { createShowcaseGallery } from './showcase-gallery.js?v=20260906-35';
-import { sampleShowcase, clamp, ease, SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260906-35';
+import { createShowcaseRuntime } from './showcase-runtime.js?v=20260906-36';
+import { createShowcaseGallery } from './showcase-gallery.js?v=20260906-36';
+import { sampleShowcase, clamp, ease, SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260906-36';
 
 export async function createStudyRoomRenderer({ canvas, stations, reducedMotion = false, onFailure = () => {}, onPresentation = () => {} }) {
   const THREE = await import('../../../vendor/three/three.module.min.js?v=20260906-33');
-  const state = initializeStudyRoom({ THREE, canvas, stations, reducedMotion, onActivate: () => {} });
+  const state = createShowcaseRuntime({ THREE, canvas, reducedMotion });
   const { renderer, camera, scene, quality } = state;
   let gallery;
   let observer;
   let disposed = false;
   let frameId = 0;
   let previous = performance.now();
+  let motionTime = 0;
   let target = 0;
   let current = 0;
   let exitTarget = 0;
@@ -26,26 +27,18 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     canvas.removeEventListener('webglcontextlost', onLost);
     document.removeEventListener('visibilitychange', onVisibility);
     gallery?.dispose();
-    state.interaction.dispose();
-    state.assetRegistry.dispose();
-    state.room.dispose();
-    state.environmentTarget?.dispose();
-    renderer.dispose();
-    renderer.forceContextLoss?.();
+    state.dispose();
   }
   function onLost(event) { event.preventDefault(); onFailure(new Error('Contesto WebGL interrotto')); }
   function onVisibility() { previous = performance.now(); }
   try {
-    const result = await state.heroAssetPromise;
-    if (!result?.homeV30) throw result?.error ?? new Error('Oggetti non disponibili');
-    state.interaction.dispose();
-    gallery = createShowcaseGallery({ THREE, source: result.homeV30.root, scene });
+    gallery = createShowcaseGallery({ THREE, source: state.source, scene });
     renderer.toneMappingExposure = 1.05;
     scene.environmentIntensity = .85;
     function resize() {
       const rect = canvas.getBoundingClientRect();
       camera.aspect = Math.max(.15, rect.width / Math.max(1,rect.height));
-      layout = resolveCameraLayout(rect.width, rect.height);
+      layout = rect.width<=760 || rect.height>rect.width*1.12 ? 'mobile' : 'desktop';
       renderer.setPixelRatio(quality.getDprCap());
       renderer.setSize(Math.max(1,rect.width), Math.max(1,rect.height), false);
       camera.updateProjectionMatrix();
@@ -56,6 +49,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       if (document.hidden) return;
       const delta = Math.min(.05, Math.max(0,(now-previous)/1000));
       previous = now;
+      motionTime += delta;
       if (focus) {
         const t = clamp((now-focus.start)/focus.duration);
         current = focus.from + (focus.to-focus.from)*ease(t);
@@ -66,7 +60,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       }
       exitCurrent += (exitTarget-exitCurrent)*(reducedMotion ? 1 : 1-Math.exp(-delta/.11));
       const shot = sampleShowcase(current, camera.aspect);
-      gallery.update(shot, exitCurrent);
+      gallery.update(shot, exitCurrent, {seconds:motionTime, motion:reducedMotion ? 0 : layout==='mobile' ? .6 : 1});
       camera.position.set(...shot.position);
       camera.fov=shot.fov;
       camera.updateProjectionMatrix();

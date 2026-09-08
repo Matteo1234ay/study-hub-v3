@@ -1,7 +1,7 @@
 export const SHOWCASE_OBJECTS = Object.freeze([
-  ['desk', 'Monitor_Root'], ['memory', 'Notebook_Root'],
-  ['social', 'Lamp_Root'], ['assessment', 'Paper_Stack'],
-  ['progress', 'Drawer_Primary'], ['future-paths', 'Cabinet_Root']
+  ['desk', 'Learning_Book'], ['memory', 'Memory_Cards'],
+  ['social', 'Course_Path'], ['assessment', 'Assessment_Checklist'],
+  ['progress', 'Progress_Steps'], ['future-paths', 'Path_Archive']
 ]);
 export const clamp = value => Math.max(0, Math.min(1, Number(value) || 0));
 export const ease = value => { const t = clamp(value); return t*t*t*(t*(t*6-15)+10); };
