@@ -5,14 +5,14 @@ import {sampleShowcase, SHOWCASE_OBJECTS} from '../src/home/scene/showcase-motio
 import {createShowcaseGallery} from '../src/home/scene/showcase-gallery.js';
 import {createSemanticObjects} from '../src/home/scene/semantic-objects.js';
 
-test('all six stops frame before opening and reveal only after opening starts',()=>{
+test('all six stops present geometry and information during the same reading hold',()=>{
   for(let i=0;i<6;i++) {
     const approach=sampleShowcase((i+.24)/6);
     assert.equal(approach.stationId,SHOWCASE_OBJECTS[i][0]);
     assert.equal(approach.opening,0);
-    assert.equal(approach.reveal,0);
+    assert.equal(approach.reveal,1);
     const read=sampleShowcase((i+.73)/6);
-    assert.equal(read.opening,1);assert.equal(read.reveal,1);assert.equal(read.phase,'read');
+    assert.equal(read.opening,0);assert.equal(read.reveal,1);assert.equal(read.phase,'read');
   }
 });
 test('camera position and target are continuous across all station boundaries',()=>{

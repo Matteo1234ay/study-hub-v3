@@ -1,8 +1,9 @@
-import { createShowcaseRuntime } from './showcase-runtime.js?v=20260908-39';
-import { createShowcaseGallery } from './showcase-gallery.js?v=20260908-39';
-import { sampleShowcase, clamp, ease, SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260908-39';
-import { createPointerCamera } from './pointer-camera.js?v=20260908-39';
-import { createParticleMorph } from './particle-morph.js?v=20260908-39';
+import { createShowcaseRuntime } from './showcase-runtime.js?v=20260908-40';
+import { createShowcaseGallery } from './showcase-gallery.js?v=20260908-40';
+import { sampleShowcase, clamp, ease, SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260908-40';
+import { createPointerCamera } from './pointer-camera.js?v=20260908-40';
+import { createParticleMorph } from './particle-morph.js?v=20260908-40';
+import { sectionFrame } from './section-projection.js?v=20260908-40';
 
 export async function createStudyRoomRenderer({ canvas, stations, reducedMotion = false, onFailure = () => {}, onPresentation = () => {} }) {
   const THREE = await import('../../../vendor/three/three.module.min.js?v=20260906-33');
@@ -48,7 +49,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
   function onLost(event) { event.preventDefault(); onFailure(new Error('Contesto WebGL interrotto')); }
   function onVisibility() { previous = performance.now(); }
   try {
-    gallery = createShowcaseGallery({ THREE, source: state.source, scene });
+    gallery = createShowcaseGallery({ THREE, source: state.source, scene, integrated:true });
     particles = createParticleMorph({THREE,records:gallery.records,scene,camera,canvas});
     document.fonts?.ready.then(()=>{if(!disposed)particles.invalidate();});
     renderer.toneMappingExposure = 1.05;
@@ -81,13 +82,21 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       const shot = sampleShowcase(current, camera.aspect);
       gallery.update(shot, exitCurrent, {seconds:motionTime, motion:reducedMotion ? 0 : layout==='mobile' ? .6 : 1});
       if(!pointerMedia.matches || reducedMotion)pointerCamera.reset();
-      const orbit=pointerCamera.sample(shot.position,shot.target,delta,reducedMotion ? 0 : (1-shot.reveal*.8)*(1-exitCurrent));
+      const orbit=pointerCamera.sample(shot.position,shot.target,delta,reducedMotion ? 0 : (1-exitCurrent));
       camera.position.set(...orbit);
       camera.fov=shot.fov;
       camera.updateProjectionMatrix();
       camera.lookAt(...shot.target);
-      onPresentation({...shot, exitProgress: exitCurrent});
-      particles.update(shot,exitCurrent,motionTime);
+      camera.updateMatrixWorld(true);
+      const root=canvas.closest('.home-journey');
+      const caption=root?.querySelector(`.home-station-caption[data-station-id="${shot.stationId}"]`);
+      let surfaceFrame;
+      if(root?.dataset.homeState==='ready' && caption?.offsetWidth){
+        const record=gallery.records[shot.index];record.target=shot.target;
+        surfaceFrame=sectionFrame(THREE,record,camera,canvas,caption);
+      }
+      onPresentation({...shot, exitProgress: exitCurrent, surfaceTransform:surfaceFrame?.transform});
+      particles.update(shot,exitCurrent,motionTime,surfaceFrame);
       renderer.render(scene, camera);
       if (quality.recordFrame(delta*1000)) resize();
     }

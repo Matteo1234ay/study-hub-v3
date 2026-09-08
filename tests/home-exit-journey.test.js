@@ -5,16 +5,16 @@ import { createCameraTimeline } from "../src/home/scene/camera-timeline.js";
 
 test("desktop and mobile reserve the requested physical scroll runway", () => {
   assert.deepEqual(homeExperience.resolveJourneyLayout(1440), {
-    contentVh: 1320,
-    exitVh: 140,
-    totalVh: 1460,
-    contentEnd: 1320 / 1460
+    contentVh: 660,
+    exitVh: 70,
+    totalVh: 730,
+    contentEnd: 660 / 730
   });
   assert.deepEqual(homeExperience.resolveJourneyLayout(390), {
-    contentVh: 2200,
-    exitVh: 180,
-    totalVh: 2380,
-    contentEnd: 2200 / 2380
+    contentVh: 660,
+    exitVh: 90,
+    totalVh: 750,
+    contentEnd: 660 / 750
   });
 });
 
@@ -45,7 +45,7 @@ test("the final scroll segment is reserved for a user-driven exit phase", () => 
   assert.equal(typeof homeExperience.resolveJourneyPhases, "function");
   if (typeof homeExperience.resolveJourneyPhases !== "function") return;
 
-  const boundary = 1320 / 1460;
+  const boundary = 660 / 730;
   const beforeExit = homeExperience.resolveJourneyPhases(.7, 1440);
   const exitStart = homeExperience.resolveJourneyPhases(boundary, 1440);
   const exitMiddle = homeExperience.resolveJourneyPhases(boundary + (1 - boundary) / 2, 1440);

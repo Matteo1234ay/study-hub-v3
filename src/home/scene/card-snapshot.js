@@ -1,6 +1,11 @@
 // Paint the actual DOM content into a local texture. No remote image, duplicate
 // data model, HTML injection or screenshot service is involved.
 export function snapshotCard(element) {
+  const neutral=element.animate([{transform:'translateY(-50%)'},{transform:'translateY(-50%)'}],{duration:1,fill:'both'});
+  neutral.pause();neutral.currentTime=1;
+  try{return paintCard(element);}finally{neutral.cancel();}
+}
+function paintCard(element) {
   const rect=element.getBoundingClientRect();
   if(!rect.width || !rect.height)return null;
   const canvas=document.createElement('canvas');

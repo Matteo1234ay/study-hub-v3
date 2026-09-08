@@ -14,8 +14,8 @@ const JOURNEY_EXIT_TRIGGER = .995;
 
 export function resolveJourneyLayout(width = 1440) {
   const mobile = Number(width) <= 760;
-  const contentVh = mobile ? 2200 : 1320;
-  const exitVh = mobile ? 180 : 140;
+  const contentVh = 660;
+  const exitVh = mobile ? 90 : 70;
   const totalVh = contentVh + exitVh;
   return { contentVh, exitVh, totalVh, contentEnd: contentVh / totalVh };
 }
@@ -135,7 +135,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     if (!root.isConnected) cleanup();
   });
   removalObserver.observe(document.documentElement, { childList: true, subtree: true });
-  const { createStudyRoomRenderer } = await import("./scene/showcase-renderer.js?v=20260908-39");
+  const { createStudyRoomRenderer } = await import("./scene/showcase-renderer.js?v=20260908-40");
   if (disposed || !root.isConnected) {
     cleanup();
     return cleanup;
@@ -181,16 +181,21 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
           caption.tabIndex=active && presentation.reveal === 1 ? 0 : -1;
           if (!sectionAnimations.has(caption)) {
             const main=caption.animate([
-              {opacity:0,transform:'translateY(-50%)'},
-              {opacity:1,transform:'translateY(-50%)'}
+              {opacity:0},
+              {opacity:1}
             ],{duration:1000,fill:'both'});
             main.pause();
-            const rows=[];
+            const pose=caption.animate([{transform:'translateY(-50%)'},{transform:'translateY(-50%)'}],{duration:1000,fill:'both'});
+            pose.pause();
+            const rows=[pose];
             sectionAnimations.set(caption,{main,rows});
           }
           const entry=sectionAnimations.get(caption);
           entry.main.currentTime=(active ? presentation.reveal : 0)*1000;
-          entry.rows.forEach((animation,index)=>{animation.currentTime=(active ? clamp01((presentation.reveal-index*.08)/.84) : 0)*1000;});
+          if(active && presentation.surfaceTransform){
+            entry.rows[0].effect.setKeyframes([{transform:presentation.surfaceTransform},{transform:presentation.surfaceTransform}]);
+            entry.rows[0].currentTime=1000;
+          }
         });
       },
       onActivate(id) {

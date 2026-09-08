@@ -1,4 +1,4 @@
-import {sampleParticleTimeline} from './particle-timeline.js?v=20260908-39';
+import {sampleParticleTimeline} from './particle-timeline.js?v=20260908-40';
 export const SHOWCASE_OBJECTS = Object.freeze([
   ['desk', 'Learning_Book'], ['memory', 'Memory_Cards'],
   ['social', 'Course_Path'], ['assessment', 'Assessment_Checklist'],
@@ -21,8 +21,8 @@ export function sampleShowcase(value, aspect = 1.6) {
   const index = Math.min(5, Math.floor(progress*6));
   const local = progress === 1 ? 1 : progress*6-index;
   const approach = windowProgress(local, 0, .24);
-  const opening = windowProgress(local, .27, .62);
-  const release = index === 5 ? 0 : windowProgress(local, .84, 1);
+  const opening = index === 5 ? 0 : windowProgress(local, .76, 1);
+  const release = index === 5 ? 0 : windowProgress(local, .8, 1);
   const morph = sampleParticleTimeline(index,local);
   const reveal = morph.reveal;
   const x = index*6 + release*6;
@@ -30,15 +30,9 @@ export function sampleShowcase(value, aspect = 1.6) {
   const orbit = (1-approach)*(1-release)+release;
   const position = [x + orbit*.42, .22*orbit, distance*(1.22-.22*approach+.22*release)];
   const target = [x,0,0];
-  if (index === 0) {
-    const axis = aspect < 1 ? 1 : 0;
-    const offset = (aspect < 1 ? .62 : -.8)*(1-approach);
-    target[axis] += offset;
-    position[axis] += offset;
-  }
   return {
     stationId: SHOWCASE_OBJECTS[index][0], index, local, opening, reveal, release, morph,
-    phase: local < .27 ? 'approach' : local < .73 ? 'unfold' : local < .84 || index === 5 ? 'read' : 'release',
+    phase: reveal === 1 ? 'read' : local < .24 ? 'approach' : 'release',
     position, target, fov: 36, settled: local >= .24 && local <= .84,
     readStrength: reveal, captionStrength: reveal
   };

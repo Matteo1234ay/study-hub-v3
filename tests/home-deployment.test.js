@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const RELEASE_TOKEN = "20260906-33";
-const motionToken = path => /(?:home-view|home-experience|showcase-renderer)\.js$/.test(path) ? "20260908-39" : /(?:study-room-renderer|home-v30-dematerialization)\.js$/.test(path) ? "20260906-34" : RELEASE_TOKEN;
+const motionToken = path => /(?:home-view|home-experience|showcase-renderer)\.js$/.test(path) ? "20260908-40" : /(?:study-room-renderer|home-v30-dematerialization)\.js$/.test(path) ? "20260906-34" : RELEASE_TOKEN;
 
 test("Three.js is pinned and vendored locally with its license", async () => {
   const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url)));
@@ -54,7 +54,7 @@ test("the changed homepage chain uses the Safari-safe V30 token", async () => {
   assert.match(sources["index.html"], new RegExp(`styles/home-immersive\\.css\\?v=${RELEASE_TOKEN}`));
   assert.match(sources["index.html"], new RegExp(`styles/home-v30-polish\\.css\\?v=${RELEASE_TOKEN}`));
   assert.match(sources["index.html"], new RegExp(`styles/home-startup\\.css\\?v=${RELEASE_TOKEN}`));
-  assert.match(sources["index.html"], /src\/app\.js\?v=20260908-39/);
+  assert.match(sources["index.html"], /src\/app\.js\?v=20260908-40/);
 
   for (const imported of ["views/home-view.js", "views/paths-view.js", "home/home-shared-transition.js"]) {
     assert.match(sources["src/app.js"], new RegExp(`${imported.replaceAll(".", "\\.")}\\?v=${motionToken(imported)}`));

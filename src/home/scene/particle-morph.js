@@ -1,4 +1,4 @@
-import {snapshotCard} from './card-snapshot.js?v=20260908-39';
+import {snapshotCard} from './card-snapshot.js?v=20260908-40';
 
 const random=i=>{const n=Math.sin(i*127.1+311.7)*43758.5453123;return n-Math.floor(n);};
 
@@ -46,14 +46,14 @@ export function createParticleMorph({THREE,records,scene,camera,canvas}) {
     transparent:true,depthWrite:false,depthTest:true,toneMapped:false,
     uniforms:{map:{value:null},card:{value:0},alpha:{value:0},cloud:{value:0}},
     vertexShader:`attribute vec4 cell; attribute vec3 surfaceColor;
-      varying vec2 tileUV; varying vec2 localUV; varying vec3 tint;
-      void main(){localUV=uv;tileUV=cell.xy+uv*cell.zw;tint=surfaceColor;
+      varying vec2 tileUV; varying vec2 localUV; varying vec3 tint;varying float face;
+      void main(){localUV=uv;tileUV=cell.xy+uv*cell.zw;tint=surfaceColor;face=step(.0001,cell.z);
         gl_Position=projectionMatrix*modelViewMatrix*instanceMatrix*vec4(position,1.);}`,
     fragmentShader:`uniform sampler2D map;uniform float card;uniform float cloud;uniform float alpha;
-      varying vec2 tileUV;varying vec2 localUV;varying vec3 tint;
+      varying vec2 tileUV;varying vec2 localUV;varying vec3 tint;varying float face;
       void main(){float disc=1.-smoothstep(.36,.5,length(localUV-.5));
         vec3 dust=mix(tint,vec3(.73,.51,.36),cloud);
-        gl_FragColor=vec4(mix(dust,texture2D(map,tileUV).rgb,card),alpha*mix(disc,1.,card));
+        gl_FragColor=vec4(mix(dust,texture2D(map,tileUV).rgb,card*face),alpha*mix(disc,1.,card*face));
         #include <colorspace_fragment>
       }`
   });
@@ -66,7 +66,7 @@ export function createParticleMorph({THREE,records,scene,camera,canvas}) {
   const topLeft=new THREE.Vector3(),right=new THREE.Vector3(),down=new THREE.Vector3(),depth=new THREE.Vector3();
   let currentIndex=-1;
   function invalidate(){snapshots.forEach(value=>value.texture.dispose());snapshots.clear();currentIndex=-1;}
-  function update(shot,exitProgress,seconds=0) {
+  function update(shot,exitProgress,seconds=0,surfaceFrame=null) {
     const morph=shot.morph,caption=captions[shot.index];
     field.visible=morph.particles>.001 && exitProgress<1;
     if(!field.visible || !caption || root.dataset.homeState!=='ready')return;
@@ -83,12 +83,13 @@ export function createParticleMorph({THREE,records,scene,camera,canvas}) {
     const rect=caption.getBoundingClientRect(),viewport=canvas.getBoundingClientRect();
     // Fixed particle identities survive every station boundary.
     const columns=count===2800?50:70;
-    const activeCount=count,gridRows=count/columns;
+    const activeCount=count,gridRows=count===2800?44:64;
+    const faceCount=columns*gridRows;
     field.count=activeCount;
     if(currentIndex!==shot.index){
       material.uniforms.map.value=snapshot.texture;
       for(let i=0;i<activeCount;i++){
-        cells.set([(i%columns)/columns,1-(Math.floor(i/columns)+1)/gridRows,1/columns,1/gridRows],i*4);
+        cells.set(i<faceCount?[(i%columns)/columns,1-(Math.floor(i/columns)+1)/gridRows,1/columns,1/gridRows]:[0,0,0,0],i*4);
         surfaces[shot.index][i].color.toArray(colors,i*3);
       }
       geometry.attributes.cell.needsUpdate=true;geometry.attributes.surfaceColor.needsUpdate=true;
@@ -97,9 +98,15 @@ export function createParticleMorph({THREE,records,scene,camera,canvas}) {
     camera.updateMatrixWorld(true);
     depth.set(...shot.target).project(camera);
     const project=(x,y,out)=>out.set((x-viewport.left)/viewport.width*2-1,1-(y-viewport.top)/viewport.height*2,depth.z).unproject(camera);
-    project(rect.left,rect.top,topLeft);
-    project(rect.right,rect.top,right).sub(topLeft);
-    project(rect.left,rect.bottom,down).sub(topLeft);
+    if(surfaceFrame){
+      topLeft.copy(surfaceFrame.corners[0]);
+      right.copy(surfaceFrame.corners[1]).sub(topLeft);
+      down.copy(surfaceFrame.corners[3]).sub(topLeft);
+    }else{
+      project(rect.left,rect.top,topLeft);
+      project(rect.right,rect.top,right).sub(topLeft);
+      project(rect.left,rect.bottom,down).sub(topLeft);
+    }
     const tileWidth=right.length()/columns,tileHeight=down.length()/gridRows;
     const cloudFloat=Math.sin(seconds*.31)*.028;
     for(let i=0;i<activeCount;i++){
@@ -107,7 +114,8 @@ export function createParticleMorph({THREE,records,scene,camera,canvas}) {
       const angle=random(i+50000)*Math.PI*2;
       const radius=.35+Math.sqrt(random(i+60000))*1.25;
       cloud.set(shot.target[0]+Math.cos(angle)*radius,shot.target[1]+Math.sin(angle)*radius*.72+cloudFloat,shot.target[2]+(random(i+70000)-.5)*1.8);
-      target.copy(topLeft).addScaledVector(right,((i%columns)+.5)/columns).addScaledVector(down,(Math.floor(i/columns)+.5)/gridRows);
+      if(i<faceCount)target.copy(topLeft).addScaledVector(right,((i%columns)+.5)/columns).addScaledVector(down,(Math.floor(i/columns)+.5)/gridRows);
+      else target.copy(surface);
       dummy.position.copy(surface).multiplyScalar(morph.object).addScaledVector(cloud,morph.cloud).addScaledVector(target,morph.card);
       // A smooth curved flight, vanishing at both endpoints. No teleport or
       // non-deterministic velocities when the scroll direction changes.
@@ -115,8 +123,10 @@ export function createParticleMorph({THREE,records,scene,camera,canvas}) {
       dummy.position.y+=arc*Math.sin(angle);
       dummy.position.z+=arc*Math.cos(angle);
       dummy.quaternion.copy(camera.quaternion);
+      if(surfaceFrame && i<faceCount)dummy.quaternion.slerp(surfaceFrame.quaternion,morph.card);
       const dust=.008+random(i+80000)*.009;
-      dummy.scale.set(dust*(1-morph.card)+tileWidth*1.003*morph.card,dust*(1-morph.card)+tileHeight*1.003*morph.card,1);
+      const coverage=i<faceCount?morph.card:0;
+      dummy.scale.set(dust*(1-coverage)+tileWidth*1.003*coverage,dust*(1-coverage)+tileHeight*1.003*coverage,1);
       dummy.updateMatrix();field.setMatrixAt(i,dummy.matrix);
     }
     material.uniforms.card.value=morph.card;

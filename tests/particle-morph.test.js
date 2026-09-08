@@ -6,17 +6,18 @@ import {sampleObjectSurface} from '../src/home/scene/particle-morph.js';
 import {createSemanticObjects} from '../src/home/scene/semantic-objects.js';
 import {createShowcaseGallery} from '../src/home/scene/showcase-gallery.js';
 
-test('all six sections follow object, cloud, card and reversible transitions',()=>{
+test('six integrated reading objects have one hold each and continuous particle boundaries',()=>{
   for(let index=0;index<6;index++){
-    assert.equal(sample(index,.24).object,1);
-    assert.equal(sample(index,.5).cloud,1);
+    assert.equal(sample(index,.24).card,1);
+    assert.equal(sample(index,.5).cloud,0);
     assert.equal(sample(index,.69).card,1);
-    assert.equal(sample(index,.69).reveal,0);
+    assert.equal(sample(index,.69).reveal,1);
     assert.equal(sample(index,.73).reveal,1);
     for(let j=0;j<=1000;j++){
       const state=sample(index,j/1000);
       assert.ok(Math.abs(state.object+state.card+state.cloud-1)<1e-12);
       for(const value of Object.values(state))assert.ok(value>=0 && value<=1);
+      assert.equal(state.object,0,'no separate object-only animation');
     }
     if(index<5)assert.deepEqual(sample(index,1),sample(index+1,0));
   }

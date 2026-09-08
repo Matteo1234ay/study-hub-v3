@@ -1,6 +1,6 @@
-import { SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260908-39';
+import { SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260908-40';
 
-export function createShowcaseGallery({ THREE, source, scene }) {
+export function createShowcaseGallery({ THREE, source, scene, integrated = false }) {
   source.updateMatrixWorld(true);
   const materials = new Set();
   const group = new THREE.Group();
@@ -9,9 +9,9 @@ export function createShowcaseGallery({ THREE, source, scene }) {
     const original = source.getObjectByName(name);
     if (!original) throw new Error(`Oggetto mancante: ${name}`);
     const box = new THREE.Box3().setFromObject(original);
-    const center = box.getCenter(new THREE.Vector3());
+    const center = integrated ? new THREE.Vector3() : box.getCenter(new THREE.Vector3());
     const size = box.getSize(new THREE.Vector3());
-    const scale = 1.8/Math.max(size.length(), .01);
+    const scale = integrated ? 1 : 1.8/Math.max(size.length(), .01);
     const object = new THREE.Group();
     object.position.x = index*6;
     object.rotation.set(.03, -.18, -.015);
