@@ -20,9 +20,9 @@ export function sampleShowcase(value, aspect = 1.6) {
   const index = Math.min(5, Math.floor(progress*6));
   const local = progress === 1 ? 1 : progress*6-index;
   const approach = windowProgress(local, 0, .24);
-  const opening = windowProgress(local, .27, .55);
+  const opening = windowProgress(local, .27, .62);
   const release = index === 5 ? 0 : windowProgress(local, .84, 1);
-  const reveal = windowProgress(local, .46, .63)*(index === 5 ? 1 : 1-windowProgress(local, .82, .94));
+  const reveal = windowProgress(local, .53, .72)*(index === 5 ? 1 : 1-windowProgress(local, .82, .94));
   const x = index*6 + release*6;
   const distance = framingDistance(1.05, aspect);
   const orbit = (1-approach)*(1-release)+release;
@@ -36,7 +36,7 @@ export function sampleShowcase(value, aspect = 1.6) {
   }
   return {
     stationId: SHOWCASE_OBJECTS[index][0], index, local, opening, reveal, release,
-    phase: local < .27 ? 'approach' : local < .55 ? 'unfold' : local < .84 || index === 5 ? 'read' : 'release',
+    phase: local < .27 ? 'approach' : local < .62 ? 'unfold' : local < .84 || index === 5 ? 'read' : 'release',
     position, target, fov: 36, settled: local >= .24 && local <= .84,
     readStrength: reveal, captionStrength: reveal
   };

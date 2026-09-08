@@ -1,4 +1,5 @@
-import { SHOWCASE_OBJECTS, ease } from './showcase-motion.js?v=20260906-36';
+import { SHOWCASE_OBJECTS, ease } from './showcase-motion.js?v=20260908-37';
+import { createShowcaseParticles } from './showcase-particles.js?v=20260908-37';
 
 export function createShowcaseGallery({ THREE, source, scene }) {
   source.updateMatrixWorld(true);
@@ -41,6 +42,7 @@ export function createShowcaseGallery({ THREE, source, scene }) {
     return { id, object, parts, name };
   });
   source.visible = false;
+  const particles=createShowcaseParticles(THREE,records);
   scene.add(group);
   scene.background = new THREE.Color('#10002f');
   scene.fog = null;
@@ -63,9 +65,11 @@ export function createShowcaseGallery({ THREE, source, scene }) {
       if (!record.object.visible) continue;
       const opening = index === shot.index ? shot.opening : 0;
       const weight=Math.max(0,Math.min(1,motion))*(1-opening*.8)*(1-exitProgress);
-      const wave=seconds*(.48-index*.025)+index*1.27;
-      record.object.position.set(index*6+Math.cos(wave*.73)*.018*weight,Math.sin(wave)*.05*weight,0);
-      record.object.rotation.set(.03+Math.sin(wave*.83)*.022*weight,-.18+Math.sin(wave*.61)*.045*weight,-.015+Math.cos(wave)*.025*weight);
+      const mass=[.9,.6,1.1,.8,1.7,1.4][index];
+      const wave=seconds*.34/Math.sqrt(mass)+index*1.27;
+      const lift=(Math.sin(wave)*.04+Math.sin(wave*1.7+.4)*.008)*weight;
+      record.object.position.set(index*6+Math.cos(wave*.73)*.014*weight,lift,Math.sin(wave*.57)*.012*weight);
+      record.object.rotation.set(.03+Math.cos(wave)*.015*weight,-.18+Math.sin(wave*.61)*.035*weight,-.015+Math.cos(wave*.8)*.016*weight);
       for (let i=0; i<record.parts.length; i++) {
         const part = record.parts[i];
         const amount = ease((opening-(i%4)*.035)/.895);
@@ -77,12 +81,14 @@ export function createShowcaseGallery({ THREE, source, scene }) {
         for (const material of part.materials) material.opacity = material.userData.originalOpacity*(1-.92*opening)*(1-exitProgress);
       }
     }
+    particles.update(shot,exitProgress,motion);
     group.updateMatrixWorld(true);
   }
   return {
     update,
     audit: () => records.map(record => ({id: record.id, name: record.name, parts: record.parts.length})),
     dispose() {
+      particles.dispose();
       scene.remove(group, ambient, key, key.target, rim, rim.target);
       materials.forEach(material => material.dispose());
       source.visible = true;

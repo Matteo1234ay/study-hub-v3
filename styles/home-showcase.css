@@ -1,4 +1,8 @@
 /* The same object-to-interface sequence on every stop, sampled from scroll. */
+.home-journey[data-motion="object-showcase"][data-home-state="ready"] {min-height:1460svh;}
+@media(max-width:760px) {
+  .home-journey[data-motion="object-showcase"][data-home-state="ready"] {min-height:2380svh;}
+}
 .home-journey[data-motion="object-showcase"] .home-v30-poster,
 .home-journey[data-motion="object-showcase"] .home-stage-shade { display:none; }
 .home-journey[data-motion="object-showcase"] .home-stage { background:#10002f; }

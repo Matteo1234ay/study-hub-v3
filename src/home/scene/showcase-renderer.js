@@ -1,6 +1,6 @@
-import { createShowcaseRuntime } from './showcase-runtime.js?v=20260906-36';
-import { createShowcaseGallery } from './showcase-gallery.js?v=20260906-36';
-import { sampleShowcase, clamp, ease, SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260906-36';
+import { createShowcaseRuntime } from './showcase-runtime.js?v=20260908-37';
+import { createShowcaseGallery } from './showcase-gallery.js?v=20260908-37';
+import { sampleShowcase, clamp, ease, SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260908-37';
 
 export async function createStudyRoomRenderer({ canvas, stations, reducedMotion = false, onFailure = () => {}, onPresentation = () => {} }) {
   const THREE = await import('../../../vendor/three/three.module.min.js?v=20260906-33');
