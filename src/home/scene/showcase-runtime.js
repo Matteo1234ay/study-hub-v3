@@ -1,6 +1,6 @@
 import { createQualityController } from './quality-controller.js?v=20260906-33';
 import { RoomEnvironment } from '../../../vendor/three/examples/jsm/environments/RoomEnvironment.js?v=20260906-33';
-import { createSectionObjects } from './section-objects.js?v=20260908-40';
+import { createSemanticObjects } from './semantic-objects.js?v=20260906-36';
 
 export function createShowcaseRuntime({THREE,canvas,reducedMotion}) {
   const rect=canvas.getBoundingClientRect();
@@ -18,7 +18,7 @@ export function createShowcaseRuntime({THREE,canvas,reducedMotion}) {
     try {environmentTarget=generator.fromScene(room,.04);}
     finally {room.dispose();generator.dispose();}
     scene.environment=environmentTarget.texture;
-    objects=createSectionObjects(THREE);
+    objects=createSemanticObjects(THREE);
     scene.add(objects.root);
     return {renderer,scene,camera,quality,source:objects.root,dispose(){
       objects.dispose();environmentTarget.dispose();renderer.dispose();renderer.forceContextLoss?.();

@@ -17,6 +17,20 @@ export function sectionFrame(THREE,record,camera,canvas,caption) {
   const viewHeight=2*radius*Math.tan(camera.fov*Math.PI/360);
   record.object.scale.set(viewHeight*camera.aspect*width/viewport.width,viewHeight*height/viewport.height,viewHeight*camera.aspect*width/viewport.width);
   record.object.position.y+=(.5-(parent.top-viewport.top)/viewport.height)*viewHeight;
+  // Reserve the top of the composition for the original semantic illustration.
+  // Compensate for the text plane's aspect ratio so models keep their shape.
+  const imageHeight=Math.min(width<=480?112:156,height*.33);
+  const size=Math.min(width*.7,imageHeight*.9)/1.8/width;
+  const imagePosition=new THREE.Vector3(0,.5-imageHeight/height/2,0);
+  const imageScale=new THREE.Vector3(size,size*width/height,size);
+  record.imageMatrix??=new THREE.Matrix4();
+  record.imageMatrix.compose(imagePosition,new THREE.Quaternion(),imageScale);
+  if(!record.imageGroup){
+    record.imageGroup=new THREE.Group();record.imageGroup.matrixAutoUpdate=false;
+    record.object.add(record.imageGroup);
+    for(const part of record.parts)record.imageGroup.add(part.mesh);
+  }
+  record.imageGroup.matrix.copy(record.imageMatrix);
   record.object.updateMatrixWorld(true);
   const corners=[[-.5,.5,.02],[.5,.5,.02],[.5,-.5,.02],[-.5,-.5,.02]].map(p=>new THREE.Vector3(...p).applyMatrix4(record.object.matrixWorld));
   const points=corners.map(p=>{const q=p.clone().project(camera);return {x:viewport.left+(q.x+1)*viewport.width/2-parent.left,y:viewport.top+(1-q.y)*viewport.height/2-parent.top};});

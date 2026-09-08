@@ -1,4 +1,4 @@
-import { SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260908-40';
+import { SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260908-41';
 
 export function createShowcaseGallery({ THREE, source, scene, integrated = false }) {
   source.updateMatrixWorld(true);
@@ -35,7 +35,7 @@ export function createShowcaseGallery({ THREE, source, scene, integrated = false
       const partCenter = new THREE.Box3().setFromObject(node).getCenter(new THREE.Vector3()).sub(center).multiplyScalar(scale);
       const side = parts.length % 2 ? 1 : -1;
       const drift = new THREE.Vector3(side*(.55+Math.abs(partCenter.x)*.3), partCenter.y*.55 + ((parts.length%3)-1)*.12, (parts.length%3-1)*.3);
-      parts.push({ mesh, position: mesh.position.clone(), quaternion: mesh.quaternion.clone(), drift, side, materials: clonedMaterials });
+      parts.push({ mesh, position: mesh.position.clone(), scale:mesh.scale.clone(), quaternion: mesh.quaternion.clone(), drift, side, materials: clonedMaterials });
       object.add(mesh);
     });
     if (!parts.length) throw new Error(`Oggetto senza superfici: ${name}`);

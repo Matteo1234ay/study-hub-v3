@@ -1,4 +1,4 @@
-import {snapshotCard} from './card-snapshot.js?v=20260908-40';
+import {snapshotCard} from './card-snapshot.js?v=20260908-41';
 
 const random=i=>{const n=Math.sin(i*127.1+311.7)*43758.5453123;return n-Math.floor(n);};
 
@@ -53,7 +53,8 @@ export function createParticleMorph({THREE,records,scene,camera,canvas}) {
       varying vec2 tileUV;varying vec2 localUV;varying vec3 tint;varying float face;
       void main(){float disc=1.-smoothstep(.36,.5,length(localUV-.5));
         vec3 dust=mix(tint,vec3(.73,.51,.36),cloud);
-        gl_FragColor=vec4(mix(dust,texture2D(map,tileUV).rgb,card*face),alpha*mix(disc,1.,card*face));
+        vec4 ink=texture2D(map,tileUV);
+        gl_FragColor=vec4(mix(dust,ink.rgb,card*face),alpha*mix(disc,ink.a,card*face));
         #include <colorspace_fragment>
       }`
   });
@@ -110,7 +111,9 @@ export function createParticleMorph({THREE,records,scene,camera,canvas}) {
     const tileWidth=right.length()/columns,tileHeight=down.length()/gridRows;
     const cloudFloat=Math.sin(seconds*.31)*.028;
     for(let i=0;i<activeCount;i++){
-      surface.copy(surfaces[shot.index][i].position).applyMatrix4(records[shot.index].object.matrixWorld);
+      surface.copy(surfaces[shot.index][i].position);
+      if(records[shot.index].imageMatrix)surface.applyMatrix4(records[shot.index].imageMatrix);
+      surface.applyMatrix4(records[shot.index].object.matrixWorld);
       const angle=random(i+50000)*Math.PI*2;
       const radius=.35+Math.sqrt(random(i+60000))*1.25;
       cloud.set(shot.target[0]+Math.cos(angle)*radius,shot.target[1]+Math.sin(angle)*radius*.72+cloudFloat,shot.target[2]+(random(i+70000)-.5)*1.8);
