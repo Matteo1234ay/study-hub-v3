@@ -1,4 +1,4 @@
-import { SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260908-44';
+import { SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260908-45';
 
 export function createShowcaseGallery({ THREE, source, scene, integrated = false }) {
   source.updateMatrixWorld(true);
@@ -20,9 +20,9 @@ export function createShowcaseGallery({ THREE, source, scene, integrated = false
       if (!node.isMesh) return;
       const clonedMaterials = (Array.isArray(node.material) ? node.material : [node.material]).map(material => {
         const clone = material.clone();
-        clone.transparent = false;
+        clone.transparent = true;
         clone.depthWrite = true;
-        clone.alphaHash = true;
+        clone.alphaHash = false;
         clone.userData.originalOpacity = material.opacity;
         materials.add(clone);
         return clone;

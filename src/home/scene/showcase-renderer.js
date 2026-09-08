@@ -1,9 +1,10 @@
-import { createShowcaseRuntime } from './showcase-runtime.js?v=20260908-44';
-import { createShowcaseGallery } from './showcase-gallery.js?v=20260908-44';
-import { sampleShowcase, clamp, ease, SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260908-44';
-import { createPointerCamera } from './pointer-camera.js?v=20260908-44';
-import { createParticleMorph } from './particle-morph.js?v=20260908-44';
-import { sectionFrame } from './section-projection.js?v=20260908-44';
+import { createShowcaseRuntime } from './showcase-runtime.js?v=20260908-45';
+import { createShowcaseGallery } from './showcase-gallery.js?v=20260908-45';
+import { sampleShowcase, clamp, ease, SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260908-45';
+import { createPointerCamera } from './pointer-camera.js?v=20260908-45';
+import { createParticleMorph } from './particle-morph.js?v=20260908-45';
+import { sectionFrame } from './section-projection.js?v=20260908-45';
+import { sampleParticleExit } from './particle-timeline.js?v=20260908-45';
 
 export async function createStudyRoomRenderer({ canvas, stations, reducedMotion = false, onFailure = () => {}, onPresentation = () => {} }) {
   const THREE = await import('../../../vendor/three/three.module.min.js?v=20260906-33');
@@ -75,15 +76,19 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
         current = focus.from + (focus.to-focus.from)*ease(t);
         if (t === 1) { target = focus.to; focus.resolve(true); focus = null; }
       } else {
-        const step=(target-current)*(reducedMotion ? 1 : 1-Math.exp(-delta/.2));
-        current += reducedMotion ? step : Math.max(-delta*.18,Math.min(delta*.18,step));
+        const step=(target-current)*(reducedMotion ? 1 : 1-Math.exp(-delta/.32));
+        current += reducedMotion ? step : Math.max(-delta*.08,Math.min(delta*.08,step));
         if (Math.abs(target-current)<.00001) current=target;
       }
       exitCurrent += (exitTarget-exitCurrent)*(reducedMotion ? 1 : 1-Math.exp(-delta/.11));
-      const shot = sampleShowcase(current, camera.aspect);
+      const baseShot = sampleShowcase(current, camera.aspect);
+      const exitMorph=sampleParticleExit(exitCurrent);
+      const shot=exitCurrent>0?{...baseShot,morph:exitMorph,reveal:exitMorph.reveal,phase:'release'}:baseShot;
       gallery.update(shot, exitCurrent, {seconds:motionTime, motion:reducedMotion ? 0 : layout==='mobile' ? .6 : 1});
       if(!pointerMedia.matches || reducedMotion)pointerCamera.reset();
-      const orbit=pointerCamera.sample(shot.position,shot.target,delta,reducedMotion ? 0 : (1-exitCurrent));
+      const exitZoom=ease(exitCurrent);
+      const exitPosition=shot.position.map((value,index)=>shot.target[index]+(value-shot.target[index])*(1-exitZoom*.72));
+      const orbit=pointerCamera.sample(exitPosition,shot.target,delta,reducedMotion ? 0 : (1-exitCurrent));
       camera.position.set(...orbit);
       camera.fov=shot.fov;
       camera.updateProjectionMatrix();

@@ -11,7 +11,7 @@ test('all six stops present geometry and information during the same reading hol
     assert.equal(approach.stationId,SHOWCASE_OBJECTS[i][0]);
     assert.equal(approach.opening,0);
     assert.equal(approach.reveal,1);
-    const read=sampleShowcase((i+.73)/6);
+    const read=sampleShowcase((i+.55)/6);
     assert.equal(read.opening,0);assert.equal(read.reveal,1);assert.equal(read.phase,'read');
   }
 });

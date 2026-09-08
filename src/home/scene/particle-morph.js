@@ -1,4 +1,4 @@
-import {snapshotCard} from './card-snapshot.js?v=20260908-44';
+import {snapshotCard} from './card-snapshot.js?v=20260908-45';
 
 const random=i=>{const n=Math.sin(i*127.1+311.7)*43758.5453123;return n-Math.floor(n);};
 
@@ -69,7 +69,7 @@ export function createParticleMorph({THREE,records,scene,camera,canvas}) {
   function invalidate(){snapshots.forEach(value=>value.texture.dispose());snapshots.clear();currentIndex=-1;}
   function update(shot,exitProgress,seconds=0,surfaceFrame=null) {
     const morph=shot.morph,caption=captions[shot.index];
-    field.visible=morph.particles>.001 && exitProgress<1;
+    field.visible=morph.particles>.001;
     if(!field.visible || !caption || root.dataset.homeState!=='ready')return;
     let snapshot=snapshots.get(shot.index);
     if(snapshot && snapshot.scrollTop!==caption.scrollTop){
@@ -134,7 +134,7 @@ export function createParticleMorph({THREE,records,scene,camera,canvas}) {
     }
     material.uniforms.card.value=morph.card;
     material.uniforms.cloud.value=morph.cloud;
-    material.uniforms.alpha.value=morph.particles*(1-exitProgress);
+    material.uniforms.alpha.value=morph.particles;
     field.instanceMatrix.needsUpdate=true;
   }
   return {update,invalidate,dispose(){invalidate();scene.remove(field);geometry.dispose();material.dispose();}};

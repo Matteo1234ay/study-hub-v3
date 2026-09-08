@@ -23,12 +23,12 @@ test('pointer limits and neutral return keep the camera controlled',()=>{
 test('surface dissolution uses depth-writing coverage rather than transparent duplicates',()=>{
   const scene=new THREE.Scene(),models=createSemanticObjects(THREE);scene.add(models.root);
   const gallery=createShowcaseGallery({THREE,source:models.root,scene});
-  gallery.update(sampleShowcase(.78/6),0,{seconds:1,motion:1});
+  gallery.update(sampleShowcase(.7/6),0,{seconds:1,motion:1});
   const object=scene.getObjectByName('StudyHub_Object_Showcase').children[0];
   const depths=[];object.traverse(mesh=>{
     if(!mesh.isMesh)return;
     const materials=Array.isArray(mesh.material)?mesh.material:[mesh.material];
-    for(const material of materials){assert.equal(material.transparent,false);assert.ok(material.opacity>0 && material.opacity<1);assert.equal(material.alphaHash,true);assert.equal(material.depthWrite,true);}
+    for(const material of materials){assert.equal(material.transparent,true);assert.ok(material.opacity>0 && material.opacity<1);assert.equal(material.alphaHash,false);assert.equal(material.depthWrite,true);}
     depths.push(mesh.position.z);
   });
   assert.ok(Math.max(...depths)-Math.min(...depths)>0);

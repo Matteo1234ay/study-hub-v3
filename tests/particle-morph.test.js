@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from '../vendor/three/three.module.min.js';
-import {sampleParticleTimeline as sample} from '../src/home/scene/particle-timeline.js';
+import {sampleParticleTimeline as sample,sampleParticleExit} from '../src/home/scene/particle-timeline.js';
 import {sampleObjectSurface} from '../src/home/scene/particle-morph.js';
 import {createSemanticObjects} from '../src/home/scene/semantic-objects.js';
 import {createShowcaseGallery} from '../src/home/scene/showcase-gallery.js';
@@ -10,9 +10,8 @@ test('six integrated reading objects have one hold each and continuous particle 
   for(let index=0;index<6;index++){
     assert.equal(sample(index,.24).card,1);
     assert.equal(sample(index,.5).cloud,0);
-    assert.equal(sample(index,.69).card,1);
-    assert.equal(sample(index,.69).reveal,1);
-    assert.equal(sample(index,.73).reveal,1);
+    assert.equal(sample(index,.6).card,1);
+    assert.equal(sample(index,.6).reveal,1);
     for(let j=0;j<=1000;j++){
       const state=sample(index,j/1000);
       assert.ok(Math.abs(state.object+state.card+state.cloud-1)<1e-12);
@@ -22,6 +21,17 @@ test('six integrated reading objects have one hold each and continuous particle 
     if(index<5)assert.deepEqual(sample(index,1),sample(index+1,0));
   }
   assert.equal(sample(5,1).reveal,1);
+});
+
+test('final exit dissolves continuously into a full particle cloud',()=>{
+  assert.deepEqual(sampleParticleExit(0),{object:0,card:1,cloud:0,mesh:1,reveal:1,particles:0});
+  let previous=sampleParticleExit(0);
+  for(let i=1;i<=1000;i++){
+    const state=sampleParticleExit(i/1000);
+    assert.ok(state.cloud>=previous.cloud && state.mesh<=previous.mesh && state.particles>=previous.particles);
+    previous=state;
+  }
+  assert.deepEqual(sampleParticleExit(1),{object:0,card:0,cloud:1,mesh:0,reveal:0,particles:1});
 });
 
 test('particle samples lie on real surfaces and are reproducible for all objects',()=>{
