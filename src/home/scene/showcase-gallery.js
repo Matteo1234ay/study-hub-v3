@@ -1,4 +1,4 @@
-import { SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260908-43';
+import { SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260908-44';
 
 export function createShowcaseGallery({ THREE, source, scene, integrated = false }) {
   source.updateMatrixWorld(true);

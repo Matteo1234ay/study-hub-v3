@@ -1,9 +1,9 @@
-import { createShowcaseRuntime } from './showcase-runtime.js?v=20260908-43';
-import { createShowcaseGallery } from './showcase-gallery.js?v=20260908-43';
-import { sampleShowcase, clamp, ease, SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260908-43';
-import { createPointerCamera } from './pointer-camera.js?v=20260908-43';
-import { createParticleMorph } from './particle-morph.js?v=20260908-43';
-import { sectionFrame } from './section-projection.js?v=20260908-43';
+import { createShowcaseRuntime } from './showcase-runtime.js?v=20260908-44';
+import { createShowcaseGallery } from './showcase-gallery.js?v=20260908-44';
+import { sampleShowcase, clamp, ease, SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260908-44';
+import { createPointerCamera } from './pointer-camera.js?v=20260908-44';
+import { createParticleMorph } from './particle-morph.js?v=20260908-44';
+import { sectionFrame } from './section-projection.js?v=20260908-44';
 
 export async function createStudyRoomRenderer({ canvas, stations, reducedMotion = false, onFailure = () => {}, onPresentation = () => {} }) {
   const THREE = await import('../../../vendor/three/three.module.min.js?v=20260906-33');
@@ -96,7 +96,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
         const record=gallery.records[shot.index];record.target=shot.target;
         surfaceFrame=sectionFrame(THREE,record,camera,canvas,caption);
       }
-      onPresentation({...shot, exitProgress: exitCurrent, surfaceTransform:layout==='mobile'?'translateY(-50%)':surfaceFrame?.transform});
+      onPresentation({...shot, exitProgress: exitCurrent, surfaceTransform:layout==='mobile'?'none':surfaceFrame?.transform});
       particles.update(shot,exitCurrent,motionTime,surfaceFrame);
       renderer.render(scene, camera);
       if (quality.recordFrame(delta*1000)) resize();

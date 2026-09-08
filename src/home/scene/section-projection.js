@@ -15,6 +15,25 @@ export function sectionFrame(THREE,record,camera,canvas,caption) {
   const width=caption.offsetWidth,height=caption.offsetHeight;
   const radius=camera.position.distanceTo(new THREE.Vector3(...record.target));
   const viewHeight=2*radius*Math.tan(camera.fov*Math.PI/360);
+  if(viewport.width<=760){
+    if(record.imageGroup){
+      for(const part of record.parts)record.object.add(part.mesh);
+      record.object.remove(record.imageGroup);record.imageGroup=null;
+    }
+    const depth=new THREE.Vector3(...record.target).project(camera).z;
+    const desiredPixels=Math.min(210,viewport.width*.54);
+    const uniform=viewHeight*desiredPixels/viewport.height/1.8;
+    record.object.scale.setScalar(uniform);
+    record.object.position.set(0,0,depth).unproject(camera);
+    record.object.position.x=record.target[0];
+    const screenY=viewport.height<700?.29:.31;
+    record.object.position.y=new THREE.Vector3(0,1-screenY*2,depth).unproject(camera).y;
+    record.object.updateMatrixWorld(true);
+    const captionRect=caption.getBoundingClientRect();
+    const unproject=(x,y)=>new THREE.Vector3((x-viewport.left)/viewport.width*2-1,1-(y-viewport.top)/viewport.height*2,depth).unproject(camera);
+    const corners=[unproject(captionRect.left,captionRect.top),unproject(captionRect.right,captionRect.top),unproject(captionRect.right,captionRect.bottom),unproject(captionRect.left,captionRect.bottom)];
+    return {corners,quaternion:camera.quaternion.clone(),transform:'none'};
+  }
   record.object.scale.set(viewHeight*camera.aspect*width/viewport.width,viewHeight*height/viewport.height,viewHeight*camera.aspect*width/viewport.width);
   record.object.position.y+=(.5-(parent.top-viewport.top)/viewport.height)*viewHeight;
   // Reserve the top of the composition for the original semantic illustration.

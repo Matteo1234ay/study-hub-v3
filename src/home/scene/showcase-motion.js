@@ -1,4 +1,4 @@
-import {sampleParticleTimeline} from './particle-timeline.js?v=20260908-43';
+import {sampleParticleTimeline} from './particle-timeline.js?v=20260908-44';
 export const SHOWCASE_OBJECTS = Object.freeze([
   ['desk', 'Learning_Book'], ['memory', 'Memory_Cards'],
   ['social', 'Course_Path'], ['assessment', 'Assessment_Checklist'],
