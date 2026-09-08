@@ -1,9 +1,9 @@
-import { createShowcaseRuntime } from './showcase-runtime.js?v=20260908-41';
-import { createShowcaseGallery } from './showcase-gallery.js?v=20260908-41';
-import { sampleShowcase, clamp, ease, SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260908-41';
-import { createPointerCamera } from './pointer-camera.js?v=20260908-41';
-import { createParticleMorph } from './particle-morph.js?v=20260908-41';
-import { sectionFrame } from './section-projection.js?v=20260908-41';
+import { createShowcaseRuntime } from './showcase-runtime.js?v=20260908-42';
+import { createShowcaseGallery } from './showcase-gallery.js?v=20260908-42';
+import { sampleShowcase, clamp, ease, SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260908-42';
+import { createPointerCamera } from './pointer-camera.js?v=20260908-42';
+import { createParticleMorph } from './particle-morph.js?v=20260908-42';
+import { sectionFrame } from './section-projection.js?v=20260908-42';
 
 export async function createStudyRoomRenderer({ canvas, stations, reducedMotion = false, onFailure = () => {}, onPresentation = () => {} }) {
   const THREE = await import('../../../vendor/three/three.module.min.js?v=20260906-33');
@@ -76,7 +76,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
         if (t === 1) { target = focus.to; focus.resolve(true); focus = null; }
       } else {
         const step=(target-current)*(reducedMotion ? 1 : 1-Math.exp(-delta/.2));
-        current += reducedMotion ? step : Math.max(-delta*.24,Math.min(delta*.24,step));
+        current += reducedMotion ? step : Math.max(-delta*.18,Math.min(delta*.18,step));
         if (Math.abs(target-current)<.00001) current=target;
       }
       exitCurrent += (exitTarget-exitCurrent)*(reducedMotion ? 1 : 1-Math.exp(-delta/.11));
@@ -96,7 +96,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
         const record=gallery.records[shot.index];record.target=shot.target;
         surfaceFrame=sectionFrame(THREE,record,camera,canvas,caption);
       }
-      onPresentation({...shot, exitProgress: exitCurrent, surfaceTransform:surfaceFrame?.transform});
+      onPresentation({...shot, exitProgress: exitCurrent, surfaceTransform:layout==='mobile'?'translateY(-50%)':surfaceFrame?.transform});
       particles.update(shot,exitCurrent,motionTime,surfaceFrame);
       renderer.render(scene, camera);
       if (quality.recordFrame(delta*1000)) resize();

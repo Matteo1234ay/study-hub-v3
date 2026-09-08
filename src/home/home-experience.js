@@ -14,7 +14,7 @@ const JOURNEY_EXIT_TRIGGER = .995;
 
 export function resolveJourneyLayout(width = 1440) {
   const mobile = Number(width) <= 760;
-  const contentVh = 660;
+  const contentVh = mobile ? 700 : 660;
   const exitVh = mobile ? 90 : 70;
   const totalVh = contentVh + exitVh;
   return { contentVh, exitVh, totalVh, contentEnd: contentVh / totalVh };
@@ -135,7 +135,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     if (!root.isConnected) cleanup();
   });
   removalObserver.observe(document.documentElement, { childList: true, subtree: true });
-  const { createStudyRoomRenderer } = await import("./scene/showcase-renderer.js?v=20260908-41");
+  const { createStudyRoomRenderer } = await import("./scene/showcase-renderer.js?v=20260908-42");
   if (disposed || !root.isConnected) {
     cleanup();
     return cleanup;

@@ -11,10 +11,10 @@ test("desktop and mobile reserve the requested physical scroll runway", () => {
     contentEnd: 660 / 730
   });
   assert.deepEqual(homeExperience.resolveJourneyLayout(390), {
-    contentVh: 660,
+    contentVh: 700,
     exitVh: 90,
-    totalVh: 750,
-    contentEnd: 660 / 750
+    totalVh: 790,
+    contentEnd: 700 / 790
   });
 });
 
