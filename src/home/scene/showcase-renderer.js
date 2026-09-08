@@ -1,6 +1,7 @@
-import { createShowcaseRuntime } from './showcase-runtime.js?v=20260908-37';
-import { createShowcaseGallery } from './showcase-gallery.js?v=20260908-37';
-import { sampleShowcase, clamp, ease, SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260908-37';
+import { createShowcaseRuntime } from './showcase-runtime.js?v=20260908-38';
+import { createShowcaseGallery } from './showcase-gallery.js?v=20260908-38';
+import { sampleShowcase, clamp, ease, SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260908-38';
+import { createPointerCamera } from './pointer-camera.js?v=20260908-38';
 
 export async function createStudyRoomRenderer({ canvas, stations, reducedMotion = false, onFailure = () => {}, onPresentation = () => {} }) {
   const THREE = await import('../../../vendor/three/three.module.min.js?v=20260906-33');
@@ -18,6 +19,15 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
   let exitCurrent = 0;
   let focus = null;
   let layout = 'desktop';
+  const pointerCamera=createPointerCamera();
+  const pointerSurface=canvas.parentElement;
+  const pointerMedia=matchMedia('(hover: hover) and (pointer: fine)');
+  function onPointer(event) {
+    if(reducedMotion || !pointerMedia.matches || event.pointerType==='touch')return;
+    const rect=canvas.getBoundingClientRect();
+    pointerCamera.setTarget((event.clientX-rect.left)/Math.max(1,rect.width)*2-1,1-(event.clientY-rect.top)/Math.max(1,rect.height)*2);
+  }
+  function resetPointer(){pointerCamera.reset();}
   function dispose() {
     if (disposed) return;
     disposed = true;
@@ -26,6 +36,9 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     observer?.disconnect();
     canvas.removeEventListener('webglcontextlost', onLost);
     document.removeEventListener('visibilitychange', onVisibility);
+    pointerSurface?.removeEventListener('pointermove',onPointer);
+    pointerSurface?.removeEventListener('pointerleave',resetPointer);
+    window.removeEventListener('blur',resetPointer);
     gallery?.dispose();
     state.dispose();
   }
@@ -61,7 +74,9 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       exitCurrent += (exitTarget-exitCurrent)*(reducedMotion ? 1 : 1-Math.exp(-delta/.11));
       const shot = sampleShowcase(current, camera.aspect);
       gallery.update(shot, exitCurrent, {seconds:motionTime, motion:reducedMotion ? 0 : layout==='mobile' ? .6 : 1});
-      camera.position.set(...shot.position);
+      if(!pointerMedia.matches || reducedMotion)pointerCamera.reset();
+      const orbit=pointerCamera.sample(shot.position,shot.target,delta,reducedMotion ? 0 : (1-shot.reveal*.8)*(1-exitCurrent));
+      camera.position.set(...orbit);
       camera.fov=shot.fov;
       camera.updateProjectionMatrix();
       camera.lookAt(...shot.target);
@@ -73,6 +88,9 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     observer.observe(canvas);
     canvas.addEventListener('webglcontextlost', onLost);
     document.addEventListener('visibilitychange', onVisibility);
+    pointerSurface?.addEventListener('pointermove',onPointer,{passive:true});
+    pointerSurface?.addEventListener('pointerleave',resetPointer);
+    window.addEventListener('blur',resetPointer);
     resize();
     draw(previous);
     return {

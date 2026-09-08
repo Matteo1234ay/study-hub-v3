@@ -21,7 +21,8 @@ export function createShowcaseGallery({ THREE, source, scene }) {
       if (!node.isMesh) return;
       const clonedMaterials = (Array.isArray(node.material) ? node.material : [node.material]).map(material => {
         const clone = material.clone();
-        clone.transparent = true;
+        clone.transparent = false;
+        clone.depthWrite = true;
         clone.userData.originalOpacity = material.opacity;
         materials.add(clone);
         return clone;
@@ -33,7 +34,7 @@ export function createShowcaseGallery({ THREE, source, scene }) {
       mesh.castShadow = false;
       const partCenter = new THREE.Box3().setFromObject(node).getCenter(new THREE.Vector3()).sub(center).multiplyScalar(scale);
       const side = parts.length % 2 ? 1 : -1;
-      const drift = new THREE.Vector3(side*(.55+Math.abs(partCenter.x)*.3), partCenter.y*.55 + ((parts.length%3)-1)*.12, -.1);
+      const drift = new THREE.Vector3(side*(.55+Math.abs(partCenter.x)*.3), partCenter.y*.55 + ((parts.length%3)-1)*.12, (parts.length%3-1)*.3);
       parts.push({ mesh, position: mesh.position.clone(), quaternion: mesh.quaternion.clone(), drift, side, materials: clonedMaterials });
       object.add(mesh);
     });
@@ -73,12 +74,15 @@ export function createShowcaseGallery({ THREE, source, scene }) {
       for (let i=0; i<record.parts.length; i++) {
         const part = record.parts[i];
         const amount = ease((opening-(i%4)*.035)/.895);
-        part.mesh.position.copy(part.position).addScaledVector(part.drift, amount);
+        // Keep opaque surfaces and real depth. Clear the foreground physically
+        // instead of dissolving layered surfaces into transparent duplicates.
+        const clearance=1+ease((opening-.65)/.35)*3;
+        part.mesh.position.copy(part.position).addScaledVector(part.drift, amount*clearance);
         part.mesh.position.y += Math.sin(Math.PI*amount)*.12;
         if (record.id === 'memory' || record.id === 'desk') part.mesh.position.z += Math.sin(wave+i*.35)*.007*weight;
-        euler.set(0, part.side*amount*.16, part.side*amount*.08);
+        euler.set((i%3-1)*amount*.06, part.side*amount*.28, part.side*amount*.1);
         part.mesh.quaternion.copy(part.quaternion).multiply(turn.setFromEuler(euler));
-        for (const material of part.materials) material.opacity = material.userData.originalOpacity*(1-.92*opening)*(1-exitProgress);
+        for (const material of part.materials) material.opacity = material.userData.originalOpacity;
       }
     }
     particles.update(shot,exitProgress,motion);
