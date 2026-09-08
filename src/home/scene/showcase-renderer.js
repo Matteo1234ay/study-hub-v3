@@ -1,13 +1,15 @@
-import { createShowcaseRuntime } from './showcase-runtime.js?v=20260908-38';
-import { createShowcaseGallery } from './showcase-gallery.js?v=20260908-38';
-import { sampleShowcase, clamp, ease, SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260908-38';
-import { createPointerCamera } from './pointer-camera.js?v=20260908-38';
+import { createShowcaseRuntime } from './showcase-runtime.js?v=20260908-39';
+import { createShowcaseGallery } from './showcase-gallery.js?v=20260908-39';
+import { sampleShowcase, clamp, ease, SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260908-39';
+import { createPointerCamera } from './pointer-camera.js?v=20260908-39';
+import { createParticleMorph } from './particle-morph.js?v=20260908-39';
 
 export async function createStudyRoomRenderer({ canvas, stations, reducedMotion = false, onFailure = () => {}, onPresentation = () => {} }) {
   const THREE = await import('../../../vendor/three/three.module.min.js?v=20260906-33');
   const state = createShowcaseRuntime({ THREE, canvas, reducedMotion });
   const { renderer, camera, scene, quality } = state;
   let gallery;
+  let particles;
   let observer;
   let disposed = false;
   let frameId = 0;
@@ -39,6 +41,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
     pointerSurface?.removeEventListener('pointermove',onPointer);
     pointerSurface?.removeEventListener('pointerleave',resetPointer);
     window.removeEventListener('blur',resetPointer);
+    particles?.dispose();
     gallery?.dispose();
     state.dispose();
   }
@@ -46,6 +49,8 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
   function onVisibility() { previous = performance.now(); }
   try {
     gallery = createShowcaseGallery({ THREE, source: state.source, scene });
+    particles = createParticleMorph({THREE,records:gallery.records,scene,camera,canvas});
+    document.fonts?.ready.then(()=>{if(!disposed)particles.invalidate();});
     renderer.toneMappingExposure = 1.05;
     scene.environmentIntensity = .85;
     function resize() {
@@ -55,6 +60,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       renderer.setPixelRatio(quality.getDprCap());
       renderer.setSize(Math.max(1,rect.width), Math.max(1,rect.height), false);
       camera.updateProjectionMatrix();
+      particles.invalidate();
     }
     function draw(now) {
       if (disposed) return;
@@ -80,8 +86,9 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       camera.fov=shot.fov;
       camera.updateProjectionMatrix();
       camera.lookAt(...shot.target);
-      renderer.render(scene, camera);
       onPresentation({...shot, exitProgress: exitCurrent});
+      particles.update(shot,exitCurrent,motionTime);
+      renderer.render(scene, camera);
       if (quality.recordFrame(delta*1000)) resize();
     }
     observer = new ResizeObserver(resize);

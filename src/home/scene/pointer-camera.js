@@ -10,8 +10,8 @@ export function createPointerCamera() {
       const delta=position.map((value,index)=>value-target[index]);
       const radius=Math.hypot(...delta);
       if(!radius)return [...position];
-      const yaw=Math.atan2(delta[0],delta[2])+x*.12*strength;
-      const pitch=Math.asin(Math.max(-1,Math.min(1,delta[1]/radius)))+y*.065*strength;
+      const yaw=Math.atan2(delta[0],delta[2])+x*.22*strength;
+      const pitch=Math.asin(Math.max(-1,Math.min(1,delta[1]/radius)))+y*.11*strength;
       return [target[0]+radius*Math.cos(pitch)*Math.sin(yaw),target[1]+radius*Math.sin(pitch),target[2]+radius*Math.cos(pitch)*Math.cos(yaw)];
     }
   };

@@ -135,7 +135,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     if (!root.isConnected) cleanup();
   });
   removalObserver.observe(document.documentElement, { childList: true, subtree: true });
-  const { createStudyRoomRenderer } = await import("./scene/showcase-renderer.js?v=20260908-38");
+  const { createStudyRoomRenderer } = await import("./scene/showcase-renderer.js?v=20260908-39");
   if (disposed || !root.isConnected) {
     cleanup();
     return cleanup;
@@ -178,17 +178,14 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
         captions.forEach(caption => {
           const active=caption.dataset.stationId === presentation.stationId;
           caption.classList.toggle('is-active', active);
-          caption.tabIndex=active && presentation.reveal > .8 ? 0 : -1;
+          caption.tabIndex=active && presentation.reveal === 1 ? 0 : -1;
           if (!sectionAnimations.has(caption)) {
             const main=caption.animate([
-              {opacity:0,transform:'translateY(calc(-50% + 42px)) scale(.82) rotateX(12deg)'},
-              {opacity:1,transform:'translateY(-50%) scale(1) rotateX(0deg)'}
+              {opacity:0,transform:'translateY(-50%)'},
+              {opacity:1,transform:'translateY(-50%)'}
             ],{duration:1000,fill:'both'});
             main.pause();
-            const rows=[...caption.querySelectorAll('.showcase-preview-row')].map(row => {
-              const animation=row.animate([{opacity:0,transform:'translateY(18px)'},{opacity:1,transform:'translateY(0)'}],{duration:1000,fill:'both'});
-              animation.pause();return animation;
-            });
+            const rows=[];
             sectionAnimations.set(caption,{main,rows});
           }
           const entry=sectionAnimations.get(caption);

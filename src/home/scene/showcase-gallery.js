@@ -1,5 +1,4 @@
-import { SHOWCASE_OBJECTS, ease } from './showcase-motion.js?v=20260908-37';
-import { createShowcaseParticles } from './showcase-particles.js?v=20260908-37';
+import { SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260908-39';
 
 export function createShowcaseGallery({ THREE, source, scene }) {
   source.updateMatrixWorld(true);
@@ -23,6 +22,7 @@ export function createShowcaseGallery({ THREE, source, scene }) {
         const clone = material.clone();
         clone.transparent = false;
         clone.depthWrite = true;
+        clone.alphaHash = true;
         clone.userData.originalOpacity = material.opacity;
         materials.add(clone);
         return clone;
@@ -43,7 +43,6 @@ export function createShowcaseGallery({ THREE, source, scene }) {
     return { id, object, parts, name };
   });
   source.visible = false;
-  const particles=createShowcaseParticles(THREE,records);
   scene.add(group);
   scene.background = new THREE.Color('#10002f');
   scene.fog = null;
@@ -52,8 +51,6 @@ export function createShowcaseGallery({ THREE, source, scene }) {
   const key = new THREE.DirectionalLight('#fff7ed', 3.2);
   const rim = new THREE.DirectionalLight('#b8bdff', 2.1);
   scene.add(ambient, key, key.target, rim, rim.target);
-  const turn = new THREE.Quaternion();
-  const euler = new THREE.Euler();
   function update(shot, exitProgress = 0, { seconds = 0, motion = 0 } = {}) {
     originalLights.forEach(light => { light.intensity = 0; });
     key.position.set(shot.target[0]+3, 4, 5);
@@ -62,7 +59,7 @@ export function createShowcaseGallery({ THREE, source, scene }) {
     rim.target.position.set(...shot.target);
     for (let index=0; index<records.length; index++) {
       const record = records[index];
-      record.object.visible = index === shot.index || (index === shot.index+1 && shot.release > 0);
+      record.object.visible = index === shot.index;
       if (!record.object.visible) continue;
       const opening = index === shot.index ? shot.opening : 0;
       const weight=Math.max(0,Math.min(1,motion))*(1-opening*.8)*(1-exitProgress);
@@ -73,26 +70,19 @@ export function createShowcaseGallery({ THREE, source, scene }) {
       record.object.rotation.set(.03+Math.cos(wave)*.015*weight,-.18+Math.sin(wave*.61)*.035*weight,-.015+Math.cos(wave*.8)*.016*weight);
       for (let i=0; i<record.parts.length; i++) {
         const part = record.parts[i];
-        const amount = ease((opening-(i%4)*.035)/.895);
-        // Keep opaque surfaces and real depth. Clear the foreground physically
-        // instead of dissolving layered surfaces into transparent duplicates.
-        const clearance=1+ease((opening-.65)/.35)*3;
-        part.mesh.position.copy(part.position).addScaledVector(part.drift, amount*clearance);
-        part.mesh.position.y += Math.sin(Math.PI*amount)*.12;
-        if (record.id === 'memory' || record.id === 'desk') part.mesh.position.z += Math.sin(wave+i*.35)*.007*weight;
-        euler.set((i%3-1)*amount*.06, part.side*amount*.28, part.side*amount*.1);
-        part.mesh.quaternion.copy(part.quaternion).multiply(turn.setFromEuler(euler));
-        for (const material of part.materials) material.opacity = material.userData.originalOpacity;
+        part.mesh.position.copy(part.position);
+        part.mesh.quaternion.copy(part.quaternion);
+        for (const material of part.materials) material.opacity = material.userData.originalOpacity*shot.morph.mesh;
+        part.mesh.visible=shot.morph.mesh>0;
       }
     }
-    particles.update(shot,exitProgress,motion);
     group.updateMatrixWorld(true);
   }
   return {
     update,
+    records,
     audit: () => records.map(record => ({id: record.id, name: record.name, parts: record.parts.length})),
     dispose() {
-      particles.dispose();
       scene.remove(group, ambient, key, key.target, rim, rim.target);
       materials.forEach(material => material.dispose());
       source.visible = true;
