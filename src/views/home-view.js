@@ -7,8 +7,8 @@ import { createReviewConceptsStore } from "../study/review-concepts-store.js?v=2
 import {
   createHomeQuickActions,
   createHomeStations
-} from "../home/home-stations.js?v=20260906-33";
-import { mountHomeExperience } from "../home/home-experience.js?v=20260909-46";
+} from "../home/home-stations.js?v=20260909-47";
+import { mountHomeExperience } from "../home/home-experience.js?v=20260909-47";
 
 function sectionPreview(station) {
   const data=station.screenData ?? {};
@@ -42,7 +42,7 @@ function stationCaption(station, index) {
     element("small", { text: station.description }),
     sectionPreview(station),
     station.meta ? element("span", { className: "home-station-meta", text: station.meta }) : null,
-    element("b", { text: station.status === "standby" ? "Esplora la struttura →" : "Apri →" })
+    element("b", { text: `${station.actionLabel ?? 'Apri la sezione'} →` })
   ]);
 }
 

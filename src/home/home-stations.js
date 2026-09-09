@@ -7,17 +7,19 @@ const STATIC_STATIONS = Object.freeze({
     href: "#/review",
     objectId: "memory-board",
     status: "active",
-    screenKind: "memory"
+    screenKind: "memory",
+    actionLabel: "Apri note e ripasso"
   }),
   progress: Object.freeze({
     id: "progress",
     label: "05 / Progressi",
     title: "Competenze e avanzamento",
-    description: "Lezioni completate, competenze forti e aree da consolidare.",
+    description: "Controlla i capitoli completati e quanto manca alla fine della lezione.",
     href: "#/progress",
     objectId: "progress-display",
     status: "active",
-    screenKind: "progress"
+    screenKind: "progress",
+    actionLabel: "Vedi i tuoi progressi"
   })
 });
 
@@ -60,6 +62,7 @@ export function createHomeStations({
         ? "Riprendi dal capitolo e dal punto in cui avevi interrotto."
         : "Apri la prima lezione e inizia il percorso.",
       href: continuation,
+      actionLabel: recentLesson ? "Riprendi la lezione" : "Inizia la lezione",
       objectId: "main-monitor",
       status: "active",
       screenKind: "lesson",
@@ -73,6 +76,9 @@ export function createHomeStations({
     },
     {
       ...STATIC_STATIONS.memory,
+      description: (screenState.noteCount ?? 0) + (screenState.reviewCount ?? 0) === 0
+        ? "Durante la lezione salva note e concetti: li ritroverai qui per ripassare."
+        : STATIC_STATIONS.memory.description,
       screenData: { noteCount: screenState.noteCount ?? 0, reviewCount: screenState.reviewCount ?? 0 }
     },
     {
@@ -81,18 +87,22 @@ export function createHomeStations({
       title: pathTitle,
       description: "Contenuti, metriche e lettura strategica delle performance.",
       href: `#/paths/${pathId}`,
+      actionLabel: "Esplora il percorso",
       objectId: "social-display",
       status: "active",
       screenKind: "social",
-      meta: `${primaryPath?.lessons?.length ?? 0} lezione disponibile`,
+      meta: `${primaryPath?.lessons?.length ?? 0} ${primaryPath?.lessons?.length === 1 ? 'lezione disponibile' : 'lezioni disponibili'}`,
       screenData: { pathTitle, lessonCount: primaryPath?.lessons?.length ?? 0 }
     },
     {
       id: "assessment",
       label: "04 / Verifica",
       title: "Verifica progressiva",
-      description: "Domande, feedback e avanzamento della valutazione.",
-      href: `#/paths/${pathId}/assessment`,
+      description: primaryPath?.assessmentManifestUrl
+        ? "Metti alla prova ciò che hai imparato e usa il feedback per capire cosa ripassare."
+        : "La verifica è in preparazione. Puoi intanto esplorare le lezioni del percorso.",
+      actionLabel: primaryPath?.assessmentManifestUrl ? "Apri la verifica" : "Esplora il percorso",
+      href: primaryPath?.assessmentManifestUrl ? `#/paths/${pathId}/assessment` : `#/paths/${pathId}`,
       objectId: "assessment-console",
       status: primaryPath?.assessmentManifestUrl ? "active" : "standby",
       screenKind: "assessment",
@@ -113,6 +123,7 @@ export function createHomeStations({
       title: "Archivio dei prossimi percorsi",
       description: "Moduli già previsti nella struttura, ancora in preparazione.",
       href: "#/paths",
+      actionLabel: "Vedi tutti i percorsi",
       objectId: "future-archive",
       status: "standby",
       screenKind: "future",

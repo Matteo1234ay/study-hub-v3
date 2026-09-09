@@ -135,7 +135,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     if (!root.isConnected) cleanup();
   });
   removalObserver.observe(document.documentElement, { childList: true, subtree: true });
-  const { createStudyRoomRenderer } = await import("./scene/showcase-renderer.js?v=20260909-46");
+  const { createStudyRoomRenderer } = await import("./scene/showcase-renderer.js?v=20260909-47");
   if (disposed || !root.isConnected) {
     cleanup();
     return cleanup;
@@ -173,30 +173,26 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
       onFailure: useDomFallback,
       onPresentation(presentation) {
         if (disposed) return;
-        root.dataset.activeStation = presentation.stationId;
-        root.dataset.homePhase = presentation.phase;
+        if (root.dataset.activeStation !== presentation.stationId) root.dataset.activeStation = presentation.stationId;
+        if (root.dataset.homePhase !== presentation.phase) root.dataset.homePhase = presentation.phase;
         if(presentation.exitProgress>=.999 && presentation.journeyProgress>=.999 && !reentryLocked && !restoring)queueMicrotask(beginAutomaticExit);
         captions.forEach(caption => {
           const active=caption.dataset.stationId === presentation.stationId;
-          caption.classList.toggle('is-active', active);
-          caption.tabIndex=active && presentation.reveal === 1 ? 0 : -1;
+          if (caption.classList.contains('is-active') !== active) caption.classList.toggle('is-active', active);
+          const tabIndex = active && presentation.reveal === 1 ? 0 : -1;
+          if (caption.tabIndex !== tabIndex) caption.tabIndex = tabIndex;
           if (!sectionAnimations.has(caption)) {
             const main=caption.animate([
               {opacity:0},
               {opacity:1}
             ],{duration:1000,fill:'both'});
             main.pause();
-            const pose=caption.animate([{transform:'translateY(-50%)'},{transform:'translateY(-50%)'}],{duration:1000,fill:'both'});
-            pose.pause();
-            const rows=[pose];
+            const rows=[];
             sectionAnimations.set(caption,{main,rows});
           }
           const entry=sectionAnimations.get(caption);
-          entry.main.currentTime=(active ? presentation.reveal : 0)*1000;
-          if(active && presentation.surfaceTransform){
-            entry.rows[0].effect.setKeyframes([{transform:presentation.surfaceTransform},{transform:presentation.surfaceTransform}]);
-            entry.rows[0].currentTime=1000;
-          }
+          const time = (active ? presentation.reveal : 0) * 1000;
+          if (entry.main.currentTime !== time) entry.main.currentTime = time;
         });
       },
       onActivate(id) {
@@ -244,7 +240,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     const station = stations.find(item => item.id === anchor.dataset.stationId);
     if (!station) return;
     event.preventDefault();
-    transitionManager.activate(station);
+    transitionManager.activate(station, { focus: false, overlay: false, viewTransition: true });
   }
 
   function onKeyDown(event) {

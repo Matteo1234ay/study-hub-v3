@@ -9,6 +9,7 @@ const paths = [
   {
     id: "smm",
     title: "Social Media Manager",
+    assessmentManifestUrl: "data/assessment.json",
     lessons: [{ id: "SMM-01", title: "Metriche e KPI organici" }]
   },
   { id: "ai", title: "Intelligenza Artificiale", lessons: [] },
@@ -86,6 +87,14 @@ test("returns fresh station records on every call", () => {
 
   assert.notEqual(first, second);
   assert.notEqual(first[0], second[0]);
+});
+
+test("unavailable assessments lead to available lessons instead of an empty verification", () => {
+  const unavailable = paths.map(path => ({ ...path, assessmentManifestUrl: null }));
+  const station = createHomeStations({ paths: unavailable })[3];
+  assert.equal(station.status, "standby");
+  assert.equal(station.href, "#/paths/smm");
+  assert.equal(station.actionLabel, "Esplora il percorso");
 });
 
 test("carries truthful local study state into physical screen data", () => {

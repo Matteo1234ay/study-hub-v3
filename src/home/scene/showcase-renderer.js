@@ -5,6 +5,7 @@ import { createPointerCamera } from './pointer-camera.js?v=20260909-46';
 import { createParticleMorph } from './particle-morph.js?v=20260909-46';
 import { sectionFrame } from './section-projection.js?v=20260909-46';
 import { sampleParticleExit } from './particle-timeline.js?v=20260909-46';
+import { createScrollFollower } from './scroll-follower.js?v=20260909-47';
 
 export async function createStudyRoomRenderer({ canvas, stations, reducedMotion = false, onFailure = () => {}, onPresentation = () => {} }) {
   const THREE = await import('../../../vendor/three/three.module.min.js?v=20260906-33');
@@ -23,6 +24,9 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
   let exitCurrent = 0;
   let focus = null;
   let layout = 'desktop';
+  const scrollFollower = createScrollFollower();
+  const root = canvas.closest('.home-journey');
+  const captions = new Map(Array.from(root?.querySelectorAll('.home-station-caption') ?? [], caption => [caption.dataset.stationId, caption]));
   const pointerCamera=createPointerCamera();
   const pointerSurface=canvas.parentElement;
   const pointerMedia=matchMedia('(hover: hover) and (pointer: fine)');
@@ -74,11 +78,10 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       if (focus) {
         const t = clamp((now-focus.start)/focus.duration);
         current = focus.from + (focus.to-focus.from)*ease(t);
+        scrollFollower.reset(current);
         if (t === 1) { target = focus.to; focus.resolve(true); focus = null; }
       } else {
-        const step=(target-current)*(reducedMotion ? 1 : 1-Math.exp(-delta/.32));
-        current += reducedMotion ? step : Math.max(-delta*.08,Math.min(delta*.08,step));
-        if (Math.abs(target-current)<.00001) current=target;
+        current = scrollFollower.sample(target, delta, reducedMotion);
       }
       const readyToExit=current>=.999;
       const desiredExit=readyToExit?exitTarget:0;
@@ -98,8 +101,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
       camera.updateProjectionMatrix();
       camera.lookAt(...shot.target);
       camera.updateMatrixWorld(true);
-      const root=canvas.closest('.home-journey');
-      const caption=root?.querySelector(`.home-station-caption[data-station-id="${shot.stationId}"]`);
+      const caption=captions.get(shot.stationId);
       let surfaceFrame;
       if(root?.dataset.homeState==='ready' && caption?.offsetWidth){
         const record=gallery.records[shot.index];record.target=shot.target;
