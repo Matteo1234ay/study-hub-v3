@@ -1,4 +1,5 @@
 /* The same object-to-interface sequence on every stop, sampled from scroll. */
+.home-particle-arrival {position:fixed;inset:0;background:#10002f;z-index:2000;pointer-events:none;}
 .home-journey[data-motion="object-showcase"][data-home-state="ready"] {min-height:730svh;}
 @media(max-width:760px) {
   .home-journey[data-motion="object-showcase"][data-home-state="ready"] {min-height:790svh;}
@@ -88,4 +89,15 @@
 }
 @media(prefers-reduced-motion:reduce) {
   .home-journey[data-motion="object-showcase"][data-home-state="ready"] .home-captions {animation:none;}
+}
+/* Final overrides also cover the older, more specific read-state rules. */
+.home-journey[data-motion="object-showcase"][data-home-state="ready"] .home-captions {animation:none;}
+.home-journey[data-motion="object-showcase"][data-home-state="ready"][data-home-phase] .home-station-caption {
+  padding:0!important;border:0!important;background:transparent!important;transform:none!important;
+}
+@media(min-width:761px) {
+  .home-journey[data-motion="object-showcase"][data-home-state="ready"] .home-captions {
+    inset:50% auto auto 6%;width:40%;max-width:560px;height:auto;transform:none;perspective:none;
+  }
+  .home-journey[data-motion="object-showcase"][data-home-state="ready"][data-home-phase] .home-station-caption {transform:translateY(-50%)!important;}
 }

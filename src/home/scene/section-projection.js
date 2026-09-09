@@ -11,49 +11,26 @@ export function quadMatrix(points,width,height) {
     0,0,1,0,p0.x,p0.y,0,1];
 }
 export function sectionFrame(THREE,record,camera,canvas,caption) {
-  const viewport=canvas.getBoundingClientRect(),parent=caption.parentElement.getBoundingClientRect();
-  const width=caption.offsetWidth,height=caption.offsetHeight;
+  const viewport=canvas.getBoundingClientRect();
   const radius=camera.position.distanceTo(new THREE.Vector3(...record.target));
   const viewHeight=2*radius*Math.tan(camera.fov*Math.PI/360);
-  if(viewport.width<=760){
+  {
     if(record.imageGroup){
       for(const part of record.parts)record.object.add(part.mesh);
       record.object.remove(record.imageGroup);record.imageGroup=null;
     }
+    record.imageMatrix=null;
     const depth=new THREE.Vector3(...record.target).project(camera).z;
-    const desiredPixels=Math.min(210,viewport.width*.54);
+    const mobile=viewport.width<=760;
+    const desiredPixels=mobile?Math.min(190,viewport.width*.48):Math.min(400,viewport.width*.29,viewport.height*.52);
     const uniform=viewHeight*desiredPixels/viewport.height/1.8;
     record.object.scale.setScalar(uniform);
-    record.object.position.set(0,0,depth).unproject(camera);
-    record.object.position.x=record.target[0];
-    const screenY=viewport.height<700?.29:.31;
-    record.object.position.y=new THREE.Vector3(0,1-screenY*2,depth).unproject(camera).y;
+    const screenY=mobile?(viewport.height<700?.29:.31):.48;
+    record.object.position.set(mobile?0:.44,1-screenY*2,depth).unproject(camera);
     record.object.updateMatrixWorld(true);
     const captionRect=caption.getBoundingClientRect();
     const unproject=(x,y)=>new THREE.Vector3((x-viewport.left)/viewport.width*2-1,1-(y-viewport.top)/viewport.height*2,depth).unproject(camera);
     const corners=[unproject(captionRect.left,captionRect.top),unproject(captionRect.right,captionRect.top),unproject(captionRect.right,captionRect.bottom),unproject(captionRect.left,captionRect.bottom)];
     return {corners,quaternion:camera.quaternion.clone(),transform:'none'};
   }
-  record.object.scale.set(viewHeight*camera.aspect*width/viewport.width,viewHeight*height/viewport.height,viewHeight*camera.aspect*width/viewport.width);
-  record.object.position.y+=(.5-(parent.top-viewport.top)/viewport.height)*viewHeight;
-  // Reserve the top of the composition for the original semantic illustration.
-  // Compensate for the text plane's aspect ratio so models keep their shape.
-  const mobile=width<=480;
-  const imageHeight=Math.min(mobile?190:156,height*(mobile?.42:.33));
-  const desiredWidth=Math.min(width*(mobile?.88:.7),imageHeight*(mobile?1.35:.9));
-  const size=desiredWidth/1.8/width;
-  const imagePosition=new THREE.Vector3(0,.5-imageHeight/height/2,0);
-  const imageScale=new THREE.Vector3(size,size*width/height,size);
-  record.imageMatrix??=new THREE.Matrix4();
-  record.imageMatrix.compose(imagePosition,new THREE.Quaternion(),imageScale);
-  if(!record.imageGroup){
-    record.imageGroup=new THREE.Group();record.imageGroup.matrixAutoUpdate=false;
-    record.object.add(record.imageGroup);
-    for(const part of record.parts)record.imageGroup.add(part.mesh);
-  }
-  record.imageGroup.matrix.copy(record.imageMatrix);
-  record.object.updateMatrixWorld(true);
-  const corners=[[-.5,.5,.02],[.5,.5,.02],[.5,-.5,.02],[-.5,-.5,.02]].map(p=>new THREE.Vector3(...p).applyMatrix4(record.object.matrixWorld));
-  const points=corners.map(p=>{const q=p.clone().project(camera);return {x:viewport.left+(q.x+1)*viewport.width/2-parent.left,y:viewport.top+(1-q.y)*viewport.height/2-parent.top};});
-  return {corners,quaternion:record.object.quaternion,transform:`matrix3d(${quadMatrix(points,width,height).join(',')})`};
 }

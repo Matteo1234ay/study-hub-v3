@@ -135,7 +135,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     if (!root.isConnected) cleanup();
   });
   removalObserver.observe(document.documentElement, { childList: true, subtree: true });
-  const { createStudyRoomRenderer } = await import("./scene/showcase-renderer.js?v=20260908-45");
+  const { createStudyRoomRenderer } = await import("./scene/showcase-renderer.js?v=20260909-46");
   if (disposed || !root.isConnected) {
     cleanup();
     return cleanup;
@@ -175,6 +175,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
         if (disposed) return;
         root.dataset.activeStation = presentation.stationId;
         root.dataset.homePhase = presentation.phase;
+        if(presentation.exitProgress>=.999 && presentation.journeyProgress>=.999 && !reentryLocked && !restoring)queueMicrotask(beginAutomaticExit);
         captions.forEach(caption => {
           const active=caption.dataset.stationId === presentation.stationId;
           caption.classList.toggle('is-active', active);
@@ -259,6 +260,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
   }
 
   function updateSharedHandoff(phases) {
+    if(root.dataset.motion==='object-showcase')return;
     const sourceRect = renderer.getPathsProjection?.();
     if (!sourceRect) return;
     if (resume) {
@@ -284,11 +286,15 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
     };
     exitTriggered = true;
     routeState.markExit({ resumeProgress: .97 });
+    const particleExit=root.dataset.motion==='object-showcase';
+    const arrival=particleExit?root.ownerDocument.createElement('div'):null;
+    if(arrival){arrival.className='home-particle-arrival';arrival.setAttribute('aria-hidden','true');root.ownerDocument.body.append(arrival);}
     Promise.resolve(transitionManager.activate(pathsStation, {
       focus: false,
       overlay: false,
-      sharedPortal: sharedTransition
+      sharedPortal: particleExit?null:sharedTransition
     })).then(started => {
+      if(arrival){const fade=arrival.animate([{opacity:1},{opacity:0}],{duration:reducedMotion?0:900,easing:'ease-out',fill:'forwards'});fade.finished.finally(()=>arrival.remove());}
       if (!started && !disposed) {
         exitTriggered = false;
         routeState.clear();
@@ -332,7 +338,7 @@ export async function mountHomeExperience(root, { stations = [], navigate } = {}
         : phases.choreography.establish > 0
           ? "establish"
           : "none";
-    if (phases.shouldExit && !reentryLocked && !restoring) beginAutomaticExit();
+    if (root.dataset.motion!=='object-showcase' && phases.shouldExit && !reentryLocked && !restoring) beginAutomaticExit();
   }
 
   function onScroll() {

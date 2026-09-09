@@ -15,16 +15,18 @@ test('projected live text aligns with all four 3D corners at desktop and mobile 
       const shot=sampleShowcase((i+.5)/6,vw/vh),record=gallery.records[i];
       gallery.update(shot,0,{seconds:3,motion:1});record.target=shot.target;
       camera.position.set(...shot.position);camera.position.x+=Math.sin(yaw)*2;camera.lookAt(...shot.target);camera.updateMatrixWorld(true);
-      const parent={left:(vw-w)/2,top:vh*.46};
+      const parent={left:vw<=760?(vw-w)/2:vw*.06,top:vh*.46};
       const frame=sectionFrame(THREE,record,camera,{getBoundingClientRect:()=>({left:0,top:0,width:vw,height:vh})},{offsetWidth:w,offsetHeight:h,getBoundingClientRect:()=>({left:parent.left,top:parent.top,width:w,height:h,right:parent.left+w,bottom:parent.top+h}),parentElement:{getBoundingClientRect:()=>parent}});
       if(vw<=760){
         const projected=record.object.position.clone().project(camera);
         assert.ok(Math.abs((1-projected.y)/2-(vh<700?.29:.31))<.01,'mobile illustration has its own upper zone');
         assert.ok(Math.abs(record.object.scale.x-record.object.scale.y)<1e-12,'mobile illustration stays proportional');
       }else{
-        const imageScale=record.imageGroup.matrixWorld.getMaxScaleOnAxis();
-        const axes=[0,1,2].map(axis=>new THREE.Vector3().setFromMatrixColumn(record.imageGroup.matrixWorld,axis).length());
-        assert.ok(axes.every(value=>Math.abs(value-imageScale)<1e-10),'illustration proportions stay undistorted');
+        const bounds=new THREE.Box3().setFromObject(record.object);
+        for(const x of [bounds.min.x,bounds.max.x])for(const y of [bounds.min.y,bounds.max.y])for(const z of [bounds.min.z,bounds.max.z]){
+          const point=new THREE.Vector3(x,y,z).project(camera);
+          assert.ok((point.x+1)*vw/2>parent.left+w+20,'actual object bounds must clear the text column');
+        }
       }
       const points=frame.corners.map(v=>{const p=v.clone().project(camera);return {x:(p.x+1)*vw/2-parent.left,y:(1-p.y)*vh/2-parent.top};});
       const m=quadMatrix(points,w,h);

@@ -1,10 +1,10 @@
-import { createShowcaseRuntime } from './showcase-runtime.js?v=20260908-45';
-import { createShowcaseGallery } from './showcase-gallery.js?v=20260908-45';
-import { sampleShowcase, clamp, ease, SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260908-45';
-import { createPointerCamera } from './pointer-camera.js?v=20260908-45';
-import { createParticleMorph } from './particle-morph.js?v=20260908-45';
-import { sectionFrame } from './section-projection.js?v=20260908-45';
-import { sampleParticleExit } from './particle-timeline.js?v=20260908-45';
+import { createShowcaseRuntime } from './showcase-runtime.js?v=20260909-46';
+import { createShowcaseGallery } from './showcase-gallery.js?v=20260909-46';
+import { sampleShowcase, clamp, ease, SHOWCASE_OBJECTS } from './showcase-motion.js?v=20260909-46';
+import { createPointerCamera } from './pointer-camera.js?v=20260909-46';
+import { createParticleMorph } from './particle-morph.js?v=20260909-46';
+import { sectionFrame } from './section-projection.js?v=20260909-46';
+import { sampleParticleExit } from './particle-timeline.js?v=20260909-46';
 
 export async function createStudyRoomRenderer({ canvas, stations, reducedMotion = false, onFailure = () => {}, onPresentation = () => {} }) {
   const THREE = await import('../../../vendor/three/three.module.min.js?v=20260906-33');
@@ -80,7 +80,11 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
         current += reducedMotion ? step : Math.max(-delta*.08,Math.min(delta*.08,step));
         if (Math.abs(target-current)<.00001) current=target;
       }
-      exitCurrent += (exitTarget-exitCurrent)*(reducedMotion ? 1 : 1-Math.exp(-delta/.11));
+      const readyToExit=current>=.999;
+      const desiredExit=readyToExit?exitTarget:0;
+      const exitStep=(desiredExit-exitCurrent)*(reducedMotion?1:1-Math.exp(-delta/.24));
+      exitCurrent+=reducedMotion?exitStep:Math.max(-delta*.38,Math.min(delta*.38,exitStep));
+      if(Math.abs(desiredExit-exitCurrent)<.001)exitCurrent=desiredExit;
       const baseShot = sampleShowcase(current, camera.aspect);
       const exitMorph=sampleParticleExit(exitCurrent);
       const shot=exitCurrent>0?{...baseShot,morph:exitMorph,reveal:exitMorph.reveal,phase:'release'}:baseShot;
@@ -101,7 +105,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
         const record=gallery.records[shot.index];record.target=shot.target;
         surfaceFrame=sectionFrame(THREE,record,camera,canvas,caption);
       }
-      onPresentation({...shot, exitProgress: exitCurrent, surfaceTransform:layout==='mobile'?'none':surfaceFrame?.transform});
+      onPresentation({...shot, exitProgress: exitCurrent, journeyProgress:current, surfaceTransform:'none'});
       particles.update(shot,exitCurrent,motionTime,surfaceFrame);
       renderer.render(scene, camera);
       if (quality.recordFrame(delta*1000)) resize();
@@ -132,7 +136,7 @@ export async function createStudyRoomRenderer({ canvas, stations, reducedMotion 
         if (disposed || index<0) return Promise.resolve(false);
         focus?.resolve(false);
         exitTarget=exitCurrent=0;
-        return new Promise(resolve=>{focus={from:current,to:(index+.73)/6,start:performance.now(),duration,resolve};});
+        return new Promise(resolve=>{focus={from:current,to:(index+.45)/6,start:performance.now(),duration,resolve};});
       },
       resize,
       getAudit: () => ({heroMode:'v30',direction:'object-showcase',cameraLayout:layout,objects:gallery.audit(),profile:quality.profile}),
